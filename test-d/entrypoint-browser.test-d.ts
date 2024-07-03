@@ -30,6 +30,7 @@ import {
   DataTable,
   attach,
   log,
+  link,
 } from "../lib/entrypoint-browser";
 
 declare const config: Cypress.PluginConfigOptions;
@@ -341,6 +342,8 @@ attach("foo", {
 });
 
 log("foo");
+
+link("foo");
 
 expectType<messages.GherkinDocument>(window.testState.gherkinDocument);
 expectType<messages.Pickle[]>(window.testState.pickles);

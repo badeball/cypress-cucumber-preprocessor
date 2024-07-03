@@ -277,6 +277,10 @@ export function log(text: string) {
   attach(text, "text/x.cucumber.log+plain");
 }
 
+export function link(text: string) {
+  attach(text, "text/uri-list");
+}
+
 function isFeature() {
   return Cypress.env(INTERNAL_SPEC_PROPERTIES) != null;
 }

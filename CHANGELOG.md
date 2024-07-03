@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 - Implement `log`, as seen in cucumber-js.
 
+- Implement `link`, as seen in cucumber-js.
+
 ## v23.0.0
 
 Breaking changes:
