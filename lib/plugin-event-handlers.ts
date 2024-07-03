@@ -874,6 +874,7 @@ export type Attach = (
 export type OnAfterStep = (
   options: {
     attach: Attach;
+    log: (text: string) => void;
     result: messages.TestStepResult;
   } & IStepHookParameter,
 ) => Promise<void> | void;
@@ -945,6 +946,48 @@ export async function testStepFinishedHandler(
 
     const attachments: ITaskCreateStringAttachment[] = [];
 
+    const attach: Attach = (data, mediaTypeOrOptions) => {
+      let options: { mediaType?: string; fileName?: string };
+
+      if (mediaTypeOrOptions == null) {
+        options = {};
+      } else if (typeof mediaTypeOrOptions === "string") {
+        options = { mediaType: mediaTypeOrOptions };
+      } else {
+        options = mediaTypeOrOptions;
+      }
+
+      if (typeof data === "string") {
+        const mediaType = options.mediaType ?? "text/plain";
+
+        if (mediaType.startsWith("base64:")) {
+          attachments.push({
+            data,
+            mediaType: mediaType.replace("base64:", ""),
+            encoding: messages.AttachmentContentEncoding.BASE64,
+          });
+        } else {
+          attachments.push({
+            data,
+            mediaType,
+            encoding: messages.AttachmentContentEncoding.IDENTITY,
+          });
+        }
+      } else if (data instanceof Buffer) {
+        if (typeof options.mediaType !== "string") {
+          throw Error("Buffer attachments must specify a media type");
+        }
+
+        attachments.push({
+          data: data.toString("base64"),
+          mediaType: options.mediaType,
+          encoding: messages.AttachmentContentEncoding.BASE64,
+        });
+      } else {
+        throw Error("Invalid attachment data: must be a Buffer or string");
+      }
+    };
+
     await options.onAfterStep?.({
       result: testStepFinished.testStepResult,
       pickle,
@@ -952,47 +995,8 @@ export async function testStepFinishedHandler(
       gherkinDocument,
       testCaseStartedId,
       testStepId,
-      attach(data, mediaTypeOrOptions) {
-        let options: { mediaType?: string; fileName?: string };
-
-        if (mediaTypeOrOptions == null) {
-          options = {};
-        } else if (typeof mediaTypeOrOptions === "string") {
-          options = { mediaType: mediaTypeOrOptions };
-        } else {
-          options = mediaTypeOrOptions;
-        }
-
-        if (typeof data === "string") {
-          const mediaType = options.mediaType ?? "text/plain";
-
-          if (mediaType.startsWith("base64:")) {
-            attachments.push({
-              data,
-              mediaType: mediaType.replace("base64:", ""),
-              encoding: messages.AttachmentContentEncoding.BASE64,
-            });
-          } else {
-            attachments.push({
-              data,
-              mediaType,
-              encoding: messages.AttachmentContentEncoding.IDENTITY,
-            });
-          }
-        } else if (data instanceof Buffer) {
-          if (typeof options.mediaType !== "string") {
-            throw Error("Buffer attachments must specify a media type");
-          }
-
-          attachments.push({
-            data: data.toString("base64"),
-            mediaType: options.mediaType,
-            encoding: messages.AttachmentContentEncoding.BASE64,
-          });
-        } else {
-          throw Error("Invalid attachment data: must be a Buffer or string");
-        }
-      },
+      attach,
+      log: (text: string) => attach(text, "text/x.cucumber.log+plain"),
     });
 
     for (const attachment of attachments) {

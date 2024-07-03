@@ -82,6 +82,10 @@ export function attach(
   throw createUnimplemented();
 }
 
+export function log(text: string) {
+  throw createUnimplemented();
+}
+
 export function Before<C extends Mocha.Context>(
   options: string,
   fn: ICaseHookBody<C>,
