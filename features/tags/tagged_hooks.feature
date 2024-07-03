@@ -26,7 +26,7 @@ Feature: tagged Hooks
         Before({ tags: "@foo" }, function() {
           this.foo = true
         })
-        Before({ tags: "@bar" }, function() {
+        Before("@bar", function() {
           this.bar = true
         })
         """
@@ -69,7 +69,7 @@ Feature: tagged Hooks
         BeforeStep({ tags: "@foo" }, function() {
           this.foo = true
         })
-        BeforeStep({ tags: "@bar" }, function() {
+        BeforeStep("@bar", function() {
           this.bar = true
         })
         """

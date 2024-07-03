@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
   - This was accidentally left out during release of v23.0.0, where dropped support for v18 was announced. Due to the announcement, I don't consider this to be another breaking change.
 
+- Expand type signature of scenario and step hooks, to allow tags to be defined using pure string arguments. This is in line with how cucumber-js behaves.
+
 ## v23.0.0
 
 Breaking changes:

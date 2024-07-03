@@ -79,19 +79,27 @@ export function attach(data: string | ArrayBuffer, mediaType?: string) {
 }
 
 export function Before<C extends Mocha.Context>(
+  options: string,
+  fn: ICaseHookBody<C>,
+): void;
+export function Before<C extends Mocha.Context>(
   options: ICaseHookOptions,
   fn: ICaseHookBody<C>,
 ): void;
 export function Before<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
 export function Before<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  optionsOrFn: string | ICaseHookBody<C> | ICaseHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maybeFn?: ICaseHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
+export function After<C extends Mocha.Context>(
+  options: string,
+  fn: ICaseHookBody<C>,
+): void;
 export function After<C extends Mocha.Context>(
   options: ICaseHookOptions,
   fn: ICaseHookBody<C>,
@@ -99,7 +107,7 @@ export function After<C extends Mocha.Context>(
 export function After<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
 export function After<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  optionsOrFn: string | ICaseHookBody<C> | ICaseHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maybeFn?: ICaseHookBody<C>,
 ) {
@@ -107,13 +115,17 @@ export function After<C extends Mocha.Context>(
 }
 
 export function BeforeStep<C extends Mocha.Context>(
+  options: string,
+  fn: IStepHookBody<C>,
+): void;
+export function BeforeStep<C extends Mocha.Context>(
   options: IStepHookOptions,
   fn: IStepHookBody<C>,
 ): void;
 export function BeforeStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
 export function BeforeStep<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  optionsOrFn: string | IStepHookBody<C> | IStepHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maybeFn?: IStepHookBody<C>,
 ) {
@@ -121,13 +133,17 @@ export function BeforeStep<C extends Mocha.Context>(
 }
 
 export function AfterStep<C extends Mocha.Context>(
+  options: string,
+  fn: IStepHookBody<C>,
+): void;
+export function AfterStep<C extends Mocha.Context>(
   options: IStepHookOptions,
   fn: IStepHookBody<C>,
 ): void;
 export function AfterStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
 export function AfterStep<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  optionsOrFn: string | IStepHookBody<C> | IStepHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maybeFn?: IStepHookBody<C>,
 ) {

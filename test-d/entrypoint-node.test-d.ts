@@ -165,6 +165,10 @@ Before({ tags: "foo", name: "bar", order: 1 }, function () {
   expectType<Mocha.Context>(this);
 });
 
+Before("foo", function () {
+  expectType<Mocha.Context>(this);
+});
+
 After(function () {
   expectType<Mocha.Context>(this);
 });
@@ -174,6 +178,10 @@ After({}, function () {
 });
 
 After({ tags: "foo", name: "bar", order: 1 }, function () {
+  expectType<Mocha.Context>(this);
+});
+
+After("foo", function () {
   expectType<Mocha.Context>(this);
 });
 
@@ -228,6 +236,24 @@ BeforeStep(
   },
 );
 
+BeforeStep(
+  "foo",
+  function ({
+    pickle,
+    pickleStep,
+    gherkinDocument,
+    testCaseStartedId,
+    testStepId,
+  }) {
+    expectType<Mocha.Context>(this);
+    expectType<messages.Pickle>(pickle);
+    expectType<messages.PickleStep>(pickleStep);
+    expectType<messages.GherkinDocument>(gherkinDocument);
+    expectType<string>(testCaseStartedId);
+    expectType<string>(testStepId);
+  },
+);
+
 AfterStep(function ({
   pickle,
   pickleStep,
@@ -263,6 +289,24 @@ AfterStep(
 
 AfterStep(
   { tags: "foo", name: "bar", order: 1 },
+  function ({
+    pickle,
+    pickleStep,
+    gherkinDocument,
+    testCaseStartedId,
+    testStepId,
+  }) {
+    expectType<Mocha.Context>(this);
+    expectType<messages.Pickle>(pickle);
+    expectType<messages.PickleStep>(pickleStep);
+    expectType<messages.GherkinDocument>(gherkinDocument);
+    expectType<string>(testCaseStartedId);
+    expectType<string>(testStepId);
+  },
+);
+
+AfterStep(
+  "foo",
   function ({
     pickle,
     pickleStep,

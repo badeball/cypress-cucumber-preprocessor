@@ -72,72 +72,99 @@ function defineParameterType<T, C extends Mocha.Context>(
 }
 
 function defineBefore<C extends Mocha.Context>(
+  options: string,
+  fn: ICaseHookBody<C>,
+): void;
+function defineBefore<C extends Mocha.Context>(
   options: ICaseHookOptions,
   fn: ICaseHookBody<C>,
 ): void;
 function defineBefore<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
 function defineBefore<C extends Mocha.Context>(
-  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  optionsOrFn: string | ICaseHookBody<C> | ICaseHookOptions,
   maybeFn?: ICaseHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
     getRegistry<C, unknown[]>().defineBefore({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
     getRegistry<C, unknown[]>().defineBefore(optionsOrFn, maybeFn);
+  } else if (typeof optionsOrFn === "string" && typeof maybeFn === "function") {
+    getRegistry<C, unknown[]>().defineBefore({ tags: optionsOrFn }, maybeFn);
   } else {
     throw new Error("Unexpected argument for Before hook");
   }
 }
 
 function defineAfter<C extends Mocha.Context>(
+  options: string,
+  fn: ICaseHookBody<C>,
+): void;
+function defineAfter<C extends Mocha.Context>(
   options: ICaseHookOptions,
   fn: ICaseHookBody<C>,
 ): void;
 function defineAfter<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
 function defineAfter<C extends Mocha.Context>(
-  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  optionsOrFn: string | ICaseHookBody<C> | ICaseHookOptions,
   maybeFn?: ICaseHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
     getRegistry<C, unknown[]>().defineAfter({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
     getRegistry<C, unknown[]>().defineAfter(optionsOrFn, maybeFn);
+  } else if (typeof optionsOrFn === "string" && typeof maybeFn === "function") {
+    getRegistry<C, unknown[]>().defineAfter({ tags: optionsOrFn }, maybeFn);
   } else {
     throw new Error("Unexpected argument for After hook");
   }
 }
 
 function defineBeforeStep<C extends Mocha.Context>(
+  options: string,
+  fn: IStepHookBody<C>,
+): void;
+function defineBeforeStep<C extends Mocha.Context>(
   options: IStepHookOptions,
   fn: IStepHookBody<C>,
 ): void;
 function defineBeforeStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
 function defineBeforeStep<C extends Mocha.Context>(
-  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  optionsOrFn: string | IStepHookBody<C> | IStepHookOptions,
   maybeFn?: IStepHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
     getRegistry<C, unknown[]>().defineBeforeStep({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
     getRegistry<C, unknown[]>().defineBeforeStep(optionsOrFn, maybeFn);
+  } else if (typeof optionsOrFn === "string" && typeof maybeFn === "function") {
+    getRegistry<C, unknown[]>().defineBeforeStep(
+      { tags: optionsOrFn },
+      maybeFn,
+    );
   } else {
     throw new Error("Unexpected argument for BeforeStep hook");
   }
 }
 
 function defineAfterStep<C extends Mocha.Context>(
+  options: string,
+  fn: IStepHookBody<C>,
+): void;
+function defineAfterStep<C extends Mocha.Context>(
   options: IStepHookOptions,
   fn: IStepHookBody<C>,
 ): void;
 function defineAfterStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
 function defineAfterStep<C extends Mocha.Context>(
-  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  optionsOrFn: string | IStepHookBody<C> | IStepHookOptions,
   maybeFn?: IStepHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
     getRegistry<C, unknown[]>().defineAfterStep({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
     getRegistry<C, unknown[]>().defineAfterStep(optionsOrFn, maybeFn);
+  } else if (typeof optionsOrFn === "string" && typeof maybeFn === "function") {
+    getRegistry<C, unknown[]>().defineAfterStep({ tags: optionsOrFn }, maybeFn);
   } else {
     throw new Error("Unexpected argument for AfterStep hook");
   }
