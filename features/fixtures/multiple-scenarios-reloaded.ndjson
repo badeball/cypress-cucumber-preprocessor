@@ -1,13 +1,13 @@
 {"meta":"meta"}
-{"testRunStarted":{"timestamp":{"seconds":0,"nanos":0}}}
 {"source":{"data":"Feature: a feature\n  @env(origin=\"https://duckduckgo.com/\")\n  Scenario: a scenario\n    Given a step\n\n  @env(origin=\"https://google.com/\")\n  Scenario: another scenario\n    Given another step","uri":"cypress/e2e/a.feature","mediaType":"text/x.cucumber.gherkin+plain"}}
 {"gherkinDocument":{"feature":{"tags":[],"location":{"line":1,"column":1},"language":"en","keyword":"Feature","name":"a feature","description":"","children":[{"scenario":{"id":"id","tags":[{"location":{"line":2,"column":3},"name":"@env(origin=\"https://duckduckgo.com/\")","id":"id"}],"location":{"line":3,"column":3},"keyword":"Scenario","name":"a scenario","description":"","steps":[{"id":"id","location":{"line":4,"column":5},"keyword":"Given ","keywordType":"Context","text":"a step"}],"examples":[]}},{"scenario":{"id":"id","tags":[{"location":{"line":6,"column":3},"name":"@env(origin=\"https://google.com/\")","id":"id"}],"location":{"line":7,"column":3},"keyword":"Scenario","name":"another scenario","description":"","steps":[{"id":"id","location":{"line":8,"column":5},"keyword":"Given ","keywordType":"Context","text":"another step"}],"examples":[]}}]},"comments":[],"uri":"cypress/e2e/a.feature"}}
 {"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id"],"tags":[{"name":"@env(origin=\"https://duckduckgo.com/\")","astNodeId":"id"}],"name":"a scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id"]}]}}
 {"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id"],"tags":[{"name":"@env(origin=\"https://google.com/\")","astNodeId":"id"}],"name":"another scenario","language":"en","steps":[{"id":"id","text":"another step","type":"Context","astNodeIds":["id"]}]}}
 {"stepDefinition":{"id":"id","pattern":{"type":"CUCUMBER_EXPRESSION","source":"a step"},"sourceReference":{"uri":"not available","location":{"line":0,"column":0}}}}
 {"stepDefinition":{"id":"id","pattern":{"type":"CUCUMBER_EXPRESSION","source":"another step"},"sourceReference":{"uri":"not available","location":{"line":0,"column":0}}}}
-{"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"]}]}}
-{"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"]}]}}
+{"testRunStarted":{"timestamp":{"seconds":0,"nanos":0}}}
+{"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
+{"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
 {"testCaseStarted":{"id":"id","testCaseId":"id","attempt":0,"timestamp":{"seconds":0,"nanos":0}}}
 {"testStepStarted":{"testStepId":"id","testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testStepFinished":{"testStepId":"id","testCaseStartedId":"id","testStepResult":{"status":"PASSED","duration":0},"timestamp":{"seconds":0,"nanos":0}}}
@@ -16,4 +16,4 @@
 {"testStepStarted":{"testStepId":"id","testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testStepFinished":{"testStepId":"id","testCaseStartedId":"id","testStepResult":{"status":"PASSED","duration":0},"timestamp":{"seconds":0,"nanos":0}}}
 {"testCaseFinished":{"testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0},"willBeRetried":false}}
-{"testRunFinished":{"timestamp":{"seconds":0,"nanos":0}}}
+{"testRunFinished":{"success":true,"timestamp":{"seconds":0,"nanos":0}}}

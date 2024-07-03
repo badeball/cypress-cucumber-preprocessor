@@ -37,6 +37,7 @@ declare const config: Cypress.PluginConfigOptions;
 declare const on: Cypress.PluginEvents;
 declare const spec: Cypress.Spec;
 declare const results: CypressCommandLine.RunResult;
+declare const runResults: CypressCommandLine.CypressRunResult;
 declare const details: Cypress.ScreenshotDetails;
 
 expectType<Promise<IPreprocessorConfiguration>>(
@@ -63,7 +64,7 @@ expectType<Promise<Cypress.PluginConfigOptions>>(
 
 expectType<Promise<void>>(beforeRunHandler(config));
 
-expectType<Promise<void>>(afterRunHandler(config));
+expectType<Promise<void>>(afterRunHandler(config, runResults));
 
 expectType<Promise<void>>(beforeSpecHandler(config, spec));
 

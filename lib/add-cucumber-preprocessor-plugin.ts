@@ -96,7 +96,7 @@ export async function addCucumberPreprocessorPlugin(
   }
 
   if (!options.omitAfterRunHandler) {
-    on("after:run", () => afterRunHandler(config));
+    on("after:run", (results) => afterRunHandler(config, results));
   }
 
   if (!options.omitBeforeSpecHandler) {
