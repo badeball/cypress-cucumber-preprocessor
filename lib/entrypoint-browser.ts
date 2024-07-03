@@ -273,6 +273,10 @@ export function attach(
   }
 }
 
+export function log(text: string) {
+  attach(text, "text/x.cucumber.log+plain");
+}
+
 function isFeature() {
   return Cypress.env(INTERNAL_SPEC_PROPERTIES) != null;
 }

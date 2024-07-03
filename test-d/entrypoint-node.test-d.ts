@@ -29,6 +29,7 @@ import {
   AfterAll,
   DataTable,
   attach,
+  log,
 } from "../lib/entrypoint-node";
 
 declare const config: Cypress.PluginConfigOptions;
@@ -338,6 +339,8 @@ attach("foo", {
   fileName: "foo.txt",
   mediaType: "text/plain",
 });
+
+log("foo");
 
 expectType<messages.GherkinDocument>(window.testState.gherkinDocument);
 expectType<messages.Pickle[]>(window.testState.pickles);

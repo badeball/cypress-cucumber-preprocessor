@@ -150,3 +150,25 @@ await addCucumberPreprocessorPlugin(on, config, {
   }
 });
 ```
+
+## Logging
+
+You can log useful information from your support code with the simple `log` function. This is available in both the browser and node environment.
+
+```ts
+import { Given, log } from "@badeball/cypress-cucumber-preprocessor";
+
+Given("a step", function() {
+  log("Something interesting happened!");
+});
+```
+
+```ts
+await addCucumberPreprocessorPlugin(on, config, {
+  onAfterStep({ log }) {
+    log("Something interesting happened!");
+  }
+});
+```
+
+Anything you log will be attached as a string with a MIME type of `text/x.cucumber.log+plain`.

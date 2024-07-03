@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 
 - Add support for attachments with filenames. This is in line with how cucumber-js behaves.
 
+- Implement `log`, as seen in cucumber-js.
+
 ## v23.0.0
 
 Breaking changes:
