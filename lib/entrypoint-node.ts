@@ -82,10 +82,12 @@ export function attach(
   throw createUnimplemented();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function log(text: string) {
   throw createUnimplemented();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function link(text: string) {
   throw createUnimplemented();
 }

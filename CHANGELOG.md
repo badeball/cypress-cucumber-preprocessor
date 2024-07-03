@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 
 - Implement `link`, as seen in cucumber-js.
 
+- Minor changes to the messages report, to ensure compatibility with `cucumber-js`.
+
 ## v23.0.0
 
 Breaking changes:

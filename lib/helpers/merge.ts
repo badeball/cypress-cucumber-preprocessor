@@ -4,7 +4,11 @@ import type * as messages from "@cucumber/messages";
 
 import { notNull } from "./type-guards";
 
-import { StrictTimestamp, durationToNanoseconds } from "./messages";
+import {
+  StrictTimestamp,
+  durationToNanoseconds,
+  orderMessages,
+} from "./messages";
 
 import { assertAndReturn } from "./assertions";
 
@@ -70,12 +74,12 @@ export function mergeMessages(
     message.testRunStarted == null &&
     message.testRunFinished == null;
 
-  return [
+  return orderMessages([
     { meta },
     { testRunStarted },
     ...messages.filter(isPassThroughMessage),
     { testRunFinished },
-  ];
+  ]);
 }
 
 export async function mergeMessagesFiles(files: string[]): Promise<string> {
