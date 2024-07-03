@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 - Expand type signature of scenario and step hooks, to allow tags to be defined using pure string arguments. This is in line with how cucumber-js behaves.
 
+- Add support for attachments with filenames. This is in line with how cucumber-js behaves.
+
 ## v23.0.0
 
 Breaking changes:

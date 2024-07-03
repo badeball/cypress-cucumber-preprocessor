@@ -28,6 +28,7 @@ import {
   BeforeAll,
   AfterAll,
   DataTable,
+  attach,
 } from "../lib/entrypoint-node";
 
 declare const config: Cypress.PluginConfigOptions;
@@ -322,6 +323,21 @@ AfterStep(
     expectType<string>(testStepId);
   },
 );
+
+attach("foo");
+
+attach(new ArrayBuffer());
+
+attach("foo", "text/plain");
+
+attach("foo", {
+  mediaType: "text/plain",
+});
+
+attach("foo", {
+  fileName: "foo.txt",
+  mediaType: "text/plain",
+});
 
 expectType<messages.GherkinDocument>(window.testState.gherkinDocument);
 expectType<messages.Pickle[]>(window.testState.pickles);

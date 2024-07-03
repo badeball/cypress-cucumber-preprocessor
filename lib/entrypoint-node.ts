@@ -73,8 +73,12 @@ export function defineParameterType<T, C extends Mocha.Context>(
   throw createUnimplemented();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function attach(data: string | ArrayBuffer, mediaType?: string) {
+export function attach(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  data: string | ArrayBuffer,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  mediaTypeOrOptions?: string | { mediaType: string; fileName?: string },
+) {
   throw createUnimplemented();
 }
 
