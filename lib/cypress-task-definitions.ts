@@ -32,6 +32,7 @@ export const TASK_CREATE_STRING_ATTACHMENT =
 
 export interface ITaskCreateStringAttachment {
   data: string;
+  fileName?: string;
   mediaType: string;
   encoding: messages.AttachmentContentEncoding;
 }

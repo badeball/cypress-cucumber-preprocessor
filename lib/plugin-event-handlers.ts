@@ -866,7 +866,10 @@ export function testStepStartedHandler(
   return true;
 }
 
-export type Attach = (data: string | Buffer, mediaType?: string) => void;
+export type Attach = (
+  data: string | Buffer,
+  mediaTypeOrOptions?: string | { mediaType: string; fileName?: string },
+) => void;
 
 export type OnAfterStep = (
   options: {
@@ -949,9 +952,19 @@ export async function testStepFinishedHandler(
       gherkinDocument,
       testCaseStartedId,
       testStepId,
-      attach(data, mediaType) {
+      attach(data, mediaTypeOrOptions) {
+        let options: { mediaType?: string; fileName?: string };
+
+        if (mediaTypeOrOptions == null) {
+          options = {};
+        } else if (typeof mediaTypeOrOptions === "string") {
+          options = { mediaType: mediaTypeOrOptions };
+        } else {
+          options = mediaTypeOrOptions;
+        }
+
         if (typeof data === "string") {
-          mediaType = mediaType ?? "text/plain";
+          const mediaType = options.mediaType ?? "text/plain";
 
           if (mediaType.startsWith("base64:")) {
             attachments.push({
@@ -962,18 +975,18 @@ export async function testStepFinishedHandler(
           } else {
             attachments.push({
               data,
-              mediaType: mediaType ?? "text/plain",
+              mediaType,
               encoding: messages.AttachmentContentEncoding.IDENTITY,
             });
           }
         } else if (data instanceof Buffer) {
-          if (typeof mediaType !== "string") {
+          if (typeof options.mediaType !== "string") {
             throw Error("Buffer attachments must specify a media type");
           }
 
           attachments.push({
             data: data.toString("base64"),
-            mediaType,
+            mediaType: options.mediaType,
             encoding: messages.AttachmentContentEncoding.BASE64,
           });
         } else {
@@ -1038,7 +1051,7 @@ export function testCaseFinishedHandler(
 
 export async function createStringAttachmentHandler(
   config: Cypress.PluginConfigOptions,
-  { data, mediaType, encoding }: ITaskCreateStringAttachment,
+  { data, fileName, mediaType, encoding }: ITaskCreateStringAttachment,
 ) {
   debug("createStringAttachmentHandler()");
 
@@ -1060,6 +1073,7 @@ export async function createStringAttachmentHandler(
       testCaseStartedId: state.testCaseStartedId,
       testStepId: state.testStepStartedId,
       body: data,
+      fileName,
       mediaType: mediaType,
       contentEncoding: encoding,
     },

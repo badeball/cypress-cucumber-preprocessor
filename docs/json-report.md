@@ -30,13 +30,26 @@ Given("a step", function() {
 });
 ```
 
-By default, text is saved with a MIME type of text/plain. You can also specify a different MIME type.
+By default, text is saved with a MIME type of text/plain. You can also specify a different MIME type as part of a second argument.
 
 ```ts
 import { Given, attach } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("a step", function() {
-  attach('{ "name": "foobar" }', "application/json");
+  attach('{ "name": "foobar" }', { mediaType: "application/json" });
+});
+```
+
+If you'd like, you can also specify a filename to be used if the attachment is made available to download as a file via a formatter.
+
+```ts
+import { Given, attach } from "@badeball/cypress-cucumber-preprocessor";
+
+Given("a step", function() {
+  attach('{ "name": "foobar" }', {
+    mediaType: "application/json",
+    fileName: "results.json"
+  });
 });
 ```
 
@@ -46,7 +59,7 @@ Images and other binary data can be attached using a ArrayBuffer. The data will 
 import { Given, attach } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("a step", function() {
-  attach(new TextEncoder().encode("foobar").buffer, "text/plain");
+  attach(new TextEncoder().encode("foobar").buffer, { mediaType: "text/plain" });
 });
 ```
 
@@ -56,7 +69,7 @@ If you've already got a base64-encoded string, you can prefix your mime type wit
 import { Given, attach } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("a step", function() {
-  attach("Zm9vYmFy", "base64:text/plain");
+  attach("Zm9vYmFy", { mediaType: "base64:text/plain" });
 });
 ```
 
@@ -72,12 +85,25 @@ await addCucumberPreprocessorPlugin(on, config, {
 });
 ```
 
-By default, text is saved with a MIME type of text/plain. You can also specify a different MIME type.
+By default, text is saved with a MIME type of text/plain. You can also specify a different MIME type as part of a second argument.
 
 ```ts
 await addCucumberPreprocessorPlugin(on, config, {
   onAfterStep({ attach }) {
-    attach('{ "name": "foobar" }', "application/json");
+    attach('{ "name": "foobar" }', { mediaType: "application/json" });
+  }
+});
+```
+
+If you'd like, you can also specify a filename to be used if the attachment is made available to download as a file via a formatter.
+
+```ts
+await addCucumberPreprocessorPlugin(on, config, {
+  onAfterStep({ attach }) {
+    attach('{ "name": "foobar" }', {
+      mediaType: "application/json"
+      fileName: "results.json"
+    });
   }
 });
 ```
@@ -87,7 +113,7 @@ Images and other binary data can be attached using a Buffer. The data will be ba
 ```ts
 await addCucumberPreprocessorPlugin(on, config, {
   onAfterStep({ attach }) {
-    attach(Buffer.from("foobar"), "text/plain");
+    attach(Buffer.from("foobar"), { mediaType: "text/plain" });
   }
 });
 ```
@@ -97,7 +123,7 @@ If you've already got a base64-encoded string, you can prefix your mime type wit
 ```ts
 await addCucumberPreprocessorPlugin(on, config, {
   onAfterStep({ attach }) {
-    attach("Zm9vYmFy", "base64:text/plain");
+    attach("Zm9vYmFy", { mediaType: "base64:text/plain" });
   }
 });
 ```
