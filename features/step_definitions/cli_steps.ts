@@ -249,3 +249,14 @@ Then(
     assert.match(expectLastRun(this).stdout, pendingScenarioExpr(scenarioName));
   },
 );
+
+Then(
+  "I should see exactly {int} instance(s) of {string} in stderr",
+  function (this: ICustomWorld, expectedOccurences: number, output: string) {
+    const actualyOccurences =
+      expectLastRun(this).stderr.match(new RegExp(rescape(output), "g"))
+        ?.length ?? 0;
+
+    assert.equal(actualyOccurences, expectedOccurences);
+  },
+);

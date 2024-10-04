@@ -21,6 +21,8 @@ function sourceMapWarn(message: string) {
   isSourceMapWarned = true;
 }
 
+const cache = new Map<string, string | undefined>();
+
 /**
  * Taken from https://github.com/evanw/node-source-map-support/blob/v0.5.21/source-map-support.js#L148-L177.
  */
@@ -61,6 +63,16 @@ export function retrieveSourceMapURL(source: string) {
   return lastMatch[1];
 }
 
+export function cachedRetrieveSourceMapURL(source: string): string | undefined {
+  if (cache.has(source)) {
+    return cache.get(source);
+  } else {
+    const result = retrieveSourceMapURL(source);
+    cache.set(source, result);
+    return result;
+  }
+}
+
 export function maybeRetrievePositionFromSourceMap(): Position | undefined {
   const stack = ErrorStackParser.parse(new Error());
 
@@ -68,7 +80,7 @@ export function maybeRetrievePositionFromSourceMap(): Position | undefined {
     return;
   }
 
-  const sourceMappingURL = retrieveSourceMapURL(stack[0].fileName);
+  const sourceMappingURL = cachedRetrieveSourceMapURL(stack[0].fileName);
 
   if (!sourceMappingURL) {
     return;
