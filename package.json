@@ -77,7 +77,7 @@
     "error-stack-parser": "^2.1.4",
     "find-cypress-specs": "^1.45.2",
     "glob": "^10.4.5",
-    "mocha": "^10.7.0",
+    "mocha": "^11.0.0",
     "seedrandom": "^3.0.5",
     "source-map": "^0.6.1",
     "split": "^1.0.1",
