@@ -42,10 +42,10 @@ When("I visit duckduckgo.com", () => {
 });
 
 Then("I should see a search bar", () => {
-  cy.get("input").should(
+  cy.get("input").eq(2).should(
     "have.attr",
     "placeholder",
-    "Search the web without being tracked"
+    "Search without being tracked"
   );
 });
 ```
