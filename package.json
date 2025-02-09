@@ -62,7 +62,7 @@
     "@cucumber/ci-environment": "^10.0.1",
     "@cucumber/cucumber": "^11.0.0",
     "@cucumber/cucumber-expressions": "^18.0.0",
-    "@cucumber/gherkin": "^30.0.0",
+    "@cucumber/gherkin": "^31.0.0",
     "@cucumber/html-formatter": "^21.7.0",
     "@cucumber/message-streams": "^4.0.1",
     "@cucumber/messages": "^27.0.0",
