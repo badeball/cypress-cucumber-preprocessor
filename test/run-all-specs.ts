@@ -2,11 +2,6 @@ import path from "path";
 import { promises as fs } from "fs";
 import child_process from "child_process";
 import { assertAndReturn } from "../lib/helpers/assertions";
-import { version as cypressVersion } from "cypress/package.json";
-
-export function isPost10() {
-  return parseInt(cypressVersion.split(".")[0], 10) >= 10;
-}
 
 function aggregatedTitle(test: Mocha.Suite | Mocha.Test): string {
   if (test.parent?.title) {
@@ -36,66 +31,39 @@ describe("Run all specs", () => {
 
     await fs.rm(this.tmpDir, { recursive: true, force: true });
 
-    if (isPost10()) {
-      await writeFile(
-        path.join(this.tmpDir, "cypress.config.js"),
-        `
-          const { defineConfig } = require("cypress");
-          const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
-          const preprocessor = require("@badeball/cypress-cucumber-preprocessor");
-          const createEsbuildPlugin = require("@badeball/cypress-cucumber-preprocessor/esbuild");
+    await writeFile(
+      path.join(this.tmpDir, "cypress.config.js"),
+      `
+        const { defineConfig } = require("cypress");
+        const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
+        const preprocessor = require("@badeball/cypress-cucumber-preprocessor");
+        const createEsbuildPlugin = require("@badeball/cypress-cucumber-preprocessor/esbuild");
 
-          async function setupNodeEvents(on, config) {
-            // This is required for the preprocessor to be able to generate JSON reports after each run, and more,
-            await preprocessor.addCucumberPreprocessorPlugin(on, config);
+        async function setupNodeEvents(on, config) {
+          // This is required for the preprocessor to be able to generate JSON reports after each run, and more,
+          await preprocessor.addCucumberPreprocessorPlugin(on, config);
 
-            on(
-              "file:preprocessor",
-              createBundler({
-                plugins: [createEsbuildPlugin.default(config)],
-              })
-            );
+          on(
+            "file:preprocessor",
+            createBundler({
+              plugins: [createEsbuildPlugin.default(config)],
+            })
+          );
 
-            // Make sure to return the config object as it might have been modified by the plugin.
-            return config;
-          }
+          // Make sure to return the config object as it might have been modified by the plugin.
+          return config;
+        }
 
-          module.exports = defineConfig({
-            e2e: {
-              experimentalRunAllSpecs: true,
-              supportFile: false,
-              specPattern: "**/*.feature",
-              setupNodeEvents
-            },
-          });
-        `,
-      );
-    } else {
-      await writeFile(
-        path.join(this.tmpDir, "cypress.json"),
-        JSON.stringify({
-          testFiles: "**/*.feature",
-          video: false,
-        }),
-      );
-
-      await writeFile(
-        path.join(this.tmpDir, "cypress", "plugins", "index.js"),
-        `
-          const { createEsbuildPlugin } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
-          const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
-
-          module.exports = (on, config) => {
-            on(
-              "file:preprocessor",
-              createBundler({
-                plugins: [createEsbuildPlugin(config)]
-              })
-            );
-          }
-        `,
-      );
-    }
+        module.exports = defineConfig({
+          e2e: {
+            experimentalRunAllSpecs: true,
+            supportFile: false,
+            specPattern: "**/*.feature",
+            setupNodeEvents
+          },
+        });
+      `,
+    );
 
     await fs.mkdir(path.join(this.tmpDir, "node_modules", "@badeball"), {
       recursive: true,
