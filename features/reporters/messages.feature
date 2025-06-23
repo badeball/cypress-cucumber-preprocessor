@@ -338,7 +338,7 @@ Feature: messages report
       Then it fails
       And there should be a messages similar to "fixtures/failing-step.ndjson"
 
-  Rule: it should contain screenshots captured during a test
+  Rule: it should by default contain screenshots captured during a test
     Scenario: explicit screenshot
       Given a file named "cypress/e2e/a.feature" with:
         """
@@ -387,6 +387,24 @@ Feature: messages report
       When I run cypress
       Then it fails
       And the messages report should contain an image attachment for what appears to be a screenshot
+
+    Scenario: with screenshots disabled
+      Given a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature
+          Scenario: a scenario
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        Given("a step", function() {
+          cy.screenshot();
+        });
+        """
+      When I run cypress with "-e attachmentsAddScreenshots=false"
+      Then it passes
+      And there should be a messages similar to "fixtures/passed-example.ndjson"
 
   Rule: it should include results of skipped (not omitted) tests
     Scenario: first scenario skipped

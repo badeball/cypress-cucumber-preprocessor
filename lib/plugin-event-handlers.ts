@@ -662,7 +662,10 @@ export async function afterScreenshotHandler(
 
   const preprocessor = await resolve(config, config.env, "/");
 
-  if (!preprocessor.isTrackingState) {
+  if (
+    !preprocessor.isTrackingState ||
+    !preprocessor.attachments.addScreenshots
+  ) {
     return details;
   }
 

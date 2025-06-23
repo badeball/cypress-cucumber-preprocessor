@@ -71,22 +71,23 @@ $ CYPRESS_filterSpecs=true cypress run
 
 Every configuration option has a similar key which can be use to override it, shown in the table below.
 
-| JSON path              | Environment key        | Example(s)                               |
-|------------------------|------------------------|------------------------------------------|
-| `stepDefinitions`      | `stepDefinitions`      | `[filepath].{js,ts}`                     |
-| `messages.enabled`     | `messagesEnabled`      | `true`, `false`                          |
-| `messages.output`      | `messagesOutput`       | `cucumber-messages.ndjson`               |
-| `json.enabled`         | `jsonEnabled`          | `true`, `false`                          |
-| `json.output`          | `jsonOutput`           | `cucumber-report.json`                   |
-| `html.enabled`         | `htmlEnabled`          | `true`, `false`                          |
-| `html.output`          | `htmlOutput`           | `cucumber-report.html`                   |
-| `usage.enabled`        | `usageEnabled`         | `true`, `false`                          |
-| `usage.output`         | `usageOutput`          | `stdout`                                 |
-| `pretty.enabled`       | `prettyEnabled`        | `true`, `false`                          |
-| `filterSpecsMixedMode` | `filterSpecsMixedMode` | `hide`, `show`, `empty-set`              |
-| `filterSpecs`          | `filterSpecs`          | `true`, `false`                          |
-| `omitFiltered`         | `omitFiltered`         | `true`, `false`                          |
-| `dryRun`               | `dryRun`               | `true`, `false`                          |
+| JSON path                    | Environment key             | Example(s)                               |
+|------------------------------|-----------------------------|------------------------------------------|
+| `stepDefinitions`            | `stepDefinitions`           | `[filepath].{js,ts}`                     |
+| `messages.enabled`           | `messagesEnabled`           | `true`, `false`                          |
+| `messages.output`            | `messagesOutput`            | `cucumber-messages.ndjson`               |
+| `json.enabled`               | `jsonEnabled`               | `true`, `false`                          |
+| `json.output`                | `jsonOutput`                | `cucumber-report.json`                   |
+| `html.enabled`               | `htmlEnabled`               | `true`, `false`                          |
+| `html.output`                | `htmlOutput`                | `cucumber-report.html`                   |
+| `usage.enabled`              | `usageEnabled`              | `true`, `false`                          |
+| `usage.output`               | `usageOutput`               | `stdout`                                 |
+| `pretty.enabled`             | `prettyEnabled`             | `true`, `false`                          |
+| `filterSpecsMixedMode`       | `filterSpecsMixedMode`      | `hide`, `show`, `empty-set`              |
+| `filterSpecs`                | `filterSpecs`               | `true`, `false`                          |
+| `omitFiltered`               | `omitFiltered`              | `true`, `false`                          |
+| `dryRun`                     | `dryRun`                    | `true`, `false`                          |
+| `attachments.addScreenshots` | `attachmentsAddScreenshots` | `true`, `false`                          |
 
 ## Test configuration
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Add an option to disabled attaching screenshots to reports, fixes [#1306](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1306).
+
+  - This option defaults to `true`, retaining existing behavior for other users.
+
 ## v22.1.0
 
 - Gracefully handle sourcemaps when running component tests with webpack and chunks enabled (default behavior), fixes [#1296](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1296).

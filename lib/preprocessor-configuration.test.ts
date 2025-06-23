@@ -178,7 +178,7 @@ function basicBooleanExample(options: {
         getValueFn,
         environment: { [environmentKey]: "" },
         configuration: {},
-        expectedValue: false,
+        expectedValue: options.default,
       }));
   });
 }
@@ -956,6 +956,27 @@ describe("resolve()", () => {
               },
               expectedValue: false,
             }));
+        });
+      });
+
+      describe("attachments", () => {
+        describe("addScreenshots", () => {
+          const getValueFn = (
+            configuration: IPreprocessorConfiguration,
+          ): boolean => configuration.attachments.addScreenshots;
+
+          const setValueFn = (
+            configuration: IBaseUserConfiguration,
+            value: boolean,
+          ) => (configuration.attachments = { addScreenshots: value });
+
+          basicBooleanExample({
+            testingType,
+            default: true,
+            environmentKey: "attachmentsAddScreenshots",
+            getValueFn,
+            setValueFn,
+          });
         });
       });
     });

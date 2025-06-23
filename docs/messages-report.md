@@ -18,7 +18,7 @@ The report is outputted to `cucumber-messages.ndjson` in the project directory, 
 
 ## Screenshots
 
-Screenshots are automatically added to messages reports, including that of failed tests (unless you have disabled `screenshotOnRunFailure`).
+Screenshots are automatically added to messages reports, including that of failed tests (unless you have disabled `screenshotOnRunFailure`). This can be turned off using the `attachments.addScreenshots` property, which defaults to `true`.
 
 ## Attachments
 

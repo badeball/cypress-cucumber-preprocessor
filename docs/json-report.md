@@ -16,7 +16,7 @@ The report is outputted to `cucumber-report.json` in the project directory, but 
 
 ## Screenshots
 
-Screenshots are automatically added to JSON reports, including that of failed tests (unless you have disabled `screenshotOnRunFailure`).
+Screenshots are automatically added to JSON reports, including that of failed tests (unless you have disabled `screenshotOnRunFailure`). This can be turned off using the `attachments.addScreenshots` property, which defaults to `true`.
 
 ## Attachments (browser environment)
 

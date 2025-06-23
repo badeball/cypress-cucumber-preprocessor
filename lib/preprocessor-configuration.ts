@@ -234,6 +234,27 @@ function validateUserConfigurationEntry(
       }
       return { [key]: value };
     }
+    case "attachments": {
+      if (typeof value !== "object" || value == null) {
+        throw new Error(
+          `Expected an object (json), but got ${util.inspect(value)}`,
+        );
+      }
+      if (
+        !hasOwnProperty(value, "addScreenshots") ||
+        typeof value.addScreenshots !== "boolean"
+      ) {
+        throw new Error(
+          `Expected a boolean (attachments.addScreenshots), but got ${util.inspect(
+            value.addScreenshots,
+          )}`,
+        );
+      }
+      const attachmentsConfig = {
+        addScreenshots: value.addScreenshots,
+      };
+      return { [key]: attachmentsConfig };
+    }
     case "e2e":
       return { [key]: validateUserConfiguration(value) };
     case "component":
@@ -435,6 +456,22 @@ function validateEnvironmentOverrides(
     }
   }
 
+  if (hasOwnProperty(environment, "attachmentsAddScreenshots")) {
+    const { attachmentsAddScreenshots } = environment;
+
+    if (isBoolean(attachmentsAddScreenshots)) {
+      overrides.attachmentsAddScreenshots = attachmentsAddScreenshots;
+    } else if (isString(attachmentsAddScreenshots)) {
+      overrides.attachmentsAddScreenshots = stringToMaybeBoolean(
+        attachmentsAddScreenshots,
+      );
+    } else {
+      throw new Error(
+        `Expected a boolean (attachmentsAddScreenshots), but got ${util.inspect(attachmentsAddScreenshots)}`,
+      );
+    }
+  }
+
   return overrides;
 }
 
@@ -480,6 +517,7 @@ interface IEnvironmentOverrides {
   filterSpecs?: boolean;
   omitFiltered?: boolean;
   dryRun?: boolean;
+  attachmentsAddScreenshots?: boolean;
 }
 
 export interface IBaseUserConfiguration {
@@ -507,6 +545,9 @@ export interface IBaseUserConfiguration {
   filterSpecs?: boolean;
   omitFiltered?: boolean;
   dryRun?: boolean;
+  attachments?: {
+    addScreenshots: boolean;
+  };
 }
 
 export interface IUserConfiguration extends IBaseUserConfiguration {
@@ -541,6 +582,9 @@ export interface IPreprocessorConfiguration {
   readonly implicitIntegrationFolder: string;
   readonly isTrackingState: boolean;
   readonly dryRun: boolean;
+  readonly attachments: {
+    addScreenshots: boolean;
+  };
 }
 
 const DEFAULT_STEP_DEFINITIONS = [
@@ -674,6 +718,14 @@ export function combineIntoConfiguration(
       usage.enabled ||
       usingPrettyReporter);
 
+  const attachments: IPreprocessorConfiguration["attachments"] = {
+    addScreenshots:
+      overrides.attachmentsAddScreenshots ??
+      specific?.attachments?.addScreenshots ??
+      unspecific.attachments?.addScreenshots ??
+      true,
+  };
+
   return {
     stepDefinitions,
     messages,
@@ -687,6 +739,7 @@ export function combineIntoConfiguration(
     implicitIntegrationFolder,
     isTrackingState,
     dryRun,
+    attachments,
   };
 }
 
