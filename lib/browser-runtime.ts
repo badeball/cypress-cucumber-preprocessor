@@ -119,7 +119,7 @@ function getSourceReferenceFromPosition(
 }
 
 interface IStep {
-  hook?: ICaseHook;
+  hook?: ICaseHook<Mocha.Context>;
   pickleStep?: messages.PickleStep;
 }
 
@@ -244,7 +244,7 @@ function emitSkippedPickle(
   const testCaseStartedId = context.newId();
   const timestamp = createTimestamp();
 
-  const steps: (ICaseHook | messages.PickleStep)[] = [
+  const steps: (ICaseHook<Mocha.Context> | messages.PickleStep)[] = [
     ...beforeHooks,
     ...pickleSteps,
     ...afterHooks,
@@ -1231,7 +1231,7 @@ export default function createTests(
     const beforeHooks = registry.resolveBeforeHooks(tags);
     const afterHooks = registry.resolveAfterHooks(tags);
 
-    const hooksToStep = (hook: ICaseHook): messages.TestStep => {
+    const hooksToStep = (hook: ICaseHook<Mocha.Context>): messages.TestStep => {
       return {
         id: createTestStepId({
           testStepIds,

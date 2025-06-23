@@ -78,68 +78,86 @@ export function attach(data: string | ArrayBuffer, mediaType?: string) {
   throw createUnimplemented();
 }
 
-export function Before(options: ICaseHookOptions, fn: ICaseHookBody): void;
-export function Before(fn: ICaseHookBody): void;
-export function Before(
+export function Before<C extends Mocha.Context>(
+  options: ICaseHookOptions,
+  fn: ICaseHookBody<C>,
+): void;
+export function Before<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
+export function Before<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: ICaseHookBody | ICaseHookOptions,
+  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: ICaseHookBody,
+  maybeFn?: ICaseHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
-export function After(options: ICaseHookOptions, fn: ICaseHookBody): void;
-export function After(fn: ICaseHookBody): void;
-export function After(
+export function After<C extends Mocha.Context>(
+  options: ICaseHookOptions,
+  fn: ICaseHookBody<C>,
+): void;
+export function After<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
+export function After<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: ICaseHookBody | ICaseHookOptions,
+  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: ICaseHookBody,
+  maybeFn?: ICaseHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
-export function BeforeStep(options: IStepHookOptions, fn: IStepHookBody): void;
-export function BeforeStep(fn: IStepHookBody): void;
-export function BeforeStep(
+export function BeforeStep<C extends Mocha.Context>(
+  options: IStepHookOptions,
+  fn: IStepHookBody<C>,
+): void;
+export function BeforeStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
+export function BeforeStep<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IStepHookBody | IStepHookOptions,
+  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: IStepHookBody,
+  maybeFn?: IStepHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
-export function AfterStep(options: IStepHookOptions, fn: IStepHookBody): void;
-export function AfterStep(fn: IStepHookBody): void;
-export function AfterStep(
+export function AfterStep<C extends Mocha.Context>(
+  options: IStepHookOptions,
+  fn: IStepHookBody<C>,
+): void;
+export function AfterStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
+export function AfterStep<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IStepHookBody | IStepHookOptions,
+  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: IStepHookBody,
+  maybeFn?: IStepHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
-export function BeforeAll(options: IRunHookOptions, fn: IRunHookBody): void;
-export function BeforeAll(fn: IRunHookBody): void;
-export function BeforeAll(
+export function BeforeAll<C extends Mocha.Context>(
+  options: IRunHookOptions,
+  fn: IRunHookBody<C>,
+): void;
+export function BeforeAll<C extends Mocha.Context>(fn: IRunHookBody<C>): void;
+export function BeforeAll<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IRunHookBody | IRunHookOptions,
+  optionsOrFn: IRunHookBody<C> | IRunHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: IRunHookBody,
+  maybeFn?: IRunHookBody<C>,
 ) {
   throw createUnimplemented();
 }
 
-export function AfterAll(options: IRunHookOptions, fn: IRunHookBody): void;
-export function AfterAll(fn: IRunHookBody): void;
-export function AfterAll(
+export function AfterAll<C extends Mocha.Context>(
+  options: IRunHookOptions,
+  fn: IRunHookBody<C>,
+): void;
+export function AfterAll<C extends Mocha.Context>(fn: IRunHookBody<C>): void;
+export function AfterAll<C extends Mocha.Context>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  optionsOrFn: IRunHookBody | IRunHookOptions,
+  optionsOrFn: IRunHookBody<C> | IRunHookOptions,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  maybeFn?: IRunHookBody,
+  maybeFn?: IRunHookBody<C>,
 ) {
   throw createUnimplemented();
 }

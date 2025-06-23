@@ -71,91 +71,109 @@ function defineParameterType<T, C extends Mocha.Context>(
   getRegistry().defineParameterType(options);
 }
 
-function defineBefore(options: ICaseHookOptions, fn: ICaseHookBody): void;
-function defineBefore(fn: ICaseHookBody): void;
-function defineBefore(
-  optionsOrFn: ICaseHookBody | ICaseHookOptions,
-  maybeFn?: ICaseHookBody,
+function defineBefore<C extends Mocha.Context>(
+  options: ICaseHookOptions,
+  fn: ICaseHookBody<C>,
+): void;
+function defineBefore<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
+function defineBefore<C extends Mocha.Context>(
+  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  maybeFn?: ICaseHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineBefore({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineBefore({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineBefore(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineBefore(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for Before hook");
   }
 }
 
-function defineAfter(options: ICaseHookOptions, fn: ICaseHookBody): void;
-function defineAfter(fn: ICaseHookBody): void;
-function defineAfter(
-  optionsOrFn: ICaseHookBody | ICaseHookOptions,
-  maybeFn?: ICaseHookBody,
+function defineAfter<C extends Mocha.Context>(
+  options: ICaseHookOptions,
+  fn: ICaseHookBody<C>,
+): void;
+function defineAfter<C extends Mocha.Context>(fn: ICaseHookBody<C>): void;
+function defineAfter<C extends Mocha.Context>(
+  optionsOrFn: ICaseHookBody<C> | ICaseHookOptions,
+  maybeFn?: ICaseHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineAfter({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineAfter({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineAfter(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineAfter(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for After hook");
   }
 }
 
-function defineBeforeStep(options: IStepHookOptions, fn: IStepHookBody): void;
-function defineBeforeStep(fn: IStepHookBody): void;
-function defineBeforeStep(
-  optionsOrFn: IStepHookBody | IStepHookOptions,
-  maybeFn?: IStepHookBody,
+function defineBeforeStep<C extends Mocha.Context>(
+  options: IStepHookOptions,
+  fn: IStepHookBody<C>,
+): void;
+function defineBeforeStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
+function defineBeforeStep<C extends Mocha.Context>(
+  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  maybeFn?: IStepHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineBeforeStep({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineBeforeStep({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineBeforeStep(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineBeforeStep(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for BeforeStep hook");
   }
 }
 
-function defineAfterStep(options: IStepHookOptions, fn: IStepHookBody): void;
-function defineAfterStep(fn: IStepHookBody): void;
-function defineAfterStep(
-  optionsOrFn: IStepHookBody | IStepHookOptions,
-  maybeFn?: IStepHookBody,
+function defineAfterStep<C extends Mocha.Context>(
+  options: IStepHookOptions,
+  fn: IStepHookBody<C>,
+): void;
+function defineAfterStep<C extends Mocha.Context>(fn: IStepHookBody<C>): void;
+function defineAfterStep<C extends Mocha.Context>(
+  optionsOrFn: IStepHookBody<C> | IStepHookOptions,
+  maybeFn?: IStepHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineAfterStep({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineAfterStep({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineAfterStep(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineAfterStep(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for AfterStep hook");
   }
 }
 
-function defineBeforeAll(options: IRunHookOptions, fn: IRunHookBody): void;
-function defineBeforeAll(fn: IRunHookBody): void;
-function defineBeforeAll(
-  optionsOrFn: IRunHookBody | IRunHookOptions,
-  maybeFn?: IRunHookBody,
+function defineBeforeAll<C extends Mocha.Context>(
+  options: IRunHookOptions,
+  fn: IRunHookBody<C>,
+): void;
+function defineBeforeAll<C extends Mocha.Context>(fn: IRunHookBody<C>): void;
+function defineBeforeAll<C extends Mocha.Context>(
+  optionsOrFn: IRunHookBody<C> | IRunHookOptions,
+  maybeFn?: IRunHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineBeforeAll({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineBeforeAll({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineBeforeAll(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineBeforeAll(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for BeforeAll hook");
   }
 }
 
-function defineAfterAll(options: IRunHookOptions, fn: IRunHookBody): void;
-function defineAfterAll(fn: IRunHookBody): void;
-function defineAfterAll(
-  optionsOrFn: IRunHookBody | IRunHookOptions,
-  maybeFn?: IRunHookBody,
+function defineAfterAll<C extends Mocha.Context>(
+  options: IRunHookOptions,
+  fn: IRunHookBody<C>,
+): void;
+function defineAfterAll<C extends Mocha.Context>(fn: IRunHookBody<C>): void;
+function defineAfterAll<C extends Mocha.Context>(
+  optionsOrFn: IRunHookBody<C> | IRunHookOptions,
+  maybeFn?: IRunHookBody<C>,
 ) {
   if (typeof optionsOrFn === "function") {
-    getRegistry().defineAfterAll({}, optionsOrFn);
+    getRegistry<C, unknown[]>().defineAfterAll({}, optionsOrFn);
   } else if (typeof optionsOrFn === "object" && typeof maybeFn === "function") {
-    getRegistry().defineAfterAll(optionsOrFn, maybeFn);
+    getRegistry<C, unknown[]>().defineAfterAll(optionsOrFn, maybeFn);
   } else {
     throw new Error("Unexpected argument for AfterAll hook");
   }

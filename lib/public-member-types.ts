@@ -10,8 +10,8 @@ export interface IRunHookOptions {
   order?: number;
 }
 
-export interface IRunHookBody {
-  (this: Mocha.Context): void;
+export interface IRunHookBody<C extends Mocha.Context> {
+  (this: C): void;
 }
 
 export interface ICaseHookOptions {
@@ -26,8 +26,8 @@ export interface ICaseHookParameter {
   testCaseStartedId: string;
 }
 
-export interface ICaseHookBody {
-  (this: Mocha.Context, options: ICaseHookParameter): void;
+export interface ICaseHookBody<C extends Mocha.Context> {
+  (this: C, options: ICaseHookParameter): void;
 }
 
 export interface IStepHookOptions {
@@ -44,8 +44,8 @@ export interface IStepHookParameter {
   testStepId: string;
 }
 
-export interface IStepHookBody {
-  (this: Mocha.Context, options: IStepHookParameter): void;
+export interface IStepHookBody<C extends Mocha.Context> {
+  (this: C, options: IStepHookParameter): void;
 }
 
 export interface IStepDefinitionBody<

@@ -335,3 +335,23 @@ Then(/foo/, function (this: CustomWorld, url: string) {
   expectType<CustomWorld>(this);
   this.pageDriver.navigateTo(url);
 });
+
+Before(function (this: CustomWorld) {
+  expectType<CustomWorld>(this);
+  this.pageDriver.navigateTo("foo");
+});
+
+After(function (this: CustomWorld) {
+  expectType<CustomWorld>(this);
+  this.pageDriver.navigateTo("foo");
+});
+
+BeforeStep(function (this: CustomWorld) {
+  expectType<CustomWorld>(this);
+  this.pageDriver.navigateTo("foo");
+});
+
+AfterStep(function (this: CustomWorld) {
+  expectType<CustomWorld>(this);
+  this.pageDriver.navigateTo("foo");
+});

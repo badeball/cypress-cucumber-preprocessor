@@ -54,17 +54,17 @@ type Node = ReturnType<typeof parse>;
 
 export const DEFAULT_HOOK_ORDER = 10000;
 
-export interface IRunHook {
-  implementation: IRunHookBody;
+export interface IRunHook<C extends Mocha.Context> {
+  implementation: IRunHookBody<C>;
   keyword: RunHookKeyword;
   order: number;
   position?: Position;
 }
 
-export interface ICaseHook {
+export interface ICaseHook<C extends Mocha.Context> {
   id: string;
   node: Node;
-  implementation: ICaseHookBody;
+  implementation: ICaseHookBody<C>;
   keyword: CaseHookKeyword;
   order: number;
   position?: Position;
@@ -72,9 +72,9 @@ export interface ICaseHook {
   name?: string;
 }
 
-export interface IStepHook {
+export interface IStepHook<C extends Mocha.Context> {
   node: Node;
-  implementation: IStepHookBody;
+  implementation: IStepHookBody<C>;
   keyword: StepHookKeyword;
   order: number;
   position?: Position;
@@ -99,13 +99,13 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
 
   public stepDefinitions: IStepDefinition<T, C>[] = [];
 
-  private preliminaryHooks: Omit<ICaseHook, "id">[] = [];
+  private preliminaryHooks: Omit<ICaseHook<C>, "id">[] = [];
 
-  public runHooks: IRunHook[] = [];
+  public runHooks: IRunHook<C>[] = [];
 
-  public caseHooks: ICaseHook[] = [];
+  public caseHooks: ICaseHook<C>[] = [];
 
-  public stepHooks: IStepHook[] = [];
+  public stepHooks: IStepHook<C>[] = [];
 
   constructor(private experimentalSourceMap: boolean = true) {
     this.defineStep = this.defineStep.bind(this);
@@ -179,7 +179,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
   public defineCaseHook(
     keyword: CaseHookKeyword,
     options: ICaseHookOptions,
-    fn: ICaseHookBody,
+    fn: ICaseHookBody<C>,
   ) {
     const { order, ...remainingOptions } = options;
     this.preliminaryHooks.push({
@@ -192,18 +192,18 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     });
   }
 
-  public defineBefore(options: ICaseHookOptions, fn: ICaseHookBody) {
+  public defineBefore(options: ICaseHookOptions, fn: ICaseHookBody<C>) {
     this.defineCaseHook("Before", options, fn);
   }
 
-  public defineAfter(options: ICaseHookOptions, fn: ICaseHookBody) {
+  public defineAfter(options: ICaseHookOptions, fn: ICaseHookBody<C>) {
     this.defineCaseHook("After", options, fn);
   }
 
   public defineStepHook(
     keyword: StepHookKeyword,
     options: ICaseHookOptions,
-    fn: IStepHookBody,
+    fn: IStepHookBody<C>,
   ) {
     const { order, ...remainingOptions } = options;
     this.stepHooks.push({
@@ -216,18 +216,18 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     });
   }
 
-  public defineBeforeStep(options: ICaseHookOptions, fn: IStepHookBody) {
+  public defineBeforeStep(options: ICaseHookOptions, fn: IStepHookBody<C>) {
     this.defineStepHook("BeforeStep", options, fn);
   }
 
-  public defineAfterStep(options: ICaseHookOptions, fn: IStepHookBody) {
+  public defineAfterStep(options: ICaseHookOptions, fn: IStepHookBody<C>) {
     this.defineStepHook("AfterStep", options, fn);
   }
 
   public defineRunHook(
     keyword: RunHookKeyword,
     options: IRunHookOptions,
-    fn: IRunHookBody,
+    fn: IRunHookBody<C>,
   ) {
     this.runHooks.push({
       implementation: fn,
@@ -237,11 +237,11 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     });
   }
 
-  public defineBeforeAll(options: IRunHookOptions, fn: IRunHookBody) {
+  public defineBeforeAll(options: IRunHookOptions, fn: IRunHookBody<C>) {
     this.defineRunHook("BeforeAll", options, fn);
   }
 
-  public defineAfterAll(options: IRunHookOptions, fn: IRunHookBody) {
+  public defineAfterAll(options: IRunHookOptions, fn: IRunHookBody<C>) {
     this.defineRunHook("AfterAll", options, fn);
   }
 
@@ -323,8 +323,8 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
   }
 
   public runCaseHook(
-    world: Mocha.Context,
-    hook: ICaseHook,
+    world: C,
+    hook: ICaseHook<C>,
     options: ICaseHookParameter,
   ) {
     return hook.implementation.call(world, options);
@@ -347,8 +347,8 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
   }
 
   public runStepHook(
-    world: Mocha.Context,
-    hook: IStepHook,
+    world: C,
+    hook: IStepHook<C>,
     options: IStepHookParameter,
   ) {
     return hook.implementation.call(world, options);
@@ -370,7 +370,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     return this.resolveRunHooks("AfterAll").reverse();
   }
 
-  public runRunHook(world: Mocha.Context, hook: IRunHook) {
+  public runRunHook(world: C, hook: IRunHook<C>) {
     return hook.implementation.call(world);
   }
 }
