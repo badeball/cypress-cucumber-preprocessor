@@ -88,16 +88,16 @@ function parseMaybeTags(tags?: string): Node {
   return tags ? parse(tags) : noopNode;
 }
 
-export class Registry {
+export class Registry<C extends Mocha.Context, T extends unknown[]> {
   public parameterTypeRegistry: ParameterTypeRegistry;
 
   private preliminaryStepDefinitions: {
     description: string | RegExp;
-    implementation: () => void;
+    implementation: IStepDefinitionBody<T, C>;
     position?: Position;
   }[] = [];
 
-  public stepDefinitions: IStepDefinition<unknown[], Mocha.Context>[] = [];
+  public stepDefinitions: IStepDefinition<T, C>[] = [];
 
   private preliminaryHooks: Omit<ICaseHook, "id">[] = [];
 
@@ -151,7 +151,10 @@ export class Registry {
     }
   }
 
-  public defineStep(description: string | RegExp, implementation: () => void) {
+  public defineStep(
+    description: string | RegExp,
+    implementation: IStepDefinitionBody<T, C>,
+  ) {
     if (typeof description !== "string" && !(description instanceof RegExp)) {
       throw new Error("Unexpected argument for step definition");
     }
@@ -281,7 +284,7 @@ export class Registry {
   }
 
   public runStepDefinition(
-    world: Mocha.Context,
+    world: C,
     text: string,
     dryRun: boolean,
     argument?: DataTable | string,
@@ -290,7 +293,7 @@ export class Registry {
 
     const args = stepDefinition.expression
       .match(text)!
-      .map((match) => match.getValue(world));
+      .map((match) => match.getValue(world)) as T;
 
     if (argument) {
       args.push(argument);
@@ -375,18 +378,20 @@ export class Registry {
 const globalPropertyName =
   "__cypress_cucumber_preprocessor_registry_dont_use_this";
 
-export function withRegistry(
+export function withRegistry<C extends Mocha.Context, T extends unknown[]>(
   experimentalSourceMap: boolean,
   fn: () => void,
-): Registry {
-  const registry = new Registry(experimentalSourceMap);
+): Registry<C, T> {
+  const registry = new Registry<C, T>(experimentalSourceMap);
   assignRegistry(registry);
   fn();
   freeRegistry();
   return registry;
 }
 
-export function assignRegistry(registry: Registry) {
+export function assignRegistry<C extends Mocha.Context, T extends unknown[]>(
+  registry: Registry<C, T>,
+) {
   globalThis[globalPropertyName] = registry;
 }
 
@@ -394,7 +399,10 @@ export function freeRegistry() {
   delete globalThis[globalPropertyName];
 }
 
-export function getRegistry(): Registry {
+export function getRegistry<
+  C extends Mocha.Context,
+  T extends unknown[],
+>(): Registry<C, T> {
   return assertAndReturn(
     globalThis[globalPropertyName],
     "Expected to find a global registry (this usually means you are trying to define steps or hooks in support/e2e.js, which is not supported)",

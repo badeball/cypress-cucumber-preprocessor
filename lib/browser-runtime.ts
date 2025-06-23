@@ -83,7 +83,7 @@ type Node = ReturnType<typeof parse>;
 type TestStepIds = Map<string, Map<string, string>>;
 
 interface CompositionContext {
-  registry: Registry;
+  registry: Registry<Mocha.Context, unknown[]>;
   newId: messages.IdGenerator.NewId;
   gherkinDocument: messages.GherkinDocument;
   astIdsMap: ReturnType<typeof createAstIdMap>;
@@ -1176,7 +1176,7 @@ function afterHandler(this: Mocha.Context, context: CompositionContext) {
 }
 
 export default function createTests(
-  registry: Registry,
+  registry: Registry<Mocha.Context, unknown[]>,
   seed: number,
   source: string,
   gherkinDocument: messages.GherkinDocument,

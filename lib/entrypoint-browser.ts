@@ -48,7 +48,7 @@ function defineStep<T extends unknown[], C extends Mocha.Context>(
   description: string | RegExp,
   implementation: IStepDefinitionBody<T, C>,
 ) {
-  getRegistry().defineStep(description, implementation);
+  getRegistry<C, T>().defineStep(description, implementation);
 }
 
 function runStepDefinition(
