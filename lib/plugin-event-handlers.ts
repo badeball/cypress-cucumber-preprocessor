@@ -53,8 +53,6 @@ import {
   createUsageFormatter,
 } from "./helpers/formatters";
 
-import { useColors } from "./helpers/colors";
-
 import { notNull } from "./helpers/type-guards";
 
 import { indent } from "./helpers/strings";
@@ -286,9 +284,9 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   if (preprocessor.pretty.enabled) {
     const writable = createPrettyStream();
 
-    const eventBroadcaster = createPrettyFormatter(useColors(), (chunk) =>
-      writable.write(chunk),
-    );
+    const eventBroadcaster = createPrettyFormatter((chunk) => {
+      writable.write(chunk);
+    });
 
     pretty = {
       enabled: true,
@@ -725,7 +723,7 @@ export async function specEnvelopesHandler(
 
   if (state.pretty.enabled) {
     for (const message of data.messages) {
-      state.pretty.broadcaster.emit("envelope", message);
+      state.pretty.broadcaster.emit("message", message);
     }
   }
 
@@ -768,25 +766,29 @@ export async function testCaseStartedHandler(
           if (state.pretty.enabled) {
             await end(state.pretty.writable);
 
-            // Reloading occurred right within a step, so we output an extra newline.
+            // Reloading occurred
+            // - right within a step, or
+            // - after a test case
+            // .. so we output an extra newline.
             if (
               state.messages.current[state.messages.current.length - 1]
-                .testStepStarted != null
+                .testStepStarted != null ||
+              state.messages.current[state.messages.current.length - 1]
+                .testCaseFinished != null
             ) {
               console.log();
             }
 
             console.log("  Reloading..");
-            console.log();
 
             const writable = createPrettyStream();
 
-            const broadcaster = createPrettyFormatter(useColors(), (chunk) =>
+            const broadcaster = createPrettyFormatter((chunk) =>
               writable.write(chunk),
             );
 
             for (const message of state.specEnvelopes) {
-              broadcaster.emit("envelope", message);
+              broadcaster.emit("message", message);
             }
 
             state.pretty = {
@@ -809,7 +811,7 @@ export async function testCaseStartedHandler(
   }
 
   if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
+    state.pretty.broadcaster.emit("message", {
       testCaseStarted: data,
     });
   }
@@ -846,7 +848,7 @@ export function testStepStartedHandler(
   }
 
   if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
+    state.pretty.broadcaster.emit("message", {
       testStepStarted: data,
     });
   }
@@ -890,7 +892,7 @@ export async function testStepFinishedHandler(
   }
 
   if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
+    state.pretty.broadcaster.emit("message", {
       testStepFinished,
     });
   }
@@ -1018,7 +1020,7 @@ export function testCaseFinishedHandler(
   }
 
   if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
+    state.pretty.broadcaster.emit("message", {
       testCaseFinished: data,
     });
   }

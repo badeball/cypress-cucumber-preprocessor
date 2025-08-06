@@ -26,10 +26,10 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step          # not available:0
       """
 
     Scenario: multiple, passing scenarios
@@ -50,13 +50,13 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step          # not available:0
 
           Scenario: another scenario name # cypress/e2e/a.feature:4
-            Given another step
+            ✔ Given another step          # not available:0
       """
 
     Scenario: multiple, passing features
@@ -81,17 +81,17 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step          # not available:0
       """
       And the output should contain
       """
-        Feature: another feature name # cypress/e2e/b.feature:1
+        Feature: another feature name
 
           Scenario: another scenario name # cypress/e2e/b.feature:2
-            Given another step
+            ✔ Given another step          # not available:0
       """
 
     Scenario: scenario with rule
@@ -111,14 +111,15 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Rule: a rule
 
             Scenario: a scenario name # cypress/e2e/a.feature:3
-              Given a step
+              ✔ Given a step          # not available:0
       """
 
+    @skip
     Scenario: described feature
       Given a file named "cypress/e2e/a.feature" with:
         """
@@ -138,14 +139,15 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           foobar
 
           Scenario: a scenario name # cypress/e2e/a.feature:5
-            Given a step
+            ✔ Given a step          # not available:0
       """
 
+    @skip
     Scenario: tagged feature
       Given a file named "cypress/e2e/a.feature" with:
         """
@@ -164,11 +166,11 @@ Feature: pretty output
       And the output should contain
       """
         @foobar
-        Feature: a feature name # cypress/e2e/a.feature:2
+        Feature: a feature name
 
           @foobar
           Scenario: a scenario name # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step          # not available:0
       """
 
     Scenario: tagged scenario
@@ -188,11 +190,11 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           @foobar
           Scenario: a scenario name # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step          # not available:0
       """
 
     Scenario: docstring
@@ -215,13 +217,13 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-              \"\"\"
-              foobar
-              \"\"\"
+            ✔ Given a step          # not available:0
+                \"\"\"
+                foobar
+                \"\"\"
       """
 
     Scenario: datatable
@@ -243,12 +245,12 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-              │ foo │
-              │ bar │
+            ✔ Given a step          # not available:0
+                | foo |
+                | bar |
       """
 
     Scenario: failing step
@@ -267,12 +269,11 @@ Feature: pretty output
       Then it fails
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-            ✖ failed
-              some error
+            ✘ Given a step          # not available:0
+                  some error
       """
 
     Scenario: failing before hook
@@ -280,7 +281,7 @@ Feature: pretty output
         """
         Feature: a feature name
           Scenario: a scenario name
-            Given a step
+            ✔ Given a step
         """
       And a file named "cypress/support/step_definitions/steps.js" with:
         """
@@ -292,13 +293,10 @@ Feature: pretty output
       Then it fails
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            ✖ failed
-              some error
-            Given a step
-            - skipped
+                  some error
       """
 
     Scenario: failing after hook
@@ -318,12 +316,11 @@ Feature: pretty output
       Then it fails
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-            ✖ failed
-              some error
+            ✔ Given a step          # not available:0
+                  some error
       """
 
     Scenario: ambiguous step
@@ -343,14 +340,13 @@ Feature: pretty output
       Then it fails
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-            ✖ ambiguous
-              Multiple matching step definitions for: a step
-               a step
-               a step
+            ✘ Given a step
+                  Multiple matching step definitions for: a step
+                   a step
+                   a step
       """
 
     Scenario: pending step
@@ -371,11 +367,10 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-            ? pending
+            ■ Given a step          # not available:0
       """
 
     Scenario: undefined step
@@ -393,11 +388,10 @@ Feature: pretty output
       Then it fails
       And the output should contain
       """
-        Feature: a feature name # cypress/e2e/a.feature:1
+        Feature: a feature name
 
           Scenario: a scenario name # cypress/e2e/a.feature:2
-            Given a step
-            ? undefined
+            ■ Given a step
       """
 
     Scenario: retried scenario
@@ -427,15 +421,14 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           Scenario: a scenario # cypress/e2e/a.feature:2
-            Given a step
-            ✖ failed
-              some error
+            ✘ Given a step     # not available:0
+                  some error
 
           Scenario: a scenario # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step     # not available:0
       """
 
   Rule: it should include results of skipped (not omitted) tests
@@ -460,18 +453,17 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @skip
           Scenario: first scenario # cypress/e2e/a.feature:3
-            Given a step
-            - skipped
+            ↷ Given a step         # not available:0
 
           Scenario: second scenario # cypress/e2e/a.feature:5
-            Given a step
+            ✔ Given a step          # not available:0
 
           Scenario: third scenario # cypress/e2e/a.feature:7
-            Given a step
+            ✔ Given a step         # not available:0
       """
 
     Scenario: middle scenario skipped
@@ -495,18 +487,17 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           Scenario: first scenario # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step         # not available:0
 
           @skip
           Scenario: second scenario # cypress/e2e/a.feature:5
-            Given a step
-            - skipped
+            ↷ Given a step          # not available:0
 
           Scenario: third scenario # cypress/e2e/a.feature:7
-            Given a step
+            ✔ Given a step         # not available:0
       """
 
     Scenario: last scenario skipped
@@ -530,18 +521,17 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           Scenario: first scenario # cypress/e2e/a.feature:2
-            Given a step
+            ✔ Given a step         # not available:0
 
           Scenario: second scenario # cypress/e2e/a.feature:4
-            Given a step
+            ✔ Given a step          # not available:0
 
           @skip
           Scenario: third scenario # cypress/e2e/a.feature:7
-            Given a step
-            - skipped
+            ↷ Given a step         # not available:0
       """
 
     Scenario: all scenario skipped
@@ -567,22 +557,19 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @skip
           Scenario: first scenario # cypress/e2e/a.feature:3
-            Given a step
-            - skipped
+            ↷ Given a step         # not available:0
 
           @skip
           Scenario: second scenario # cypress/e2e/a.feature:6
-            Given a step
-            - skipped
+            ↷ Given a step          # not available:0
 
           @skip
           Scenario: third scenario # cypress/e2e/a.feature:9
-            Given a step
-            - skipped
+            ↷ Given a step         # not available:0
       """
 
   @network
@@ -618,15 +605,15 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step     # not available:0
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
       """
 
     Scenario: reloading within steps
@@ -646,31 +633,29 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
 
         Reloading..
 
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step     # not available:0
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
 
         Reloading..
 
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
       """
 
     Scenario: reloading in before()
@@ -707,23 +692,23 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step     # not available:0
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
 
         Reloading..
 
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
       """
 
     Scenario: reloading in beforeEach()
@@ -760,29 +745,29 @@ Feature: pretty output
       Then it passes
       And the output should contain
       """
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step     # not available:0
 
         Reloading..
 
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://duckduckgo.com/")
           Scenario: a scenario # cypress/e2e/a.feature:3
-            Given a step
+            ✔ Given a step     # not available:0
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
 
         Reloading..
 
-        Feature: a feature # cypress/e2e/a.feature:1
+        Feature: a feature
 
           @env(origin="https://google.com/")
           Scenario: another scenario # cypress/e2e/a.feature:7
-            Given another step
+            ✔ Given another step     # not available:0
       """
