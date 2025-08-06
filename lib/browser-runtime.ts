@@ -1146,7 +1146,6 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                   ...(message.includes("Multiple matching step definitions for")
                     ? {
                         status: messages.TestStepResultStatus.AMBIGUOUS,
-                        message,
                       }
                     : {
                         status: messages.TestStepResultStatus.FAILED,

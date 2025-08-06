@@ -69,7 +69,7 @@
     "@cucumber/html-formatter": "^23.0.0",
     "@cucumber/message-streams": "^4.0.1",
     "@cucumber/messages": "^32.0.0",
-    "@cucumber/pretty-formatter": "^1.0.1",
+    "@cucumber/pretty-formatter": "^3.0.0",
     "@cucumber/tag-expressions": "^9.0.0",
     "@jridgewell/trace-mapping": "^0.3.31",
     "base64-js": "^1.5.1",

@@ -30,7 +30,6 @@ import {
   ITaskTestStepStarted,
 } from "./cypress-task-definitions";
 import { assert, assertIsString, ensure } from "./helpers/assertions";
-import { useColors } from "./helpers/colors";
 import debug from "./helpers/debug";
 import { CypressCucumberError, homepage } from "./helpers/error";
 import {
@@ -340,9 +339,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   if (preprocessor.pretty.enabled) {
     const writable = createPrettyStream();
 
-    const eventBroadcaster = createPrettyFormatter(useColors(), (chunk) =>
-      writable.write(chunk),
-    );
+    const eventBroadcaster = createPrettyFormatter(writable);
 
     pretty = {
       enabled: true,
@@ -471,6 +468,7 @@ export async function afterRunHandler(
   };
 
   if (state.pretty.enabled) {
+    state.pretty.broadcaster.emit("envelope", testRunFinished);
     await end(state.pretty.writable);
   }
 
@@ -913,22 +911,24 @@ export const testCaseStartedHandler = createGracefullPluginEventHandler(
             if (state.pretty.enabled) {
               await end(state.pretty.writable);
 
-              // Reloading occurred right within a step, so we output an extra newline.
+              // Reloading occurred
+              // - right within a step, or
+              // - after a test case
+              // .. so we output an extra newline.
               if (
                 state.messages.current[state.messages.current.length - 1]
-                  .testStepStarted != null
+                  .testStepStarted != null ||
+                state.messages.current[state.messages.current.length - 1]
+                  .testCaseFinished != null
               ) {
                 console.log();
               }
 
               console.log("  Reloading..");
-              console.log();
 
               const writable = createPrettyStream();
 
-              const broadcaster = createPrettyFormatter(useColors(), (chunk) =>
-                writable.write(chunk),
-              );
+              const broadcaster = createPrettyFormatter(writable);
 
               for (const message of state.specEnvelopes) {
                 broadcaster.emit("envelope", message);

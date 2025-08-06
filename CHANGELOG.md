@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unrelased
+
+- Update dependency @cucumber/pretty-formatter to v3.
+
+  - This is not a breaking change, but warrants mentioning because the output is changed stylistically in some ways.
+
 ## v24.0.0
 
 Breaking changes:
