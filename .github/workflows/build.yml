@@ -13,7 +13,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - id: set-matrix
         name: Prepare
         run: echo "matrix=$(node -p "JSON.stringify(require('./package.json').peerDependencies['cypress'].split(' || '))")" >> $GITHUB_OUTPUT
@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 18
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Cache NPM modules
         uses: actions/cache@v4
         with:
@@ -73,7 +73,7 @@ jobs:
         with:
           node-version: 18
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Cache NPM modules
         uses: actions/cache@v4
         with:
