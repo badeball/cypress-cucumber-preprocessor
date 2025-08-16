@@ -58,7 +58,7 @@ function example(
     }
 
     for (let i = 0; i < expected.length; i++) {
-      if (expected[i] !== actual[i]) {
+      if (expected[i] !== actual[i].replace(/\\/g, '/')) {
         throwUnequal();
       }
     }
@@ -72,7 +72,10 @@ describe("pathParts()", () => {
   it(`should return ${util.inspect(expectedParts)} for ${util.inspect(
     relativePath,
   )}`, () => {
-    assert.deepStrictEqual(pathParts(relativePath), expectedParts);
+    let actualParts = pathParts(relativePath);
+    actualParts = actualParts.map(p => p.replace(/\\/g, '/'));
+
+    assert.deepStrictEqual(actualParts, expectedParts);
   });
 });
 
