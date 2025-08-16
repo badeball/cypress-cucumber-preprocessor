@@ -6,11 +6,14 @@
     "@badeball/cypress-cucumber-preprocessor": "latest",
     "@cypress/vite-dev-server": "<7",
     "@originjs/vite-plugin-commonjs": "latest",
-    "@vitejs/plugin-react": "latest",
+    "@vitejs/plugin-react": "<5",
     "cypress": "latest",
     "patch-package": "latest",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest"
+  },
+  "peerDependencies": {
+    "vite": "<7"
   }
 }
