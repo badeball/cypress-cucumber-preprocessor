@@ -81,7 +81,7 @@
     "seedrandom": "^3.0.5",
     "source-map": "^0.6.1",
     "split": "^1.0.1",
-    "uuid": "^10.0.0"
+    "uuid": "^11.0.0"
   },
   "devDependencies": {
     "@babel/parser": "^7.25.3",
