@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@badeball/cypress-cucumber-preprocessor": "latest",
-    "@cypress/webpack-dev-server": "<5",
+    "@cypress/webpack-dev-server": "latest",
     "cypress": "latest",
     "react": "latest",
     "react-dom": "latest",
