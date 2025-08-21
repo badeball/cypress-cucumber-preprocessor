@@ -8,6 +8,8 @@ Breaking changes:
 
 - Dropped support for Cypress v11.
 
+- Dropped support for Node v18.
+
 Other changes:
 
 - Added support for Cypress v15, fixes [#1312](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1312).
