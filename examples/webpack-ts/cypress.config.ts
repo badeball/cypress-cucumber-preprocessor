@@ -1,5 +1,5 @@
 import { defineConfig } from "cypress";
-import * as webpack from "@cypress/webpack-preprocessor";
+import webpack from "@cypress/webpack-preprocessor";
 import { addCucumberPreprocessorPlugin } from "@badeball/cypress-cucumber-preprocessor";
 
 async function setupNodeEvents(

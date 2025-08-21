@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Breaking changes:
+
+- Dropped support for Cypress v11.
+
+Other changes:
+
+- Added support for Cypress v15, fixes [#1312](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1312).
+
 ## v22.2.0
 
 - Add TypeScript support for custom world in hooks, fixes [#1304](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1304).
