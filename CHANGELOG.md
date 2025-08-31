@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unrelased
+
+- Bumb engine requirement to Node v20.
+
+  - This was accidentally left out during release of v23.0.0, where dropped support for v18 was announced. Due to the announcement, I don't consider this to be another breaking change.
+
 ## v23.0.0
 
 Breaking changes:
