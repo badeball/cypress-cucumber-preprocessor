@@ -56,7 +56,10 @@
     "test:run-all-specs": "mocha --timeout 0 test/run-all-specs.ts",
     "test:integration": "cucumber-js",
     "test:actions:examples": "xvfb-run bash -c 'act -W \".github/workflows/examples-branch.yml\" --use-gitignore=false --artifact-server-path=tmp/artifacts --env DISPLAY=$DISPLAY'",
-    "prepublishOnly": "npm run clean-install && npm run clear-dist && npm run build && npm run test"
+    "git:is-master": "[ \"$(git branch --show-current)\" == \"master\" ]",
+    "git:empty-status": "[ \"$(git status --porcelain)\" == \"\" ]",
+    "git:not-diverged": "git fetch && [ \"$(git rev-list --count --left-only @{u}...HEAD)\" == \"0\" ]",
+    "prepublishOnly": "npm run git:is-master && npm run git:empty-status && npm run git:not-diverged && npm run clean-install && npm run clear-dist && npm run build && npm run test"
   },
   "dependencies": {
     "@cucumber/ci-environment": "^10.0.1",
