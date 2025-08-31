@@ -5,12 +5,13 @@ body:
     attributes:
       label: Current behavior
       description: A description including screenshots, stack traces, DEBUG logs, etc.
-      value: |
-        Make sure to read the section titled "Reduced test case" under the contributing guidelines [1]. Your
-        report should contain everything necessary in order for us to reproduce the issue. Preferably link
-        to another, minimal Git repository that illustrates the issue.
-
-        [1] https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/CONTRIBUTING.md#reduced-test-case
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: |
+        Make sure to read the section titled ["Reduced test case"](https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/CONTRIBUTING.md#reduced-test-case) under the contributing guidelines. Your report should contain everything necessary in order for us to reproduce the issue. Preferably link to another, minimal Git repository that illustrates the issue.
     validations:
       required: true
   - type: textarea
