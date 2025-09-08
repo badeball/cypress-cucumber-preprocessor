@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unrelased
+## v23.1.0
 
 - Bumb engine requirement to Node v20.
 
