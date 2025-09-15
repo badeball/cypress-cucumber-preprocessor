@@ -10,6 +10,8 @@ import stream from "stream";
 
 import { EventEmitter } from "events";
 
+import { inspect } from "util";
+
 import chalk from "chalk";
 
 import * as messages from "@cucumber/messages";
@@ -18,7 +20,7 @@ import detectCiEnvironment from "@cucumber/ci-environment";
 
 import split from "split";
 
-import { HOOK_FAILURE_EXPR } from "./constants";
+import { HOOK_FAILURE_EXPR, INTERNAL_PROPERTY_NAME } from "./constants";
 
 import {
   ITaskSpecEnvelopes,
@@ -27,6 +29,7 @@ import {
   ITaskTestStepStarted,
   ITaskTestStepFinished,
   ITaskTestCaseFinished,
+  ITaskFrontendTrackingError,
 } from "./cypress-task-definitions";
 
 import { resolve as origResolve } from "./preprocessor-configuration";
@@ -190,6 +193,12 @@ interface StateHasReloadedAndReceivedSpecEnvelopes {
   };
 }
 
+interface StateTrackingError {
+  state: "tracking-error";
+  type: "backend" | "frontend";
+  error: string;
+}
+
 type State =
   | StateUninitialized
   | StateBeforeRun
@@ -202,7 +211,8 @@ type State =
   | StateAfterSpec
   | StateAfterRun
   | StateHasReloaded
-  | StateHasReloadedAndReceivedSpecEnvelopes;
+  | StateHasReloadedAndReceivedSpecEnvelopes
+  | StateTrackingError;
 
 let state: State = {
   state: "uninitialized",
@@ -233,10 +243,41 @@ const createPrettyStream = () => {
   return stream.compose(line, indent, log);
 };
 
+export class CypressCucumberStateError extends CypressCucumberError {}
+
 const createStateError = (stateHandler: string, currentState: State["state"]) =>
-  new CypressCucumberError(
+  new CypressCucumberStateError(
     `Unexpected state in ${stateHandler}: ${currentState}. This almost always means that you or some other plugin, are overwriting this plugin's event handlers. For more information & workarounds, see https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/docs/event-handlers.md (if neither workaround work, please report at ${homepage})`,
   );
+
+const createGracefullPluginEventHandler = <A extends unknown[], R>(
+  fn: (config: Cypress.PluginConfigOptions, ...args: A) => Promise<R>,
+  gracefullReturnValue: any = undefined,
+) => {
+  return async (config: Cypress.PluginConfigOptions, ...args: A) => {
+    const preprocessor = await resolve(config, config.env, "/");
+
+    if (state.state === "tracking-error") {
+      return gracefullReturnValue;
+    }
+
+    if (preprocessor.state.softErrors) {
+      try {
+        return await fn(config, ...args);
+      } catch (e) {
+        state = {
+          state: "tracking-error",
+          type: "backend",
+          error: inspect(e),
+        };
+
+        return gracefullReturnValue;
+      }
+    } else {
+      return fn(config, ...args);
+    }
+  };
+};
 
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   debug("beforeRunHandler()");
@@ -323,6 +364,18 @@ export async function afterRunHandler(
   const preprocessor = await resolve(config, config.env, "/");
 
   if (!preprocessor.isTrackingState) {
+    return;
+  }
+
+  if (state.state === "tracking-error") {
+    console.warn(
+      chalk.yellow(
+        `A Cucumber library state error (shown bellow) occured in the ${state.type}, thus no report is created.`,
+      ),
+    );
+    console.warn("");
+    console.warn(chalk.yellow(state.error));
+
     return;
   }
 
@@ -478,165 +531,163 @@ export async function afterRunHandler(
   }
 }
 
-export async function beforeSpecHandler(
-  config: Cypress.PluginConfigOptions,
-  spec: Cypress.Spec,
-) {
-  debug("beforeSpecHandler()");
+export const beforeSpecHandler = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, spec: Cypress.Spec) => {
+    debug("beforeSpecHandler()");
 
-  if (!isFeature(spec)) {
-    return;
-  }
-
-  const preprocessor = await resolve(config, config.env, "/");
-
-  if (!preprocessor.isTrackingState) {
-    return;
-  }
-
-  /**
-   * Ideally this would only run when current state is either "before-run" or "after-spec". However,
-   * reload-behavior means that this is not necessarily true. Reloading can occur in the following
-   * scenarios:
-   *
-   * - before()
-   * - beforeEach()
-   * - in a step
-   * - afterEach()
-   * - after()
-   *
-   * If it happens in the three latter scenarios, the current / previous test will be re-run by
-   * Cypress under a new domain. In these cases, messages associated with the latest test will have
-   * to be discarded and a "Reloading.." message will appear *if* pretty output is enabled. If that
-   * is the case, then the pretty reporter instance will also have re-instantiated and primed with
-   * envelopes associated with the current spec.
-   *
-   * To make matters worse, it's impossible in this handler to determine of a reload occurs due to
-   * a beforeEach hook or an afterEach hook. In the latter case, messages must be discarded. This is
-   * however not true for the former case.
-   */
-  switch (state.state) {
-    case "before-run":
-    case "after-spec":
-      state = {
-        state: "before-spec",
-        spec,
-        pretty: state.pretty,
-        messages: state.messages,
-      };
+    if (!isFeature(spec)) {
       return;
-  }
+    }
 
-  // This will be the case for reloads occurring in a before(), in which case we do nothing,
-  // because "received-envelopes" would anyway be the next natural state.
-  if (state.state === "before-spec") {
-    return;
-  }
+    const preprocessor = await resolve(config, config.env, "/");
 
-  switch (state.state) {
-    case "received-envelopes": // This will be the case for reloading occurring in a beforeEach().
-    case "step-started": // This will be the case for reloading occurring in a step.
-    case "test-finished": // This will be the case for reloading occurring in any after-ish hook (and possibly beforeEach).
-      if (state.spec.relative === spec.relative) {
+    if (!preprocessor.isTrackingState) {
+      return;
+    }
+
+    /**
+     * Ideally this would only run when current state is either "before-run" or "after-spec". However,
+     * reload-behavior means that this is not necessarily true. Reloading can occur in the following
+     * scenarios:
+     *
+     * - before()
+     * - beforeEach()
+     * - in a step
+     * - afterEach()
+     * - after()
+     *
+     * If it happens in the three latter scenarios, the current / previous test will be re-run by
+     * Cypress under a new domain. In these cases, messages associated with the latest test will have
+     * to be discarded and a "Reloading.." message will appear *if* pretty output is enabled. If that
+     * is the case, then the pretty reporter instance will also have re-instantiated and primed with
+     * envelopes associated with the current spec.
+     *
+     * To make matters worse, it's impossible in this handler to determine of a reload occurs due to
+     * a beforeEach hook or an afterEach hook. In the latter case, messages must be discarded. This is
+     * however not true for the former case.
+     */
+    switch (state.state) {
+      case "before-run":
+      case "after-spec":
         state = {
-          state: "has-reloaded",
-          spec: spec,
+          state: "before-spec",
+          spec,
           pretty: state.pretty,
           messages: state.messages,
         };
         return;
-      }
-    // eslint-disable-next-line no-fallthrough
-    default:
-      throw createStateError("beforeSpecHandler", state.state);
-  }
-}
+    }
 
-export async function afterSpecHandler(
-  config: Cypress.PluginConfigOptions,
-  spec: Cypress.Spec,
-  results: CypressCommandLine.RunResult,
-) {
-  debug("afterSpecHandler()");
+    // This will be the case for reloads occurring in a before(), in which case we do nothing,
+    // because "received-envelopes" would anyway be the next natural state.
+    if (
+      state.state === "before-spec" &&
+      config.env[`${INTERNAL_PROPERTY_NAME}_simulate_backend_error`] !== true
+    ) {
+      return;
+    }
 
-  if (!isFeature(spec)) {
-    return;
-  }
+    switch (state.state) {
+      case "received-envelopes": // This will be the case for reloading occurring in a beforeEach().
+      case "step-started": // This will be the case for reloading occurring in a step.
+      case "test-finished": // This will be the case for reloading occurring in any after-ish hook (and possibly beforeEach).
+        if (state.spec.relative === spec.relative) {
+          state = {
+            state: "has-reloaded",
+            spec: spec,
+            pretty: state.pretty,
+            messages: state.messages,
+          };
+          return;
+        }
+      // eslint-disable-next-line no-fallthrough
+      default:
+        throw createStateError("beforeSpecHandler", state.state);
+    }
+  },
+);
 
-  const preprocessor = await resolve(config, config.env, "/");
+export const afterSpecHandler = createGracefullPluginEventHandler(
+  async (
+    config: Cypress.PluginConfigOptions,
+    spec: Cypress.Spec,
+    results: CypressCommandLine.RunResult,
+  ) => {
+    debug("afterSpecHandler()");
 
-  if (!preprocessor.isTrackingState) {
-    return;
-  }
+    if (!isFeature(spec)) {
+      return;
+    }
 
-  /**
-   * This pretty much can't happen and the check is merely to satisfy TypeScript in the next block.
-   */
-  switch (state.state) {
-    case "uninitialized":
-    case "after-run":
-      throw createStateError("afterSpecHandler", state.state);
-  }
+    const preprocessor = await resolve(config, config.env, "/");
 
-  const browserCrashExprCol = [
-    /We detected that the .+ process just crashed/,
-    /We detected that the .+ Renderer process just crashed/,
-  ];
+    if (!preprocessor.isTrackingState) {
+      return;
+    }
 
-  const error = results.error;
-
-  if (error != null && browserCrashExprCol.some((expr) => expr.test(error))) {
-    console.log(
-      chalk.yellow(
-        `\nDue to browser crash, no reports are created for ${spec.relative}.`,
-      ),
+    assert(
+      state.state !== "tracking-error",
+      "State tracking-error should not be possible within a gracefull plugin event handler",
     );
 
-    state = {
-      state: "after-spec",
-      pretty: state.pretty,
-      messages: {
-        accumulation: state.messages.accumulation,
-      },
-    };
+    /**
+     * This pretty much can't happen and the check is merely to satisfy TypeScript in the next block.
+     */
+    switch (state.state) {
+      case "uninitialized":
+      case "after-run":
+        throw createStateError("afterSpecHandler", state.state);
+    }
 
-    return;
-  }
+    const browserCrashExprCol = [
+      /We detected that the .+ process just crashed/,
+      /We detected that the .+ Renderer process just crashed/,
+    ];
 
-  switch (state.state) {
-    case "test-finished": // This is the normal case.
-    case "before-spec": // This can happen if a spec doesn't contain any tests.
-    case "received-envelopes": // This can happen in case of a failing beforeEach hook.
-      break;
-    default:
-      throw createStateError("afterSpecHandler", state.state);
-  }
+    const error = results.error;
 
-  // `results` is undefined when running via `cypress open`.
-  // However, `isTrackingState` is never true in open-mode, thus this should be defined.
-  assert(results, "Expected results to be defined");
+    if (error != null && browserCrashExprCol.some((expr) => expr.test(error))) {
+      console.log(
+        chalk.yellow(
+          `\nDue to browser crash, no reports are created for ${spec.relative}.`,
+        ),
+      );
 
-  const wasRemainingSkipped = results.tests.some((test) =>
-    test.displayError?.match(HOOK_FAILURE_EXPR),
-  );
+      state = {
+        state: "after-spec",
+        pretty: state.pretty,
+        messages: {
+          accumulation: state.messages.accumulation,
+        },
+      };
 
-  if (wasRemainingSkipped) {
-    console.log(
-      chalk.yellow(
-        `  Hook failures can't be represented in any reports (messages / json / html), thus none is created for ${spec.relative}.`,
-      ),
+      return;
+    }
+
+    switch (state.state) {
+      case "test-finished": // This is the normal case.
+      case "before-spec": // This can happen if a spec doesn't contain any tests.
+      case "received-envelopes": // This can happen in case of a failing beforeEach hook.
+        break;
+      default:
+        throw createStateError("afterSpecHandler", state.state);
+    }
+
+    // `results` is undefined when running via `cypress open`.
+    // However, `isTrackingState` is never true in open-mode, thus this should be defined.
+    assert(results, "Expected results to be defined");
+
+    const wasRemainingSkipped = results.tests.some((test) =>
+      test.displayError?.match(HOOK_FAILURE_EXPR),
     );
 
-    state = {
-      state: "after-spec",
-      pretty: state.pretty,
-      messages: {
-        accumulation: state.messages.accumulation,
-      },
-    };
-  } else {
-    if (state.state === "before-spec") {
-      // IE. the spec didn't contain any tests.
+    if (wasRemainingSkipped) {
+      console.log(
+        chalk.yellow(
+          `  Hook failures can't be represented in any reports (messages / json / html), thus none is created for ${spec.relative}.`,
+        ),
+      );
+
       state = {
         state: "after-spec",
         pretty: state.pretty,
@@ -645,19 +696,30 @@ export async function afterSpecHandler(
         },
       };
     } else {
-      // The spec did contain tests.
-      state = {
-        state: "after-spec",
-        pretty: state.pretty,
-        messages: {
-          accumulation: orderMessages(
-            state.messages.accumulation.concat(state.messages.current),
-          ),
-        },
-      };
+      if (state.state === "before-spec") {
+        // IE. the spec didn't contain any tests.
+        state = {
+          state: "after-spec",
+          pretty: state.pretty,
+          messages: {
+            accumulation: state.messages.accumulation,
+          },
+        };
+      } else {
+        // The spec did contain tests.
+        state = {
+          state: "after-spec",
+          pretty: state.pretty,
+          messages: {
+            accumulation: orderMessages(
+              state.messages.accumulation.concat(state.messages.current),
+            ),
+          },
+        };
+      }
     }
-  }
-}
+  },
+);
 
 export async function afterScreenshotHandler(
   config: Cypress.PluginConfigOptions,
@@ -705,171 +767,171 @@ export async function afterScreenshotHandler(
   return details;
 }
 
-export async function specEnvelopesHandler(
-  config: Cypress.PluginConfigOptions,
-  data: ITaskSpecEnvelopes,
-) {
-  debug("specEnvelopesHandler()");
+export const specEnvelopesHandler = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskSpecEnvelopes) => {
+    debug("specEnvelopesHandler()");
 
-  switch (state.state) {
-    case "before-spec":
-      break;
-    case "has-reloaded":
-      state = {
-        state: "has-reloaded-received-envelopes",
-        spec: state.spec,
-        specEnvelopes: data.messages,
-        pretty: state.pretty,
-        messages: state.messages,
-      };
+    switch (state.state) {
+      case "before-spec":
+        break;
+      case "has-reloaded":
+        state = {
+          state: "has-reloaded-received-envelopes",
+          spec: state.spec,
+          specEnvelopes: data.messages,
+          pretty: state.pretty,
+          messages: state.messages,
+        };
 
-      return true;
-    default:
-      throw createStateError("specEnvelopesHandler", state.state);
-  }
-
-  if (state.pretty.enabled) {
-    for (const message of data.messages) {
-      state.pretty.broadcaster.emit("envelope", message);
+        return true;
+      default:
+        throw createStateError("specEnvelopesHandler", state.state);
     }
-  }
 
-  state = {
-    state: "received-envelopes",
-    spec: state.spec,
-    pretty: state.pretty,
-    messages: {
-      accumulation: state.messages.accumulation,
-      current: data.messages,
-    },
-  };
-
-  return true;
-}
-
-export async function testCaseStartedHandler(
-  config: Cypress.PluginConfigOptions,
-  data: ITaskTestCaseStarted,
-) {
-  debug("testCaseStartedHandler()");
-
-  switch (state.state) {
-    case "received-envelopes":
-    case "test-finished":
-      break;
-    case "has-reloaded-received-envelopes":
-      {
-        const iLastTestCaseStarted = state.messages.current.findLastIndex(
-          (message) => message.testCaseStarted,
-        );
-
-        const lastTestCaseStarted =
-          iLastTestCaseStarted > -1
-            ? state.messages.current[iLastTestCaseStarted]
-            : undefined;
-
-        // A test is being re-run.
-        if (lastTestCaseStarted?.testCaseStarted!.id === data.id) {
-          if (state.pretty.enabled) {
-            await end(state.pretty.writable);
-
-            // Reloading occurred right within a step, so we output an extra newline.
-            if (
-              state.messages.current[state.messages.current.length - 1]
-                .testStepStarted != null
-            ) {
-              console.log();
-            }
-
-            console.log("  Reloading..");
-            console.log();
-
-            const writable = createPrettyStream();
-
-            const broadcaster = createPrettyFormatter(useColors(), (chunk) =>
-              writable.write(chunk),
-            );
-
-            for (const message of state.specEnvelopes) {
-              broadcaster.emit("envelope", message);
-            }
-
-            state.pretty = {
-              enabled: true,
-              writable,
-              broadcaster,
-            };
-          }
-
-          // Discard messages of previous test, which is being re-run.
-          state.messages.current = state.messages.current.slice(
-            0,
-            iLastTestCaseStarted,
-          );
-        }
+    if (state.pretty.enabled) {
+      for (const message of data.messages) {
+        state.pretty.broadcaster.emit("envelope", message);
       }
-      break;
-    default:
-      throw createStateError("testCaseStartedHandler", state.state);
-  }
+    }
 
-  if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
-      testCaseStarted: data,
-    });
-  }
+    state = {
+      state: "received-envelopes",
+      spec: state.spec,
+      pretty: state.pretty,
+      messages: {
+        accumulation: state.messages.accumulation,
+        current: data.messages,
+      },
+    };
 
-  state = {
-    state: "test-started",
-    spec: state.spec,
-    pretty: state.pretty,
-    messages: {
-      accumulation: state.messages.accumulation,
-      current: state.messages.current.concat({ testCaseStarted: data }),
-    },
-    testCaseStartedId: data.id,
-  };
+    return true;
+  },
+  true,
+);
 
-  return true;
-}
+export const testCaseStartedHandler = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskTestCaseStarted) => {
+    debug("testCaseStartedHandler()");
 
-export function testStepStartedHandler(
-  config: Cypress.PluginConfigOptions,
-  data: ITaskTestStepStarted,
-) {
-  debug("testStepStartedHandler()");
+    switch (state.state) {
+      case "received-envelopes":
+      case "test-finished":
+        break;
+      case "has-reloaded-received-envelopes":
+        {
+          const iLastTestCaseStarted = state.messages.current.findLastIndex(
+            (message) => message.testCaseStarted,
+          );
 
-  switch (state.state) {
-    case "test-started":
-    case "step-finished":
-      break;
-    // This state can happen in cases where an error is "rescued".
-    case "step-started":
-      break;
-    default:
-      throw createStateError("testStepStartedHandler", state.state);
-  }
+          const lastTestCaseStarted =
+            iLastTestCaseStarted > -1
+              ? state.messages.current[iLastTestCaseStarted]
+              : undefined;
 
-  if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
-      testStepStarted: data,
-    });
-  }
+          // A test is being re-run.
+          if (lastTestCaseStarted?.testCaseStarted!.id === data.id) {
+            if (state.pretty.enabled) {
+              await end(state.pretty.writable);
 
-  state = {
-    state: "step-started",
-    spec: state.spec,
-    pretty: state.pretty,
-    messages: {
-      accumulation: state.messages.accumulation,
-      current: state.messages.current.concat({ testStepStarted: data }),
-    },
-    testCaseStartedId: state.testCaseStartedId,
-    testStepStartedId: data.testStepId,
-  };
+              // Reloading occurred right within a step, so we output an extra newline.
+              if (
+                state.messages.current[state.messages.current.length - 1]
+                  .testStepStarted != null
+              ) {
+                console.log();
+              }
 
-  return true;
-}
+              console.log("  Reloading..");
+              console.log();
+
+              const writable = createPrettyStream();
+
+              const broadcaster = createPrettyFormatter(useColors(), (chunk) =>
+                writable.write(chunk),
+              );
+
+              for (const message of state.specEnvelopes) {
+                broadcaster.emit("envelope", message);
+              }
+
+              state.pretty = {
+                enabled: true,
+                writable,
+                broadcaster,
+              };
+            }
+
+            // Discard messages of previous test, which is being re-run.
+            state.messages.current = state.messages.current.slice(
+              0,
+              iLastTestCaseStarted,
+            );
+          }
+        }
+        break;
+      default:
+        throw createStateError("testCaseStartedHandler", state.state);
+    }
+
+    if (state.pretty.enabled) {
+      state.pretty.broadcaster.emit("envelope", {
+        testCaseStarted: data,
+      });
+    }
+
+    state = {
+      state: "test-started",
+      spec: state.spec,
+      pretty: state.pretty,
+      messages: {
+        accumulation: state.messages.accumulation,
+        current: state.messages.current.concat({ testCaseStarted: data }),
+      },
+      testCaseStartedId: data.id,
+    };
+
+    return true;
+  },
+  true,
+);
+
+export const testStepStartedHandler = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskTestStepStarted) => {
+    debug("testStepStartedHandler()");
+
+    switch (state.state) {
+      case "test-started":
+      case "step-finished":
+        break;
+      // This state can happen in cases where an error is "rescued".
+      case "step-started":
+        break;
+      default:
+        throw createStateError("testStepStartedHandler", state.state);
+    }
+
+    if (state.pretty.enabled) {
+      state.pretty.broadcaster.emit("envelope", {
+        testStepStarted: data,
+      });
+    }
+
+    state = {
+      state: "step-started",
+      spec: state.spec,
+      pretty: state.pretty,
+      messages: {
+        accumulation: state.messages.accumulation,
+        current: state.messages.current.concat({ testStepStarted: data }),
+      },
+      testCaseStartedId: state.testCaseStartedId,
+      testStepStartedId: data.testStepId,
+    };
+
+    return true;
+  },
+  true,
+);
 
 export type Attach = (
   data: string | Buffer,
@@ -884,211 +946,230 @@ export type OnAfterStep = (
   } & IStepHookParameter,
 ) => Promise<void> | void;
 
-export async function testStepFinishedHandler(
-  config: Cypress.PluginConfigOptions,
-  options: { onAfterStep?: OnAfterStep },
-  testStepFinished: ITaskTestStepFinished,
-) {
-  debug("testStepFinishedHandler()");
+export const testStepFinishedHandler = createGracefullPluginEventHandler(
+  async (
+    config: Cypress.PluginConfigOptions,
+    options: { onAfterStep?: OnAfterStep },
+    testStepFinished: ITaskTestStepFinished,
+  ) => {
+    debug("testStepFinishedHandler()");
 
-  switch (state.state) {
-    case "step-started":
-      break;
-    default:
-      throw createStateError("testStepFinishedHandler", state.state);
-  }
+    switch (state.state) {
+      case "step-started":
+        break;
+      default:
+        throw createStateError("testStepFinishedHandler", state.state);
+    }
 
-  if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
-      testStepFinished,
-    });
-  }
+    if (state.pretty.enabled) {
+      state.pretty.broadcaster.emit("envelope", {
+        testStepFinished,
+      });
+    }
 
-  const { testCaseStartedId, testStepId } = testStepFinished;
+    const { testCaseStartedId, testStepId } = testStepFinished;
 
-  const { testCaseId: pickleId } = ensure(
-    state.messages.current
-      .map((message) => message.testCaseStarted)
-      .filter(notNull)
-      .find((testCaseStarted) => testCaseStarted.id === testCaseStartedId),
-    "Expected to find a testCaseStarted",
-  );
-
-  const testCase = ensure(
-    state.messages.current
-      .map((message) => message.testCase)
-      .filter(notNull)
-      .find((testCase) => testCase.id === pickleId),
-    "Expected to find a testCase",
-  );
-
-  const { pickleStepId, hookId } = ensure(
-    testCase.testSteps.find((testStep) => testStep.id === testStepId),
-    "Expected to find a testStep",
-  );
-
-  if (pickleStepId != null) {
-    const pickle = ensure(
+    const { testCaseId: pickleId } = ensure(
       state.messages.current
-        .map((message) => message.pickle)
+        .map((message) => message.testCaseStarted)
         .filter(notNull)
-        .find((pickle) => pickle.id === pickleId),
-      "Expected to find a pickle",
+        .find((testCaseStarted) => testCaseStarted.id === testCaseStartedId),
+      "Expected to find a testCaseStarted",
     );
 
-    const pickleStep = ensure(
-      pickle.steps.find((step) => step.id === pickleStepId),
-      "Expected to find a pickleStep",
-    );
-
-    const gherkinDocument = ensure(
+    const testCase = ensure(
       state.messages.current
-        .map((message) => message.gherkinDocument)
+        .map((message) => message.testCase)
         .filter(notNull)
-        .find((gherkinDocument) => gherkinDocument.uri === pickle.uri),
-      "Expected to find a gherkinDocument",
+        .find((testCase) => testCase.id === pickleId),
+      "Expected to find a testCase",
     );
 
-    const attachments: ITaskCreateStringAttachment[] = [];
+    const { pickleStepId, hookId } = ensure(
+      testCase.testSteps.find((testStep) => testStep.id === testStepId),
+      "Expected to find a testStep",
+    );
 
-    const attach: Attach = (data, mediaTypeOrOptions) => {
-      let options: { mediaType?: string; fileName?: string };
+    if (pickleStepId != null) {
+      const pickle = ensure(
+        state.messages.current
+          .map((message) => message.pickle)
+          .filter(notNull)
+          .find((pickle) => pickle.id === pickleId),
+        "Expected to find a pickle",
+      );
 
-      if (mediaTypeOrOptions == null) {
-        options = {};
-      } else if (typeof mediaTypeOrOptions === "string") {
-        options = { mediaType: mediaTypeOrOptions };
-      } else {
-        options = mediaTypeOrOptions;
-      }
+      const pickleStep = ensure(
+        pickle.steps.find((step) => step.id === pickleStepId),
+        "Expected to find a pickleStep",
+      );
 
-      if (typeof data === "string") {
-        const mediaType = options.mediaType ?? "text/plain";
+      const gherkinDocument = ensure(
+        state.messages.current
+          .map((message) => message.gherkinDocument)
+          .filter(notNull)
+          .find((gherkinDocument) => gherkinDocument.uri === pickle.uri),
+        "Expected to find a gherkinDocument",
+      );
 
-        if (mediaType.startsWith("base64:")) {
+      const attachments: ITaskCreateStringAttachment[] = [];
+
+      const attach: Attach = (data, mediaTypeOrOptions) => {
+        let options: { mediaType?: string; fileName?: string };
+
+        if (mediaTypeOrOptions == null) {
+          options = {};
+        } else if (typeof mediaTypeOrOptions === "string") {
+          options = { mediaType: mediaTypeOrOptions };
+        } else {
+          options = mediaTypeOrOptions;
+        }
+
+        if (typeof data === "string") {
+          const mediaType = options.mediaType ?? "text/plain";
+
+          if (mediaType.startsWith("base64:")) {
+            attachments.push({
+              data,
+              mediaType: mediaType.replace("base64:", ""),
+              encoding: messages.AttachmentContentEncoding.BASE64,
+            });
+          } else {
+            attachments.push({
+              data,
+              mediaType,
+              encoding: messages.AttachmentContentEncoding.IDENTITY,
+            });
+          }
+        } else if (data instanceof Buffer) {
+          if (typeof options.mediaType !== "string") {
+            throw Error("Buffer attachments must specify a media type");
+          }
+
           attachments.push({
-            data,
-            mediaType: mediaType.replace("base64:", ""),
+            data: data.toString("base64"),
+            mediaType: options.mediaType,
             encoding: messages.AttachmentContentEncoding.BASE64,
           });
         } else {
-          attachments.push({
-            data,
-            mediaType,
-            encoding: messages.AttachmentContentEncoding.IDENTITY,
-          });
+          throw Error("Invalid attachment data: must be a Buffer or string");
         }
-      } else if (data instanceof Buffer) {
-        if (typeof options.mediaType !== "string") {
-          throw Error("Buffer attachments must specify a media type");
-        }
+      };
 
-        attachments.push({
-          data: data.toString("base64"),
-          mediaType: options.mediaType,
-          encoding: messages.AttachmentContentEncoding.BASE64,
-        });
-      } else {
-        throw Error("Invalid attachment data: must be a Buffer or string");
+      await options.onAfterStep?.({
+        result: testStepFinished.testStepResult,
+        pickle,
+        pickleStep,
+        gherkinDocument,
+        testCaseStartedId,
+        testStepId,
+        attach,
+        log: (text: string) => attach(text, "text/x.cucumber.log+plain"),
+      });
+
+      for (const attachment of attachments) {
+        await createStringAttachmentHandler(config, attachment);
       }
+    } else {
+      assert(hookId != null, "Expected a hookId in absence of pickleStepId");
+    }
+
+    state = {
+      state: "step-finished",
+      spec: state.spec,
+      pretty: state.pretty,
+      messages: {
+        accumulation: state.messages.accumulation,
+        current: state.messages.current.concat({ testStepFinished }),
+      },
+      testCaseStartedId: state.testCaseStartedId,
     };
 
-    await options.onAfterStep?.({
-      result: testStepFinished.testStepResult,
-      pickle,
-      pickleStep,
-      gherkinDocument,
-      testCaseStartedId,
-      testStepId,
-      attach,
-      log: (text: string) => attach(text, "text/x.cucumber.log+plain"),
-    });
-
-    for (const attachment of attachments) {
-      await createStringAttachmentHandler(config, attachment);
-    }
-  } else {
-    assert(hookId != null, "Expected a hookId in absence of pickleStepId");
-  }
-
-  state = {
-    state: "step-finished",
-    spec: state.spec,
-    pretty: state.pretty,
-    messages: {
-      accumulation: state.messages.accumulation,
-      current: state.messages.current.concat({ testStepFinished }),
-    },
-    testCaseStartedId: state.testCaseStartedId,
-  };
-
-  return true;
-}
-
-export function testCaseFinishedHandler(
-  config: Cypress.PluginConfigOptions,
-  data: ITaskTestCaseFinished,
-) {
-  debug("testCaseFinishedHandler()");
-
-  switch (state.state) {
-    case "test-started":
-    case "step-finished":
-      break;
-    default:
-      throw createStateError("testCaseFinishedHandler", state.state);
-  }
-
-  if (state.pretty.enabled) {
-    state.pretty.broadcaster.emit("envelope", {
-      testCaseFinished: data,
-    });
-  }
-
-  state = {
-    state: "test-finished",
-    spec: state.spec,
-    pretty: state.pretty,
-    messages: {
-      accumulation: state.messages.accumulation,
-      current: state.messages.current.concat({ testCaseFinished: data }),
-    },
-  };
-
-  return true;
-}
-
-export async function createStringAttachmentHandler(
-  config: Cypress.PluginConfigOptions,
-  { data, fileName, mediaType, encoding }: ITaskCreateStringAttachment,
-) {
-  debug("createStringAttachmentHandler()");
-
-  const preprocessor = await resolve(config, config.env, "/");
-
-  if (!preprocessor.isTrackingState) {
     return true;
-  }
+  },
+  true,
+);
 
-  switch (state.state) {
-    case "step-started":
-      break;
-    default:
-      throw createStateError("createStringAttachmentHandler", state.state);
-  }
+export const testCaseFinishedHandler = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskTestCaseFinished) => {
+    debug("testCaseFinishedHandler()");
 
-  const message: messages.Envelope = {
-    attachment: {
-      testCaseStartedId: state.testCaseStartedId,
-      testStepId: state.testStepStartedId,
-      body: data,
-      fileName,
-      mediaType: mediaType,
-      contentEncoding: encoding,
-    },
+    switch (state.state) {
+      case "test-started":
+      case "step-finished":
+        break;
+      default:
+        throw createStateError("testCaseFinishedHandler", state.state);
+    }
+
+    if (state.pretty.enabled) {
+      state.pretty.broadcaster.emit("envelope", {
+        testCaseFinished: data,
+      });
+    }
+
+    state = {
+      state: "test-finished",
+      spec: state.spec,
+      pretty: state.pretty,
+      messages: {
+        accumulation: state.messages.accumulation,
+        current: state.messages.current.concat({ testCaseFinished: data }),
+      },
+    };
+
+    return true;
+  },
+  true,
+);
+
+export const createStringAttachmentHandler = createGracefullPluginEventHandler(
+  async (
+    config: Cypress.PluginConfigOptions,
+    { data, fileName, mediaType, encoding }: ITaskCreateStringAttachment,
+  ) => {
+    debug("createStringAttachmentHandler()");
+
+    const preprocessor = await resolve(config, config.env, "/");
+
+    if (!preprocessor.isTrackingState) {
+      return true;
+    }
+
+    switch (state.state) {
+      case "step-started":
+        break;
+      default:
+        throw createStateError("createStringAttachmentHandler", state.state);
+    }
+
+    const message: messages.Envelope = {
+      attachment: {
+        testCaseStartedId: state.testCaseStartedId,
+        testStepId: state.testStepStartedId,
+        body: data,
+        fileName,
+        mediaType: mediaType,
+        contentEncoding: encoding,
+      },
+    };
+
+    state.messages.current.push(message);
+
+    return true;
+  },
+  true,
+);
+
+export function frontendTrackingErrorHandler(
+  config: Cypress.PluginConfigOptions,
+  data: ITaskFrontendTrackingError,
+) {
+  state = {
+    state: "tracking-error",
+    type: "frontend",
+    error: data,
   };
-
-  state.messages.current.push(message);
 
   return true;
 }

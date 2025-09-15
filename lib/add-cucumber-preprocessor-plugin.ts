@@ -19,6 +19,7 @@ import {
   TASK_TEST_STEP_STARTED,
   TASK_TEST_STEP_FINISHED,
   TASK_TEST_CASE_FINISHED,
+  TASK_FRONTEND_TRACKING_ERROR,
 } from "./cypress-task-definitions";
 
 import {
@@ -34,6 +35,7 @@ import {
   testStepFinishedHandler,
   testCaseFinishedHandler,
   OnAfterStep,
+  frontendTrackingErrorHandler,
 } from "./plugin-event-handlers";
 
 import { resolve as origResolve } from "./preprocessor-configuration";
@@ -126,6 +128,10 @@ export async function addCucumberPreprocessorPlugin(
     ),
     [TASK_TEST_CASE_FINISHED]: testCaseFinishedHandler.bind(null, config),
     [TASK_CREATE_STRING_ATTACHMENT]: createStringAttachmentHandler.bind(
+      null,
+      config,
+    ),
+    [TASK_FRONTEND_TRACKING_ERROR]: frontendTrackingErrorHandler.bind(
       null,
       config,
     ),

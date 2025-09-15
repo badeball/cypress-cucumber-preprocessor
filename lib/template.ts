@@ -137,6 +137,7 @@ export async function compile(
     gherkinDocument,
     pickles,
     preprocessor.isTrackingState,
+    preprocessor.state.softErrors,
     preprocessor.omitFiltered,
     {
       stepDefinitions,

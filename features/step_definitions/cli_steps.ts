@@ -227,19 +227,30 @@ Then(
   },
 );
 
-const normalizeOutput = (world: ICustomWorld) =>
-  stripAnsi(expectLastRun(world).stdout)
-    .replaceAll("\\", "/")
-    .replaceAll("×", "✖");
+const normalizeOutput = (outout: string) =>
+  stripAnsi(outout).replaceAll("\\", "/").replaceAll("×", "✖");
 
 Then("the output should contain", function (this: ICustomWorld, content) {
-  assert.match(normalizeOutput(this), new RegExp(rescape(content)));
+  assert.match(
+    normalizeOutput(expectLastRun(this).stdout),
+    new RegExp(rescape(content)),
+  );
+});
+
+Then("stderr should contain", function (this: ICustomWorld, content) {
+  assert.match(
+    normalizeOutput(expectLastRun(this).stderr),
+    new RegExp(rescape(content)),
+  );
 });
 
 Then(
   "the output should not contain {string}",
   function (this: ICustomWorld, content) {
-    assert.doesNotMatch(normalizeOutput(this), new RegExp(rescape(content)));
+    assert.doesNotMatch(
+      normalizeOutput(expectLastRun(this).stdout),
+      new RegExp(rescape(content)),
+    );
   },
 );
 
