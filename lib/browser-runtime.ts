@@ -13,7 +13,7 @@ import { v4 as uuid } from "uuid";
 
 import random from "seedrandom";
 
-import { assert, assertAndReturn, fail } from "./helpers/assertions";
+import { assert, ensure, fail } from "./helpers/assertions";
 
 import DataTable from "./data_table";
 
@@ -293,7 +293,7 @@ function emitSkippedPickle(
 }
 
 function findPickleById(context: CompositionContext, astId: string) {
-  return assertAndReturn(
+  return ensure(
     context.pickles.find(
       (pickle) => pickle.astNodeIds && pickle.astNodeIds.includes(astId),
     ),
@@ -304,11 +304,8 @@ function findPickleById(context: CompositionContext, astId: string) {
 function collectExampleIds(examples: readonly messages.Examples[]) {
   return examples
     .map((examples) => {
-      return assertAndReturn(
-        examples.tableBody,
-        "Expected to find a table body",
-      ).map((row) =>
-        assertAndReturn(row.id, "Expected table row to have an id"),
+      return ensure(examples.tableBody, "Expected to find a table body").map(
+        (row) => ensure(row.id, "Expected table row to have an id"),
       );
     })
     .reduce((acum, el) => acum.concat(el), []);
@@ -346,8 +343,8 @@ function getTestStepId(options: {
 }) {
   const { context, pickleId, hookIdOrPickleStepId } = options;
 
-  return assertAndReturn(
-    assertAndReturn(
+  return ensure(
+    ensure(
       context.testStepIds.get(pickleId),
       "Expected to find test step IDs for pickle = " + pickleId,
     ).get(hookIdOrPickleStepId),
@@ -422,7 +419,7 @@ function createRule(context: CompositionContext, rule: messages.Rule) {
           return findPickleById(context, exampleId);
         });
       } else {
-        const scenarioId = assertAndReturn(
+        const scenarioId = ensure(
           scenario.id,
           "Expected scenario to have an id",
         );
@@ -473,10 +470,7 @@ function createScenario(
       createPickle(context, { ...pickle, name: exampleName });
     }
   } else {
-    const scenarioId = assertAndReturn(
-      scenario.id,
-      "Expected scenario to have an id",
-    );
+    const scenarioId = ensure(scenario.id, "Expected scenario to have an id");
 
     const pickle = findPickleById(context, scenarioId);
 
@@ -521,12 +515,9 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     [INTERNAL_SPEC_PROPERTIES]: internalProperties,
   };
 
-  const scenario = assertAndReturn(
+  const scenario = ensure(
     context.astIdsMap.get(
-      assertAndReturn(
-        pickle.astNodeIds?.[0],
-        "Expected to find at least one astNodeId",
-      ),
+      ensure(pickle.astNodeIds?.[0], "Expected to find at least one astNodeId"),
     ),
     `Expected to find scenario associated with id = ${pickle.astNodeIds?.[0]}`,
   );
@@ -624,7 +615,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
         remainingSteps.shift();
 
         for (const skippedStep of remainingSteps) {
-          const hookIdOrPickleStepId = assertAndReturn(
+          const hookIdOrPickleStepId = ensure(
             skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
             "Expected a step to either be a hook or a pickleStep",
           );
@@ -729,14 +720,14 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
           hookIdOrPickleStepId: pickleStep.id,
         });
 
-        const text = assertAndReturn(
+        const text = ensure(
           pickleStep.text,
           "Expected pickle step to have a text",
         );
 
-        const scenarioStep = assertAndReturn(
+        const scenarioStep = ensure(
           context.astIdsMap.get(
-            assertAndReturn(
+            ensure(
               pickleStep.astNodeIds?.[0],
               "Expected to find at least one astNodeId",
             ),
@@ -797,7 +788,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
             return beforeHooksChain.then(() => {
               try {
                 return runStepWithLogGroup({
-                  keyword: assertAndReturn(
+                  keyword: ensure(
                     "keyword" in scenarioStep && scenarioStep.keyword,
                     "Expected to find a keyword in the scenario step",
                   ),
@@ -935,12 +926,9 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
 
   if (remainingSteps.length > 0) {
     if (this.currentTest?.state === "failed") {
-      const error = assertAndReturn(
-        this.currentTest?.err,
-        "Expected to find an error",
-      );
+      const error = ensure(this.currentTest?.err, "Expected to find an error");
 
-      const message = assertAndReturn(
+      const message = ensure(
         error.message,
         "Expected to find an error message",
       );
@@ -949,12 +937,12 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
         return;
       }
 
-      const failedStep = assertAndReturn(
+      const failedStep = ensure(
         remainingSteps.shift(),
         "Expected there to be a remaining step",
       );
 
-      const hookIdOrPickleStepId = assertAndReturn(
+      const hookIdOrPickleStepId = ensure(
         failedStep.hook?.id ?? failedStep.pickleStep?.id,
         "Expected a step to either be a hook or a pickleStep",
       );
@@ -998,7 +986,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                       message,
                     }),
                 duration: duration(
-                  assertAndReturn(
+                  ensure(
                     currentStepStartedAt,
                     "Expected there to be a timestamp for current step",
                   ),
@@ -1021,7 +1009,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
       taskTestStepFinished(context, failedTestStepFinished);
 
       for (const skippedStep of remainingSteps) {
-        const hookIdOrPickleStepId = assertAndReturn(
+        const hookIdOrPickleStepId = ensure(
           skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
           "Expected a step to either be a hook or a pickleStep",
         );
@@ -1053,12 +1041,12 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
       }
     } else if (this.currentTest?.state === "pending") {
       if (currentStepStartedAt) {
-        const skippedStep = assertAndReturn(
+        const skippedStep = ensure(
           remainingSteps.shift(),
           "Expected there to be a remaining step",
         );
 
-        const hookIdOrPickleStepId = assertAndReturn(
+        const hookIdOrPickleStepId = ensure(
           skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
           "Expected a step to either be a hook or a pickleStep",
         );
@@ -1081,7 +1069,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
       }
 
       for (const remainingStep of remainingSteps) {
-        const hookIdOrPickleStepId = assertAndReturn(
+        const hookIdOrPickleStepId = ensure(
           remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
           "Expected a step to either be a hook or a pickleStep",
         );
@@ -1113,7 +1101,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
       }
     } else {
       for (const remainingStep of remainingSteps) {
-        const hookIdOrPickleStepId = assertAndReturn(
+        const hookIdOrPickleStepId = ensure(
           remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
           "Expected a step to either be a hook or a pickleStep",
         );
@@ -1146,12 +1134,12 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
     }
   }
 
-  const currentRetry = assertAndReturn(
+  const currentRetry = ensure(
     (this.currentTest as any)?._currentRetry,
     "Expected to find an attribute _currentRetry",
   );
 
-  const retries = assertAndReturn(
+  const retries = ensure(
     (this.currentTest as any)?._retries,
     "Expected to find an attribute _retries",
   );
@@ -1318,10 +1306,7 @@ export default function createTests(
   specEnvelopes.push({
     source: {
       data: source,
-      uri: assertAndReturn(
-        gherkinDocument.uri,
-        "Expected gherkin document to have URI",
-      ),
+      uri: ensure(gherkinDocument.uri, "Expected gherkin document to have URI"),
       mediaType: SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
     },
   });
@@ -1495,7 +1480,7 @@ function createMissingStepDefinitionMessage(
     .map((expression) =>
       generateSnippet(
         expression,
-        assertAndReturn(pickleStep.type, "Expected pickleStep to have a type"),
+        ensure(pickleStep.type, "Expected pickleStep to have a type"),
         parameter,
       ),
     )

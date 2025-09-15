@@ -18,7 +18,7 @@ export function assert(value: unknown, message: string): asserts value {
   fail(message);
 }
 
-export function assertAndReturn<T>(
+export function ensure<T>(
   value: T,
   message: string,
 ): Exclude<T, false | null | undefined> {

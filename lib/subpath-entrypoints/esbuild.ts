@@ -6,7 +6,7 @@ import type esbuild from "esbuild";
 
 import { compile } from "../template";
 
-import { assertAndReturn } from "../helpers/assertions";
+import { ensure } from "../helpers/assertions";
 
 import { default as origDebug } from "../helpers/debug";
 
@@ -26,7 +26,7 @@ export function createEsbuildPlugin(
         build.initialOptions.sourcemap = "external";
 
         build.onEnd(async () => {
-          const outfile = assertAndReturn(
+          const outfile = ensure(
             build.initialOptions.outfile,
             "Expected an outfile",
           );
