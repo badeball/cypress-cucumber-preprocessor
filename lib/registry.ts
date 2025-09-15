@@ -10,7 +10,7 @@ import parse from "@cucumber/tag-expressions";
 
 import type { IdGenerator } from "@cucumber/messages";
 
-import { assertAndReturn } from "./helpers/assertions";
+import { ensure } from "./helpers/assertions";
 
 import DataTable from "./data_table";
 
@@ -403,7 +403,7 @@ export function getRegistry<
   C extends Mocha.Context,
   T extends unknown[],
 >(): Registry<C, T> {
-  return assertAndReturn(
+  return ensure(
     globalThis[globalPropertyName],
     "Expected to find a global registry (this usually means you are trying to define steps or hooks in support/e2e.js, which is not supported)",
   );

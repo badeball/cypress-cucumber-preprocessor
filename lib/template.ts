@@ -10,7 +10,7 @@ import { getSpecs } from "find-cypress-specs";
 
 import ancestor from "common-ancestor-path";
 
-import { assertAndReturn } from "./helpers/assertions";
+import { ensure } from "./helpers/assertions";
 
 import { resolve } from "./preprocessor-configuration";
 
@@ -56,21 +56,21 @@ export async function compile(
 
   if (envelopes[0].parseError) {
     throw new Error(
-      assertAndReturn(
+      ensure(
         envelopes[0].parseError.message,
         "Expected parse error to have a description",
       ),
     );
   }
 
-  const gherkinDocument = assertAndReturn(
+  const gherkinDocument = ensure(
     envelopes.map((envelope) => envelope.gherkinDocument).find(notNull),
     "Expected to find a gherkin document amongst the envelopes.",
   );
 
   const pickles = envelopes.map((envelope) => envelope.pickle).filter(notNull);
 
-  const implicitIntegrationFolder = assertAndReturn(
+  const implicitIntegrationFolder = ensure(
     ancestor(
       ...getSpecs(configuration, "foobar" as any, true)
         .map(path.dirname)

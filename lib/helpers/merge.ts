@@ -10,7 +10,7 @@ import {
   orderMessages,
 } from "./messages";
 
-import { assertAndReturn } from "./assertions";
+import { ensure } from "./assertions";
 
 import { CypressCucumberError } from "./error";
 
@@ -46,12 +46,12 @@ export function mergeMessages(
     }
   }
 
-  const meta = assertAndReturn(
+  const meta = ensure(
     messages.map((message) => message.meta).find(notNull),
     "Expected to find a meta envelope",
   );
 
-  const testRunStarted = assertAndReturn(
+  const testRunStarted = ensure(
     messages
       .map((message) => message.testRunStarted)
       .filter(notNull)
@@ -60,7 +60,7 @@ export function mergeMessages(
     "Expected to find a testRunStarted envelope",
   );
 
-  const testRunFinished = assertAndReturn(
+  const testRunFinished = ensure(
     messages
       .map((message) => message.testRunFinished)
       .filter(notNull)

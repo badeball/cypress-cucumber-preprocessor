@@ -1,6 +1,6 @@
 import type * as messages from "@cucumber/messages";
 
-import { assert, assertAndReturn } from "./helpers/assertions";
+import { assert, ensure } from "./helpers/assertions";
 
 function zip<A, B>(collectionA: A[], collectionB: B[]) {
   return collectionA.map<[A, B]>((element, index) => [
@@ -16,18 +16,17 @@ export default class DataTable {
     if (sourceTable instanceof Array) {
       this.rawTable = sourceTable;
     } else {
-      this.rawTable = assertAndReturn(
+      this.rawTable = ensure(
         sourceTable.rows,
         "Expected a PicleTable to have rows",
       ).map((row) =>
-        assertAndReturn(
-          row.cells,
-          "Expected a PicleTableRow to have cells",
-        ).map((cell) => {
-          const { value } = cell;
-          assert(value != null, "Expected a PicleTableCell to have a value");
-          return value;
-        }),
+        ensure(row.cells, "Expected a PicleTableRow to have cells").map(
+          (cell) => {
+            const { value } = cell;
+            assert(value != null, "Expected a PicleTableCell to have a value");
+            return value;
+          },
+        ),
       );
     }
   }

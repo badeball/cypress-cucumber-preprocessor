@@ -46,7 +46,7 @@ import debug from "./helpers/debug";
 
 import { CypressCucumberError, createError, homepage } from "./helpers/error";
 
-import { assert, assertAndReturn, assertIsString } from "./helpers/assertions";
+import { assert, ensure, assertIsString } from "./helpers/assertions";
 
 import {
   createHtmlStream,
@@ -906,7 +906,7 @@ export async function testStepFinishedHandler(
 
   const { testCaseStartedId, testStepId } = testStepFinished;
 
-  const { testCaseId: pickleId } = assertAndReturn(
+  const { testCaseId: pickleId } = ensure(
     state.messages.current
       .map((message) => message.testCaseStarted)
       .filter(notNull)
@@ -914,7 +914,7 @@ export async function testStepFinishedHandler(
     "Expected to find a testCaseStarted",
   );
 
-  const testCase = assertAndReturn(
+  const testCase = ensure(
     state.messages.current
       .map((message) => message.testCase)
       .filter(notNull)
@@ -922,13 +922,13 @@ export async function testStepFinishedHandler(
     "Expected to find a testCase",
   );
 
-  const { pickleStepId, hookId } = assertAndReturn(
+  const { pickleStepId, hookId } = ensure(
     testCase.testSteps.find((testStep) => testStep.id === testStepId),
     "Expected to find a testStep",
   );
 
   if (pickleStepId != null) {
-    const pickle = assertAndReturn(
+    const pickle = ensure(
       state.messages.current
         .map((message) => message.pickle)
         .filter(notNull)
@@ -936,12 +936,12 @@ export async function testStepFinishedHandler(
       "Expected to find a pickle",
     );
 
-    const pickleStep = assertAndReturn(
+    const pickleStep = ensure(
       pickle.steps.find((step) => step.id === pickleStepId),
       "Expected to find a pickleStep",
     );
 
-    const gherkinDocument = assertAndReturn(
+    const gherkinDocument = ensure(
       state.messages.current
         .map((message) => message.gherkinDocument)
         .filter(notNull)

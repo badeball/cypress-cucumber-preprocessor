@@ -1,6 +1,6 @@
 import type * as messages from "@cucumber/messages";
 
-import { assertAndReturn } from "./assertions";
+import { ensure } from "./assertions";
 
 export function* traverseGherkinDocument(
   gherkinDocument: messages.GherkinDocument,
@@ -190,9 +190,7 @@ export function collectTagNames(
   tags: readonly (messages.Tag | messages.PickleTag)[] | null | undefined,
 ) {
   return (
-    tags?.map((tag) =>
-      assertAndReturn(tag.name, "Expected tag to have a name"),
-    ) ?? []
+    tags?.map((tag) => ensure(tag.name, "Expected tag to have a name")) ?? []
   );
 }
 
