@@ -89,6 +89,39 @@ You may have stumbled upon a configuration caveat (see [docs/configuration.md: C
 
 You might be overriding some of the plugin's own event handlers (see [docs/event-handlers.md: On event handlers](https://github.com/badeball/cypress-cucumber-preprocessor/blob/master/docs/event-handlers.md)).
 
+If that's not the case, you might've come across a bug in the preprocessor. If you intend to create a ticket, make sure to provide a *reproducible example*. Sometimes it might not be clear what happens when these errors are produced, especially if they're intermittent. In that case you can turn on "soft errors", which means that they *won't* halt the execution. This in turn *might* help you understand your edge case and thus help your provide a reproducible example. This option can be configured like shown below.
+
+```
+// package.json
+{
+  "dependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "latest"
+  },
+  "cypress-cucumber-preprocessor": {
+    "state": {
+      "softErrors": true
+    }
+  }
+}
+```
+
+```
+// .cypress-cucumber-preprocessorrc.json
+{
+  "state": {
+    "softErrors": true
+  }
+}
+```
+
+```
+$ cypress run -e stateSoftErrors=true
+```
+
+```
+$ env CYPRESS_stateSoftErrors=true cypress run
+```
+
 <!-- Configuration issues -->
 
 ## I get `Webpack Compilation Error` (shown below)

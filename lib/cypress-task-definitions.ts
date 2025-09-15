@@ -30,6 +30,11 @@ export type ITaskTestStepFinished = messages.TestStepFinished;
 export const TASK_CREATE_STRING_ATTACHMENT =
   "cypress-cucumber-preprocessor:create-string-attachment";
 
+export const TASK_FRONTEND_TRACKING_ERROR =
+  "cypress-cucumber-preprocessor:frontend-tracking-error";
+
+export type ITaskFrontendTrackingError = string;
+
 export interface ITaskCreateStringAttachment {
   data: string;
   fileName?: string;
