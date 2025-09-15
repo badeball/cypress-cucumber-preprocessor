@@ -44,7 +44,7 @@ import { memoize } from "./helpers/memoize";
 
 import debug from "./helpers/debug";
 
-import { CypressCucumberError, createError, homepage } from "./helpers/error";
+import { CypressCucumberError, homepage } from "./helpers/error";
 
 import { assert, ensure, assertIsString } from "./helpers/assertions";
 
@@ -251,7 +251,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
     case "uninitialized":
       break;
     default:
-      throw createError("Unexpected state in beforeRunHandler: " + state.state);
+      throw createStateError("beforeRunHandler", state.state);
   }
 
   // Copied from https://github.com/cucumber/cucumber-js/blob/v10.0.1/src/cli/helpers.ts#L104-L122.
@@ -331,7 +331,7 @@ export async function afterRunHandler(
     case "before-run": // This can happen when running only non-feature specs.
       break;
     default:
-      throw createError("Unexpected state in afterRunHandler: " + state.state);
+      throw createStateError("afterRunHandler", state.state);
   }
 
   const testRunFinished: messages.Envelope = {
@@ -575,7 +575,7 @@ export async function afterSpecHandler(
   switch (state.state) {
     case "uninitialized":
     case "after-run":
-      throw createError("Unexpected state in afterSpecHandler: " + state.state);
+      throw createStateError("afterSpecHandler", state.state);
   }
 
   const browserCrashExprCol = [
@@ -609,7 +609,7 @@ export async function afterSpecHandler(
     case "received-envelopes": // This can happen in case of a failing beforeEach hook.
       break;
     default:
-      throw createError("Unexpected state in afterSpecHandler: " + state.state);
+      throw createStateError("afterSpecHandler", state.state);
   }
 
   // `results` is undefined when running via `cypress open`.
