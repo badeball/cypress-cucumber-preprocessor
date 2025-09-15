@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Add a flag to turn expectation errors soft. Relates to [#1313](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1313) and [#1222](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1222).
+
+  - During creation of message reports, which the JSON & HTML reports are products of, some test state is tracked by this library. This requires taking into account a myriad of edge cases, mostly related to Cypress' reload behavior. There are however likely several remaining edge cases that are unaccounted for.
+
+    In case of [#1222](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1222), the [fail fast](https://martinfowler.com/ieeeSoftware/failFast.pdf) strategy adopted here appeared to mask an underlying issue. I suspect this might also be the case for [#1313](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1313) and similar issues. Thus an option for erroring softly is introduced. With this option, instead of throwing fast in Cypress' event handlers, the preprocessor will emit an error message to stderr at the end of a run.
+
+    My hope is that this will make it easier for the end-user to provide proper reproducible examples when running into these errors. Additionally, it can be useful for users whom which reports aren't strictly a necessity but do encounter such errors.
+
+    This option can be configured similar to other options, with examples shown below.
+
+    ```
+    // package.json
+    {
+      "dependencies": {
+        "@badeball/cypress-cucumber-preprocessor": "latest"
+      },
+      "cypress-cucumber-preprocessor": {
+        "state": {
+          "softErrors": true
+        }
+      }
+    }
+    ```
+
+    ```
+    // .cypress-cucumber-preprocessorrc.json
+    {
+      "state": {
+        "softErrors": true
+      }
+    }
+    ```
+
+    ```
+    $ cypress run -e stateSoftErrors=true
+    ```
+
+    ```
+    $ env CYPRESS_stateSoftErrors=true cypress run
+    ```
+
 ## v23.1.0
 
 - Bumb engine requirement to Node v20.

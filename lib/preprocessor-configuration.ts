@@ -43,6 +43,27 @@ function validateUserConfigurationEntry(
         );
       }
       return { [key]: value };
+    case "state": {
+      if (typeof value !== "object" || value == null) {
+        throw new Error(
+          `Expected an object (state), but got ${util.inspect(value)}`,
+        );
+      }
+      if (
+        !hasOwnProperty(value, "softErrors") ||
+        typeof value.softErrors !== "boolean"
+      ) {
+        throw new Error(
+          `Expected a boolean (messages.softErrors), but got ${util.inspect(
+            value.softErrors,
+          )}`,
+        );
+      }
+      const stateConfig = {
+        softErrors: value.softErrors,
+      };
+      return { [key]: stateConfig };
+    }
     case "messages": {
       if (typeof value !== "object" || value == null) {
         throw new Error(
@@ -300,6 +321,22 @@ function validateEnvironmentOverrides(
     }
   }
 
+  if (hasOwnProperty(environment, "stateSoftErrors")) {
+    const { stateSoftErrors } = environment;
+
+    if (isBoolean(stateSoftErrors)) {
+      overrides.stateSoftErrors = stateSoftErrors;
+    } else if (isString(stateSoftErrors)) {
+      overrides.stateSoftErrors = stringToMaybeBoolean(stateSoftErrors);
+    } else {
+      throw new Error(
+        `Expected a boolean (stateSoftErrors), but got ${util.inspect(
+          stateSoftErrors,
+        )}`,
+      );
+    }
+  }
+
   if (hasOwnProperty(environment, "messagesEnabled")) {
     const { messagesEnabled } = environment;
 
@@ -504,6 +541,7 @@ export type FilterSpecsMixedMode = "hide" | "show" | "empty-set";
 
 interface IEnvironmentOverrides {
   stepDefinitions?: string | string[];
+  stateSoftErrors?: boolean;
   messagesEnabled?: boolean;
   messagesOutput?: string;
   jsonEnabled?: boolean;
@@ -522,6 +560,9 @@ interface IEnvironmentOverrides {
 
 export interface IBaseUserConfiguration {
   stepDefinitions?: string | string[];
+  state?: {
+    softErrors: boolean;
+  };
   messages?: {
     enabled: boolean;
     output?: string;
@@ -557,6 +598,9 @@ export interface IUserConfiguration extends IBaseUserConfiguration {
 
 export interface IPreprocessorConfiguration {
   readonly stepDefinitions: string | string[];
+  readonly state: {
+    softErrors: boolean;
+  };
   readonly messages: {
     enabled: boolean;
     output: string;
@@ -657,6 +701,14 @@ export function combineIntoConfiguration(
       "cucumber-messages.ndjson",
   };
 
+  const state: IPreprocessorConfiguration["state"] = {
+    softErrors:
+      overrides.stateSoftErrors ??
+      specific?.state?.softErrors ??
+      unspecific.state?.softErrors ??
+      false,
+  };
+
   const usage: IPreprocessorConfiguration["usage"] = {
     enabled:
       overrides.usageEnabled ??
@@ -728,6 +780,7 @@ export function combineIntoConfiguration(
 
   return {
     stepDefinitions,
+    state,
     messages,
     json,
     html,
