@@ -27,6 +27,7 @@ import {
   freeRegistry,
   ICaseHook,
   MissingDefinitionError,
+  MultipleDefinitionsError,
   Registry,
 } from "./registry";
 
@@ -37,19 +38,24 @@ import {
 } from "./helpers/ast";
 
 import {
-  HOOK_FAILURE_EXPR,
+  ALL_HOOK_FAILURE_EXPR,
+  EACH_HOOK_FAILURE_EXPR,
   INTERNAL_SPEC_PROPERTIES,
   INTERNAL_SUITE_PROPERTIES,
 } from "./constants";
 
 import {
   ITaskFrontendTrackingError,
+  ITaskTestRunHookFinished,
+  ITaskTestRunHookStarted,
   ITaskSpecEnvelopes,
   ITaskTestCaseFinished,
   ITaskTestCaseStarted,
   ITaskTestStepFinished,
   ITaskTestStepStarted,
   TASK_FRONTEND_TRACKING_ERROR,
+  TASK_TEST_RUN_HOOK_FINISHED,
+  TASK_TEST_RUN_HOOK_STARTED,
   TASK_SPEC_ENVELOPES,
   TASK_TEST_CASE_FINISHED,
   TASK_TEST_CASE_STARTED,
@@ -233,6 +239,36 @@ function taskTestStepFinished(
     cy.task(
       TASK_TEST_STEP_FINISHED,
       testStepfinished satisfies ITaskTestStepFinished,
+      {
+        log: false,
+      },
+    );
+  }
+}
+
+function taskRunHookStarted(
+  context: CompositionContext,
+  testRunHookStarted: messages.TestRunHookStarted,
+) {
+  if (context.isTrackingState) {
+    cy.task(
+      TASK_TEST_RUN_HOOK_STARTED,
+      testRunHookStarted satisfies ITaskTestRunHookStarted,
+      {
+        log: false,
+      },
+    );
+  }
+}
+
+function taskRunHookFinished(
+  context: CompositionContext,
+  testRunHookFinished: messages.TestRunHookFinished,
+) {
+  if (context.isTrackingState) {
+    cy.task(
+      TASK_TEST_RUN_HOOK_FINISHED,
+      testRunHookFinished satisfies ITaskTestRunHookFinished,
       {
         log: false,
       },
@@ -812,8 +848,26 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
                   ),
                   argument,
                   text,
-                  fn: () =>
-                    registry.runStepDefinition(this, text, dryRun, argument),
+                  fn: () => {
+                    try {
+                      return registry.runStepDefinition(
+                        this,
+                        text,
+                        dryRun,
+                        argument,
+                      );
+                    } catch (e) {
+                      if (
+                        e instanceof MissingDefinitionError ||
+                        e instanceof MultipleDefinitionsError
+                      ) {
+                        (this.test as any)._retries = (
+                          this.test as any
+                        )._currentRetry;
+                      }
+                      throw e;
+                    }
+                  },
                 }).then((result) => {
                   return afterStepHooks
                     .reduce(
@@ -906,19 +960,41 @@ function beforeHandler(this: Mocha.Context, context: CompositionContext) {
 
   const { registry } = context;
 
+  taskSpecEnvelopes(context);
+
   registry.resolveBeforeAllHooks().reduce(
     (chain, hook) => {
-      return chain.then(() =>
+      return chain.then(() => {
+        const testRunHookStartedId = context.newId();
+        const start = createTimestamp();
+
+        taskRunHookStarted(context, {
+          id: testRunHookStartedId,
+          hookId: hook.id,
+          testRunStartedId: ensure(
+            Cypress.env("testRunStartedId"),
+            "Expected to find a testRunStartedId",
+          ),
+          timestamp: start,
+        });
+
         runStepWithLogGroup({
           fn: context.dryRun ? noopFn : () => registry.runRunHook(this, hook),
           keyword: "BeforeAll",
-        }),
-      );
+        }).then(() => {
+          taskRunHookFinished(context, {
+            testRunHookStartedId,
+            timestamp: createTimestamp(),
+            result: {
+              duration: duration(start, createTimestamp()),
+              status: TestStepResultStatus.PASSED,
+            },
+          });
+        });
+      });
     },
     cy.wrap({} as unknown, { log: false }),
   );
-
-  taskSpecEnvelopes(context);
 
   while (
     context.includedPickles.length > 0 &&
@@ -955,7 +1031,10 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
           "Expected to find an error message",
         );
 
-        if (HOOK_FAILURE_EXPR.test(message)) {
+        if (
+          EACH_HOOK_FAILURE_EXPR.test(message) ||
+          ALL_HOOK_FAILURE_EXPR.test(message)
+        ) {
           return;
         }
 
@@ -1017,16 +1096,6 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                 },
                 timestamp: endTimestamp,
               };
-
-        if (wasUndefinedStepDefinition) {
-          /**
-           * Hack to abort any retry-attempts, as it won't help in this situation. There are no native
-           * way of doing this, ref. https://github.com/cypress-io/cypress/issues/19677.
-           */
-          (this.currentTest as any)!._retries = (
-            this.currentTest as any
-          )?._currentRetry;
-        }
 
         taskTestStepFinished(context, failedTestStepFinished);
 
@@ -1211,12 +1280,34 @@ function afterHandler(this: Mocha.Context, context: CompositionContext) {
 
   registry.resolveAfterAllHooks().reduce(
     (chain, hook) => {
-      return chain.then(() =>
+      return chain.then(() => {
+        const testRunHookStartedId = context.newId();
+        const start = createTimestamp();
+
+        taskRunHookStarted(context, {
+          id: testRunHookStartedId,
+          hookId: hook.id,
+          testRunStartedId: ensure(
+            Cypress.env("testRunStartedId"),
+            "Expected to find a testRunStartedId",
+          ),
+          timestamp: start,
+        });
+
         runStepWithLogGroup({
           fn: context.dryRun ? noopFn : () => registry.runRunHook(this, hook),
           keyword: "AfterAll",
-        }),
-      );
+        }).then(() => {
+          taskRunHookFinished(context, {
+            testRunHookStartedId,
+            timestamp: createTimestamp(),
+            result: {
+              duration: duration(start, createTimestamp()),
+              status: TestStepResultStatus.PASSED,
+            },
+          });
+        });
+      });
     },
     cy.wrap({} as unknown, { log: false }),
   );
@@ -1267,6 +1358,17 @@ export default function createTests(
         ),
       };
     });
+
+  const runHooks: messages.Hook[] = registry.runHooks.map((runHook) => {
+    return {
+      id: runHook.id,
+      sourceReference: getSourceReferenceFromPosition(runHook.position),
+      type:
+        runHook.keyword === "BeforeAll"
+          ? HookType.BEFORE_TEST_RUN
+          : HookType.AFTER_TEST_RUN,
+    };
+  });
 
   const testStepIds: TestStepIds = new Map();
 
@@ -1391,6 +1493,12 @@ export default function createTests(
   for (const stepDefinition of stepDefinitions) {
     specEnvelopes.push({
       stepDefinition,
+    });
+  }
+
+  for (const hook of runHooks) {
+    specEnvelopes.push({
+      hook,
     });
   }
 

@@ -597,6 +597,52 @@ Feature: JSON formatter
         """
       And the JSON report shouldn't contain any specs
 
+    Scenario: failing BeforeAll hook (simulated using Cypress' before)
+      Given a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature
+          Scenario: a scenario
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { BeforeAll, Given } = require("@badeball/cypress-cucumber-preprocessor");
+        BeforeAll(function() {
+          throw "some error"
+        })
+        Given("a step", function() {})
+        """
+      When I run cypress
+      Then it fails
+      And the output should contain
+        """
+        Hook failures can't be represented in any reports (messages / json / html), thus none is created for cypress/e2e/a.feature.
+        """
+      And the JSON report shouldn't contain any specs
+
+    Scenario: failing AfterAll hook (simulated using Cypress' after)
+      Given a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature
+          Scenario: a scenario
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { AfterAll, Given } = require("@badeball/cypress-cucumber-preprocessor");
+        AfterAll(function() {
+          throw "some error"
+        })
+        Given("a step", function() {})
+        """
+      When I run cypress
+      Then it fails
+      And the output should contain
+        """
+        Hook failures can't be represented in any reports (messages / json / html), thus none is created for cypress/e2e/a.feature.
+        """
+      And the JSON report shouldn't contain any specs
+
   @network
   Rule: it should handle reloads gracefully in a multitude of scenarios
 

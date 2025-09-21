@@ -38,18 +38,6 @@ When(
   },
 );
 
-When("a JPEG image is attached", function () {
-  cy.readFile("cucumber.jpeg", "base64").then((file) =>
-    attach(file, "base64:image/jpeg"),
-  );
-});
-
-When("a PNG image is attached", function () {
-  cy.readFile("cucumber.png", "base64").then((file) =>
-    attach(file, "base64:image/png"),
-  );
-});
-
 When("a PDF document is attached and renamed", function () {
   cy.readFile("document.pdf", "base64").then((file) =>
     attach(file, {

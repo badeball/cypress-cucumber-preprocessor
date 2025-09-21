@@ -27,6 +27,16 @@ export const TASK_TEST_STEP_FINISHED =
 
 export type ITaskTestStepFinished = messages.TestStepFinished;
 
+export const TASK_TEST_RUN_HOOK_STARTED =
+  "cypress-cucumber-preprocessor:test-run-hook-started";
+
+export type ITaskTestRunHookStarted = messages.TestRunHookStarted;
+
+export const TASK_TEST_RUN_HOOK_FINISHED =
+  "cypress-cucumber-preprocessor:test-run-hook-finished";
+
+export type ITaskTestRunHookFinished = messages.TestRunHookFinished;
+
 export const TASK_CREATE_STRING_ATTACHMENT =
   "cypress-cucumber-preprocessor:create-string-attachment";
 
