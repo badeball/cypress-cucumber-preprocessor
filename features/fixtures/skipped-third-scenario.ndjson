@@ -5,7 +5,7 @@
 {"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id"],"tags":[],"name":"second scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id"]}]}}
 {"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id"],"tags":[{"name":"@skip","astNodeId":"id"}],"name":"third scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id"]}]}}
 {"stepDefinition":{"id":"id","pattern":{"type":"CUCUMBER_EXPRESSION","source":"a step"},"sourceReference":{"uri":"not available","location":{"line":0,"column":0}}}}
-{"testRunStarted":{"timestamp":{"seconds":0,"nanos":0}}}
+{"testRunStarted":{"id":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
 {"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
 {"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}

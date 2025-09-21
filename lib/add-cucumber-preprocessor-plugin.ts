@@ -5,6 +5,7 @@ import { generateMessages } from "@cucumber/gherkin";
 import { IdGenerator, SourceMediaType } from "@cucumber/messages";
 import parse from "@cucumber/tag-expressions";
 import { getSpecs } from "find-cypress-specs";
+import { v4 as uuid } from "uuid";
 
 import { INTERNAL_PROPERTY_NAME, INTERNAL_SUITE_PROPERTIES } from "./constants";
 import {
@@ -13,6 +14,8 @@ import {
   TASK_SPEC_ENVELOPES,
   TASK_TEST_CASE_FINISHED,
   TASK_TEST_CASE_STARTED,
+  TASK_TEST_RUN_HOOK_FINISHED,
+  TASK_TEST_RUN_HOOK_STARTED,
   TASK_TEST_STEP_FINISHED,
   TASK_TEST_STEP_STARTED,
 } from "./cypress-task-definitions";
@@ -33,6 +36,8 @@ import {
   specEnvelopesHandler,
   testCaseFinishedHandler,
   testCaseStartedHandler,
+  testRunHookFinishedHandler,
+  testRunHookStartedHandler,
   testStepFinishedHandler,
   testStepStartedHandler,
 } from "./plugin-event-handlers";
@@ -114,6 +119,11 @@ export async function addCucumberPreprocessorPlugin(
       config,
       options,
     ),
+    [TASK_TEST_RUN_HOOK_STARTED]: testRunHookStartedHandler.bind(null, config),
+    [TASK_TEST_RUN_HOOK_FINISHED]: testRunHookFinishedHandler.bind(
+      null,
+      config,
+    ),
     [TASK_TEST_CASE_FINISHED]: testCaseFinishedHandler.bind(null, config),
     [TASK_CREATE_STRING_ATTACHMENT]: createStringAttachmentHandler.bind(
       null,
@@ -188,6 +198,8 @@ export async function addCucumberPreprocessorPlugin(
   if (preprocessor.dryRun) {
     config.supportFile = false;
   }
+
+  config.env["testRunStartedId"] = uuid();
 
   return config;
 }

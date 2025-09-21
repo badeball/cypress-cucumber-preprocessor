@@ -98,27 +98,6 @@ export function removeDuplicatedStepDefinitions(
   }
 }
 
-export function removeUnusedDefinitions(envelopes: messages.Envelope[]) {
-  for (let i = 0; i < envelopes.length; i++) {
-    const { stepDefinition } = envelopes[i];
-
-    if (stepDefinition) {
-      const isUsed = envelopes.some((envelope) =>
-        envelope.testCase?.testSteps.some((testStep) =>
-          testStep.stepDefinitionIds?.includes(stepDefinition.id),
-        ),
-      );
-
-      if (!isUsed) {
-        // Remove this from the stack.
-        envelopes.splice(i, 1);
-        // Make sure we iterate over the "next".
-        i--;
-      }
-    }
-  }
-}
-
 /**
  * Some messages are emitted out-of-order, but not all. The messages below are the ones that need
  * additional sorting. The remaining messages are untouched.
