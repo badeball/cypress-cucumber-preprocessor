@@ -1,513 +1,21 @@
 import util from "node:util";
 
 import { cosmiconfig } from "cosmiconfig";
+import { isRight } from "fp-ts/Either";
+import * as D from "io-ts/Decoder";
 
 import debug from "./helpers/debug";
+import { CypressCucumberError } from "./helpers/error";
 import { ensureIsRelative } from "./helpers/paths";
-import {
-  isBoolean,
-  isString,
-  isStringOrStringArray,
-} from "./helpers/type-guards";
 
-function hasOwnProperty<X extends Record<string, unknown>, Y extends string>(
-  value: X,
-  property: Y,
-): value is X & Record<Y, unknown> {
-  return Object.prototype.hasOwnProperty.call(value, property);
-}
+function decode<I, O>(decoder: D.Decoder<I, O>, val: I): O {
+  const res = decoder.decode(val);
 
-function isPlainObject(value: any): value is object {
-  return value?.constructor === Object;
-}
-
-function isFilterSpecsMixedMode(value: any): value is FilterSpecsMixedMode {
-  const availableModes = ["hide", "show", "empty-set"];
-
-  return typeof value === "string" && availableModes.indexOf(value) !== -1;
-}
-
-function validateUserConfigurationEntry(
-  key: string,
-  value: Record<string, unknown>,
-): Partial<IUserConfiguration> {
-  switch (key) {
-    case "stepDefinitions":
-      if (!isStringOrStringArray(value)) {
-        throw new Error(
-          `Expected a string or array of strings (stepDefinitions), but got ${util.inspect(
-            value,
-          )}`,
-        );
-      }
-      return { [key]: value };
-    case "state": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (state), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "softErrors") ||
-        typeof value.softErrors !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (messages.softErrors), but got ${util.inspect(
-            value.softErrors,
-          )}`,
-        );
-      }
-      const stateConfig = {
-        softErrors: value.softErrors,
-      };
-      return { [key]: stateConfig };
-    }
-    case "messages": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (messages), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "enabled") ||
-        typeof value.enabled !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (messages.enabled), but got ${util.inspect(
-            value.enabled,
-          )}`,
-        );
-      }
-      let output: string | undefined;
-      if (hasOwnProperty(value, "output")) {
-        if (isString(value.output)) {
-          output = value.output;
-        } else {
-          throw new Error(
-            `Expected a string (messages.output), but got ${util.inspect(
-              value.output,
-            )}`,
-          );
-        }
-      }
-      const messagesConfig = {
-        enabled: value.enabled,
-        output,
-      };
-      return { [key]: messagesConfig };
-    }
-    case "json": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (json), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "enabled") ||
-        typeof value.enabled !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (json.enabled), but got ${util.inspect(
-            value.enabled,
-          )}`,
-        );
-      }
-      let output: string | undefined;
-      if (hasOwnProperty(value, "output")) {
-        if (isString(value.output)) {
-          output = value.output;
-        } else {
-          throw new Error(
-            `Expected a string (json.output), but got ${util.inspect(
-              value.output,
-            )}`,
-          );
-        }
-      }
-      const messagesConfig = {
-        enabled: value.enabled,
-        output,
-      };
-      return { [key]: messagesConfig };
-    }
-    case "html": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (html), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "enabled") ||
-        typeof value.enabled !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (html.enabled), but got ${util.inspect(
-            value.enabled,
-          )}`,
-        );
-      }
-      let output: string | undefined;
-      if (hasOwnProperty(value, "output")) {
-        if (isString(value.output)) {
-          output = value.output;
-        } else {
-          throw new Error(
-            `Expected a string (html.output), but got ${util.inspect(
-              value.output,
-            )}`,
-          );
-        }
-      }
-      const messagesConfig = {
-        enabled: value.enabled,
-        output,
-      };
-      return { [key]: messagesConfig };
-    }
-    case "usage": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (usage), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "enabled") ||
-        typeof value.enabled !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (usage.enabled), but got ${util.inspect(
-            value.enabled,
-          )}`,
-        );
-      }
-      let output: string | undefined;
-      if (hasOwnProperty(value, "output")) {
-        if (isString(value.output)) {
-          output = value.output;
-        } else {
-          throw new Error(
-            `Expected a string (usage.output), but got ${util.inspect(
-              value.output,
-            )}`,
-          );
-        }
-      }
-      const messagesConfig = {
-        enabled: value.enabled,
-        output,
-      };
-      return { [key]: messagesConfig };
-    }
-    case "pretty": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (pretty), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "enabled") ||
-        typeof value.enabled !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (pretty.enabled), but got ${util.inspect(
-            value.enabled,
-          )}`,
-        );
-      }
-      const prettyConfig = {
-        enabled: value.enabled,
-      };
-      return { [key]: prettyConfig };
-    }
-    case "filterSpecsMixedMode": {
-      if (!isFilterSpecsMixedMode(value)) {
-        throw new Error(
-          `Unrecognize filterSpecsMixedMode: ${util.inspect(
-            value,
-          )} (valid options are "hide", "show" and "empty-set")`,
-        );
-      }
-      return { [key]: value };
-    }
-    case "filterSpecs": {
-      if (!isBoolean(value)) {
-        throw new Error(
-          `Expected a boolean (filterSpecs), but got ${util.inspect(value)}`,
-        );
-      }
-      return { [key]: value };
-    }
-    case "omitFiltered": {
-      if (!isBoolean(value)) {
-        throw new Error(
-          `Expected a boolean (omitFiltered), but got ${util.inspect(value)}`,
-        );
-      }
-      return { [key]: value };
-    }
-    case "dryRun": {
-      if (!isBoolean(value)) {
-        throw new Error(
-          `Expected a boolean (dryRun), but got ${util.inspect(value)}`,
-        );
-      }
-      return { [key]: value };
-    }
-    case "attachments": {
-      if (typeof value !== "object" || value == null) {
-        throw new Error(
-          `Expected an object (json), but got ${util.inspect(value)}`,
-        );
-      }
-      if (
-        !hasOwnProperty(value, "addScreenshots") ||
-        typeof value.addScreenshots !== "boolean"
-      ) {
-        throw new Error(
-          `Expected a boolean (attachments.addScreenshots), but got ${util.inspect(
-            value.addScreenshots,
-          )}`,
-        );
-      }
-      const attachmentsConfig = {
-        addScreenshots: value.addScreenshots,
-      };
-      return { [key]: attachmentsConfig };
-    }
-    case "e2e":
-      return { [key]: validateUserConfiguration(value) };
-    case "component":
-      return { [key]: validateUserConfiguration(value) };
-    default:
-      return {};
+  if (isRight(res)) {
+    return res.right;
+  } else {
+    throw new CypressCucumberError(D.draw(res.left));
   }
-}
-
-function validateUserConfiguration(configuration: object): IUserConfiguration {
-  if (!isPlainObject(configuration)) {
-    throw new Error(
-      `Malformed configuration, expected an object, but got ${util.inspect(
-        configuration,
-      )}`,
-    );
-  }
-
-  return Object.assign(
-    {},
-    ...Object.entries(configuration).map((entry) =>
-      validateUserConfigurationEntry(...entry),
-    ),
-  );
-}
-
-function validateEnvironmentOverrides(
-  environment: Record<string, unknown>,
-): IEnvironmentOverrides {
-  const overrides: IEnvironmentOverrides = {};
-
-  if (hasOwnProperty(environment, "stepDefinitions")) {
-    const { stepDefinitions } = environment;
-
-    if (isStringOrStringArray(stepDefinitions)) {
-      overrides.stepDefinitions = stepDefinitions;
-    } else {
-      throw new Error(
-        `Expected a string or array of strings (stepDefinitions), but got ${util.inspect(
-          stepDefinitions,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "stateSoftErrors")) {
-    const { stateSoftErrors } = environment;
-
-    if (isBoolean(stateSoftErrors)) {
-      overrides.stateSoftErrors = stateSoftErrors;
-    } else if (isString(stateSoftErrors)) {
-      overrides.stateSoftErrors = stringToMaybeBoolean(stateSoftErrors);
-    } else {
-      throw new Error(
-        `Expected a boolean (stateSoftErrors), but got ${util.inspect(
-          stateSoftErrors,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "messagesEnabled")) {
-    const { messagesEnabled } = environment;
-
-    if (isBoolean(messagesEnabled)) {
-      overrides.messagesEnabled = messagesEnabled;
-    } else if (isString(messagesEnabled)) {
-      overrides.messagesEnabled = stringToMaybeBoolean(messagesEnabled);
-    } else {
-      throw new Error(
-        `Expected a boolean (messagesEnabled), but got ${util.inspect(
-          messagesEnabled,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "messagesOutput")) {
-    const { messagesOutput } = environment;
-
-    if (isString(messagesOutput)) {
-      overrides.messagesOutput = messagesOutput;
-    } else {
-      throw new Error(
-        `Expected a string (messagesOutput), but got ${util.inspect(
-          messagesOutput,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "jsonEnabled")) {
-    const { jsonEnabled } = environment;
-
-    if (isBoolean(jsonEnabled)) {
-      overrides.jsonEnabled = jsonEnabled;
-    } else if (isString(jsonEnabled)) {
-      overrides.jsonEnabled = stringToMaybeBoolean(jsonEnabled);
-    } else {
-      throw new Error(
-        `Expected a boolean (jsonEnabled), but got ${util.inspect(jsonEnabled)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "jsonOutput")) {
-    const { jsonOutput } = environment;
-
-    if (isString(jsonOutput)) {
-      overrides.jsonOutput = jsonOutput;
-    } else {
-      throw new Error(
-        `Expected a string (jsonOutput), but got ${util.inspect(jsonOutput)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "htmlEnabled")) {
-    const { htmlEnabled } = environment;
-
-    if (isBoolean(htmlEnabled)) {
-      overrides.htmlEnabled = htmlEnabled;
-    } else if (isString(htmlEnabled)) {
-      overrides.htmlEnabled = stringToMaybeBoolean(htmlEnabled);
-    } else {
-      throw new Error(
-        `Expected a boolean (htmlEnabled), but got ${util.inspect(htmlEnabled)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "htmlOutput")) {
-    const { htmlOutput } = environment;
-
-    if (isString(htmlOutput)) {
-      overrides.htmlOutput = htmlOutput;
-    } else {
-      throw new Error(
-        `Expected a string (htmlOutput), but got ${util.inspect(htmlOutput)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "prettyEnabled")) {
-    const { prettyEnabled } = environment;
-
-    if (isBoolean(prettyEnabled)) {
-      overrides.prettyEnabled = prettyEnabled;
-    } else if (isString(prettyEnabled)) {
-      overrides.prettyEnabled = stringToMaybeBoolean(prettyEnabled);
-    } else {
-      throw new Error(
-        `Expected a boolean (prettyEnabled), but got ${util.inspect(
-          prettyEnabled,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "filterSpecsMixedMode")) {
-    const { filterSpecsMixedMode } = environment;
-
-    if (isFilterSpecsMixedMode(filterSpecsMixedMode)) {
-      overrides.filterSpecsMixedMode = filterSpecsMixedMode;
-    } else {
-      throw new Error(
-        `Unrecognize filterSpecsMixedMode: ${util.inspect(
-          filterSpecsMixedMode,
-        )} (valid options are "hide", "show" and "empty-set")`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "filterSpecs")) {
-    const { filterSpecs } = environment;
-
-    if (isBoolean(filterSpecs)) {
-      overrides.filterSpecs = filterSpecs;
-    } else if (isString(filterSpecs)) {
-      overrides.filterSpecs = stringToMaybeBoolean(filterSpecs);
-    } else {
-      throw new Error(
-        `Expected a boolean (filterSpecs), but got ${util.inspect(filterSpecs)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "omitFiltered")) {
-    const { omitFiltered } = environment;
-
-    if (isBoolean(omitFiltered)) {
-      overrides.omitFiltered = omitFiltered;
-    } else if (isString(omitFiltered)) {
-      overrides.omitFiltered = stringToMaybeBoolean(omitFiltered);
-    } else {
-      throw new Error(
-        `Expected a boolean (omitFiltered), but got ${util.inspect(
-          omitFiltered,
-        )}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "dryRun")) {
-    const { dryRun } = environment;
-
-    if (isBoolean(dryRun)) {
-      overrides.dryRun = dryRun;
-    } else if (isString(dryRun)) {
-      overrides.dryRun = stringToMaybeBoolean(dryRun);
-    } else {
-      throw new Error(
-        `Expected a boolean (dryRun), but got ${util.inspect(dryRun)}`,
-      );
-    }
-  }
-
-  if (hasOwnProperty(environment, "attachmentsAddScreenshots")) {
-    const { attachmentsAddScreenshots } = environment;
-
-    if (isBoolean(attachmentsAddScreenshots)) {
-      overrides.attachmentsAddScreenshots = attachmentsAddScreenshots;
-    } else if (isString(attachmentsAddScreenshots)) {
-      overrides.attachmentsAddScreenshots = stringToMaybeBoolean(
-        attachmentsAddScreenshots,
-      );
-    } else {
-      throw new Error(
-        `Expected a boolean (attachmentsAddScreenshots), but got ${util.inspect(attachmentsAddScreenshots)}`,
-      );
-    }
-  }
-
-  return overrides;
 }
 
 function stringToMaybeBoolean(value: string): boolean | undefined {
@@ -535,64 +43,90 @@ export type ICypressRuntimeConfiguration = Pick<
   | "env"
 >;
 
-export type FilterSpecsMixedMode = "hide" | "show" | "empty-set";
+const FilterSpecsMixedMode = D.union(
+  D.literal("hide"),
+  D.literal("show"),
+  D.literal("empty-set"),
+);
 
-interface IEnvironmentOverrides {
-  stepDefinitions?: string | string[];
-  stateSoftErrors?: boolean;
-  messagesEnabled?: boolean;
-  messagesOutput?: string;
-  jsonEnabled?: boolean;
-  jsonOutput?: string;
-  htmlEnabled?: boolean;
-  htmlOutput?: string;
-  usageEnabled?: boolean;
-  usageOutput?: string;
-  prettyEnabled?: boolean;
-  filterSpecsMixedMode?: FilterSpecsMixedMode;
-  filterSpecs?: boolean;
-  omitFiltered?: boolean;
-  dryRun?: boolean;
-  attachmentsAddScreenshots?: boolean;
-}
+export type IFilterSpecsMixedMode = D.TypeOf<typeof FilterSpecsMixedMode>;
 
-export interface IBaseUserConfiguration {
-  stepDefinitions?: string | string[];
-  state?: {
-    softErrors: boolean;
-  };
-  messages?: {
-    enabled: boolean;
-    output?: string;
-  };
-  json?: {
-    enabled: boolean;
-    output?: string;
-  };
-  html?: {
-    enabled: boolean;
-    output?: string;
-  };
-  usage?: {
-    enabled: boolean;
-    output?: string;
-  };
-  pretty?: {
-    enabled: boolean;
-  };
-  filterSpecsMixedMode?: FilterSpecsMixedMode;
-  filterSpecs?: boolean;
-  omitFiltered?: boolean;
-  dryRun?: boolean;
-  attachments?: {
-    addScreenshots: boolean;
-  };
-}
+const StringishToBoolean: D.Decoder<unknown, boolean | undefined> = {
+  decode: (val) => {
+    if (typeof val === "string") {
+      return D.success(stringToMaybeBoolean(val));
+    } else if (typeof val === "boolean") {
+      return D.success(val);
+    } else {
+      return D.failure(val, "string");
+    }
+  },
+};
 
-export interface IUserConfiguration extends IBaseUserConfiguration {
-  e2e?: IBaseUserConfiguration;
-  component?: IBaseUserConfiguration;
-}
+const EnvironmentOverrides = D.partial({
+  stepDefinitions: D.union(D.string, D.array(D.string)),
+  stateSoftErrors: StringishToBoolean,
+  messagesEnabled: StringishToBoolean,
+  messagesOutput: D.string,
+  jsonEnabled: StringishToBoolean,
+  jsonOutput: D.string,
+  htmlEnabled: StringishToBoolean,
+  htmlOutput: D.string,
+  usageEnabled: StringishToBoolean,
+  usageOutput: D.string,
+  prettyEnabled: StringishToBoolean,
+  filterSpecsMixedMode: FilterSpecsMixedMode,
+  filterSpecs: StringishToBoolean,
+  omitFiltered: StringishToBoolean,
+  dryRun: StringishToBoolean,
+  attachmentsAddScreenshots: StringishToBoolean,
+});
+
+type IEnvironmentOverrides = D.TypeOf<typeof EnvironmentOverrides>;
+
+const BaseConfiguration = D.partial({
+  stepDefinitions: D.union(D.string, D.array(D.string)),
+  state: D.partial({
+    softErrors: D.boolean,
+  }),
+  messages: D.partial({
+    enabled: D.boolean,
+    output: D.string,
+  }),
+  json: D.partial({
+    enabled: D.boolean,
+    output: D.string,
+  }),
+  html: D.partial({
+    enabled: D.boolean,
+    output: D.string,
+  }),
+  usage: D.partial({
+    enabled: D.boolean,
+    output: D.string,
+  }),
+  pretty: D.partial({
+    enabled: D.boolean,
+  }),
+  filterSpecsMixedMode: FilterSpecsMixedMode,
+  filterSpecs: D.boolean,
+  omitFiltered: D.boolean,
+  dryRun: D.boolean,
+  attachments: D.partial({
+    addScreenshots: D.boolean,
+  }),
+});
+
+export type IBaseUserConfiguration = D.TypeOf<typeof BaseConfiguration>;
+
+const UserConfiguration = D.intersect(
+  D.partial({
+    e2e: BaseConfiguration,
+    component: BaseConfiguration,
+  }),
+)(BaseConfiguration);
+
+export type IUserConfiguration = D.TypeOf<typeof UserConfiguration>;
 
 export interface IPreprocessorConfiguration {
   readonly stepDefinitions: string | string[];
@@ -618,7 +152,7 @@ export interface IPreprocessorConfiguration {
   readonly pretty: {
     enabled: boolean;
   };
-  readonly filterSpecsMixedMode: FilterSpecsMixedMode;
+  readonly filterSpecsMixedMode: D.TypeOf<typeof FilterSpecsMixedMode>;
   readonly filterSpecs: boolean;
   readonly omitFiltered: boolean;
   readonly implicitIntegrationFolder: string;
@@ -814,14 +348,14 @@ export async function resolve(
 ): Promise<IPreprocessorConfiguration> {
   const result = await configurationFileResolver(cypressConfig.projectRoot);
 
-  const environmentOverrides = validateEnvironmentOverrides(environment);
+  const environmentOverrides = decode(EnvironmentOverrides, environment);
 
   debug(`resolved environment overrides ${util.inspect(environmentOverrides)}`);
 
   let explicitConfiguration: IUserConfiguration;
 
   if (result) {
-    explicitConfiguration = validateUserConfiguration(result);
+    explicitConfiguration = decode(UserConfiguration, result);
 
     debug(
       `resolved explicit user configuration ${util.inspect(
