@@ -1,8 +1,10 @@
 import assert from "assert";
 
+import { dedent } from "strip-indent";
+
 import {
   COMPILED_REPORTER_ENTRYPOINT,
-  FilterSpecsMixedMode,
+  IFilterSpecsMixedMode,
   IBaseUserConfiguration,
   ICypressRuntimeConfiguration,
   IPreprocessorConfiguration,
@@ -623,11 +625,11 @@ describe("resolve()", () => {
       describe("filterSpecsMixedMode", () => {
         const getValueFn = (
           configuration: IPreprocessorConfiguration,
-        ): FilterSpecsMixedMode => configuration.filterSpecsMixedMode;
+        ): IFilterSpecsMixedMode => configuration.filterSpecsMixedMode;
 
         const setValueFn = (
           configuration: IBaseUserConfiguration,
-          value: FilterSpecsMixedMode,
+          value: IFilterSpecsMixedMode,
         ) => (configuration.filterSpecsMixedMode = value);
 
         it("default", () =>
@@ -715,7 +717,7 @@ describe("resolve()", () => {
             expectedValue: "empty-set",
           }));
 
-        it("should fail when configured using non-recognized mode", () =>
+        it("should fail when configured using non-recognized mode", async () =>
           assert.rejects(
             () =>
               resolve(
@@ -728,8 +730,17 @@ describe("resolve()", () => {
                 () => ({ filterSpecsMixedMode: "foobar" }),
               ),
             {
-              message:
-                'Unrecognize filterSpecsMixedMode: \'foobar\' (valid options are "hide", "show" and "empty-set")',
+              message: dedent(
+                `
+                  optional property "filterSpecsMixedMode"
+                  ├─ member 0
+                  │  └─ cannot decode "foobar", should be "hide"
+                  ├─ member 1
+                  │  └─ cannot decode "foobar", should be "show"
+                  └─ member 2
+                     └─ cannot decode "foobar", should be "empty-set"
+                `,
+              ),
             },
           ));
       });
