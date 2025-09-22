@@ -121,7 +121,6 @@ interface StateTestStarted {
     accumulation: messages.Envelope[];
     current: messages.Envelope[];
   };
-  testCaseStartedId: string;
 }
 
 interface StateStepStarted {
@@ -132,8 +131,6 @@ interface StateStepStarted {
     accumulation: messages.Envelope[];
     current: messages.Envelope[];
   };
-  testCaseStartedId: string;
-  testStepStartedId: string;
 }
 
 interface StateStepFinished {
@@ -144,7 +141,6 @@ interface StateStepFinished {
     accumulation: messages.Envelope[];
     current: messages.Envelope[];
   };
-  testCaseStartedId: string;
 }
 
 interface StateTestFinished {
@@ -219,6 +215,8 @@ let state: State = {
 };
 
 const isFeature = (spec: Cypress.Spec) => spec.name.endsWith(".feature");
+
+const last = <E>(col: E[]): E => col[col.length - 1];
 
 const end = (stream: stream.Writable) =>
   new Promise<void>((resolve) => stream.end(resolve));
@@ -751,10 +749,15 @@ export async function afterScreenshotHandler(
     return details;
   }
 
+  const { testCaseStartedId, testStepId } = ensure(
+    last(state.messages.current).testStepStarted,
+    "Expected to find a testStepStarted last",
+  );
+
   const message: messages.Envelope = {
     attachment: {
-      testCaseStartedId: state.testCaseStartedId,
-      testStepId: state.testStepStartedId,
+      testCaseStartedId,
+      testStepId,
       body: buffer.toString("base64"),
       mediaType: "image/png",
       contentEncoding:
@@ -887,7 +890,6 @@ export const testCaseStartedHandler = createGracefullPluginEventHandler(
         accumulation: state.messages.accumulation,
         current: state.messages.current.concat({ testCaseStarted: data }),
       },
-      testCaseStartedId: data.id,
     };
 
     return true;
@@ -924,8 +926,6 @@ export const testStepStartedHandler = createGracefullPluginEventHandler(
         accumulation: state.messages.accumulation,
         current: state.messages.current.concat({ testStepStarted: data }),
       },
-      testCaseStartedId: state.testCaseStartedId,
-      testStepStartedId: data.testStepId,
     };
 
     return true;
@@ -1082,7 +1082,6 @@ export const testStepFinishedHandler = createGracefullPluginEventHandler(
         accumulation: state.messages.accumulation,
         current: state.messages.current.concat({ testStepFinished }),
       },
-      testCaseStartedId: state.testCaseStartedId,
     };
 
     return true;
@@ -1143,10 +1142,15 @@ export const createStringAttachmentHandler = createGracefullPluginEventHandler(
         throw createStateError("createStringAttachmentHandler", state.state);
     }
 
+    const { testCaseStartedId, testStepId } = ensure(
+      last(state.messages.current).testStepStarted,
+      "Expected to find a testStepStarted last",
+    );
+
     const message: messages.Envelope = {
       attachment: {
-        testCaseStartedId: state.testCaseStartedId,
-        testStepId: state.testStepStartedId,
+        testCaseStartedId,
+        testStepId,
         body: data,
         fileName,
         mediaType: mediaType,
