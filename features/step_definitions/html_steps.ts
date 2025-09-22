@@ -90,20 +90,19 @@ Then(
 );
 
 Then(
-  "the report should have an image attachment",
+  "the report should have a video attachment",
   async function (this: ICustomWorld) {
     const dom = await JSDOM.fromFile(
       path.join(this.tmpDir, "cucumber-report.html"),
       { runScripts: "dangerously" },
     );
 
-    const AccordionItemPanel = await findByText(
+    const el = await findByText(
       dom.window.document.documentElement,
-      (_, element) => element?.textContent?.includes("Attached Image") ?? false,
-      { selector: '[data-accordion-component="AccordionItemPanel"]' },
+      /\w+\.feature\.mp4/,
     );
 
-    assert(AccordionItemPanel);
+    assert(el);
   },
 );
 

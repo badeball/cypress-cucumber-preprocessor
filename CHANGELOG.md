@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Add rudimentary support for videos in reports (messages & HTML), fixes [#1139](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1139).
+
+  - This can be enabled by setting `attachments.addVideos` to `true`.
+
 ## v23.2.0
 
 - Add a flag to turn expectation errors soft. Relates to [#1313](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1313) and [#1222](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1222).

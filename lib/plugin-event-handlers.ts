@@ -20,6 +20,8 @@ import detectCiEnvironment from "@cucumber/ci-environment";
 
 import split from "split";
 
+import { v4 as uuid } from "uuid";
+
 import {
   ALL_HOOK_FAILURE_EXPR,
   EACH_HOOK_FAILURE_EXPR,
@@ -72,6 +74,11 @@ import { indent } from "./helpers/strings";
 import { version as packageVersion } from "./version";
 
 import { IStepHookParameter } from "./public-member-types";
+import {
+  AttachmentContentEncoding,
+  HookType,
+  TestStepResultStatus,
+} from "./helpers/messages-enums";
 
 const resolve = memoize(origResolve);
 
@@ -414,6 +421,66 @@ export async function afterRunHandler(
       break;
     default:
       throw createStateError("afterRunHandler", state.state);
+  }
+
+  if (preprocessor.attachments.addVideos && "runs" in results) {
+    const hookId = uuid();
+    const testRunHookStartedId = uuid();
+    const testRunStartedId = ensure(
+      config.env["testRunStartedId"],
+      "Expected to find a testRunStartedId",
+    );
+
+    state.messages.accumulation.push(
+      {
+        hook: {
+          id: hookId,
+          type: HookType.AFTER_TEST_RUN,
+          sourceReference: {
+            uri: "cypress-cucumber-preprocessor:internal",
+            location: { line: 0 },
+          },
+        },
+      },
+      {
+        testRunHookStarted: {
+          id: testRunHookStartedId,
+          hookId,
+          testRunStartedId,
+          timestamp: createTimestamp(),
+        },
+      },
+    );
+
+    for (const run of results.runs) {
+      if (!run.video) {
+        continue;
+      }
+
+      state.messages.accumulation.push({
+        attachment: {
+          testRunHookStartedId,
+          body: await fs.readFile(run.video, { encoding: "base64" }),
+          fileName: path.basename(run.video),
+          contentEncoding: AttachmentContentEncoding.BASE64,
+          mediaType: "video/mp4",
+        },
+      });
+    }
+
+    state.messages.accumulation.push({
+      testRunHookFinished: {
+        testRunHookStartedId,
+        result: {
+          duration: {
+            seconds: 0,
+            nanos: 0,
+          },
+          status: TestStepResultStatus.PASSED,
+        },
+        timestamp: createTimestamp(),
+      },
+    });
   }
 
   const testRunFinished: messages.Envelope = {
