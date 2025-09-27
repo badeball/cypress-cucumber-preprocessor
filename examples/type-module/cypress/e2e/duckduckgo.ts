@@ -11,6 +11,4 @@ Then("I should see a search bar", () => {
       "match",
       /Search the web without being tracked|Search without being tracked/,
     );
-
-  assert.deepEqual({}, {});
 });
