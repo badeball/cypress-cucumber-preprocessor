@@ -152,7 +152,15 @@ BeforeAll(function () {
   expectType<Mocha.Context>(this);
 });
 
+BeforeAll({ order: 10 }, function () {
+  expectType<Mocha.Context>(this);
+});
+
 AfterAll(function () {
+  expectType<Mocha.Context>(this);
+});
+
+AfterAll({ order: 10 }, function () {
   expectType<Mocha.Context>(this);
 });
 
