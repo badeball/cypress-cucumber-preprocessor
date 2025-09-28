@@ -157,11 +157,19 @@ BeforeAll({ order: 10 }, function () {
   expectType<Mocha.Context>(this);
 });
 
+BeforeAll({ name: "foo" }, function () {
+  expectType<Mocha.Context>(this);
+});
+
 AfterAll(function () {
   expectType<Mocha.Context>(this);
 });
 
 AfterAll({ order: 10 }, function () {
+  expectType<Mocha.Context>(this);
+});
+
+AfterAll({ name: "foo" }, function () {
   expectType<Mocha.Context>(this);
 });
 

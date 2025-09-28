@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Run hooks (BeforeAll/AfterAll) may now be optionally named. This is in line with how cucumber-js behaves.
+
 ## v23.2.1
 
 - Determine interactive mode correctly, fixes [#1323](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1323).

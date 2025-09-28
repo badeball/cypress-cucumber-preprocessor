@@ -8,6 +8,7 @@ export interface IParameterTypeDefinition<T, C extends Mocha.Context> {
 
 export interface IRunHookOptions {
   order?: number;
+  name?: string;
 }
 
 export interface IRunHookBody<C extends Mocha.Context> {
