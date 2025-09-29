@@ -56,6 +56,7 @@
     "test:compatibility": "mocha --require ts-node/register --timeout 20000 \"compatibility/**/*_spec.ts\"",
     "test:run-all-specs": "mocha --timeout 0 test/run-all-specs.ts",
     "test:integration": "cucumber-js",
+    "test:parallel": "cucumber-js -p parallel",
     "test:actions:examples": "xvfb-run bash -c 'act -W \".github/workflows/examples-branch.yml\" --use-gitignore=false --artifact-server-path=tmp/artifacts --env DISPLAY=$DISPLAY'",
     "git:is-master": "[ \"$(git branch --show-current)\" == \"master\" ]",
     "git:empty-status": "[ \"$(git status --porcelain)\" == \"\" ]",
