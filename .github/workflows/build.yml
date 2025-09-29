@@ -6,6 +6,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   prepare-versions:
     runs-on: ubuntu-latest
@@ -85,7 +89,6 @@ jobs:
           path: .cypress
           key: cypress-windows
       - name: Dependencies
-        shell: bash
         run: npm install --engine-strict
       - name: Build
         run: npm run build
