@@ -97,7 +97,7 @@ Then("I should see a search bar", () => {
     .should("have.attr", "placeholder")
     .and(
       "match",
-      /Search the web without being tracked|Search without being tracked/,
+      /Search without being tracked|Search privately/,
     );
 });
 ```
