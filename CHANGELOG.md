@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v23.2.1
+
+- Determine interactive mode correctly, fixes [#1323](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1323).
+
 ## v23.2.0
 
 - Add a flag to turn expectation errors soft. Relates to [#1313](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1313) and [#1222](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1222).
