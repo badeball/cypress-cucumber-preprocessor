@@ -1428,17 +1428,17 @@ type Tail<T extends any[]> = T extends [infer _A, ...infer R] ? R : never;
 
 export type CreateTestsOptions = Tail<Parameters<typeof createTests>>;
 
-function strictIsInteractive(): boolean {
-  const isInteractive = Cypress.config(
-    "isInteractive" as keyof Cypress.ConfigOptions,
+function strictIsTextTerminal(): boolean {
+  const isTextTerminal = Cypress.config(
+    "isTextTerminal" as keyof Cypress.ConfigOptions,
   );
 
-  if (typeof isInteractive === "boolean") {
-    return isInteractive;
+  if (typeof isTextTerminal === "boolean") {
+    return isTextTerminal;
   }
 
   throw new Error(
-    "Expected to find a Cypress configuration property `isInteractive`, but didn't",
+    "Expected to find a Cypress configuration property `isTextTerminal`, but didn't",
   );
 }
 
@@ -1495,7 +1495,7 @@ function createMissingStepDefinitionMessage(
       : noStepDefinitionPathsTemplate;
 
   const maybeEscape = (string: string) =>
-    strictIsInteractive() ? string.replaceAll("*", "\\*") : string;
+    strictIsTextTerminal() ? string : string.replaceAll("*", "\\*");
 
   const prettyPrintList = (items: string[]) =>
     items.map((item) => "  - " + maybeEscape(item)).join("\n");
