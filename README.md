@@ -7,7 +7,8 @@
 
 [Quick start](docs/quick-start.md) •
 [Documentation](docs/readme.md) •
-[Contributing](CONTRIBUTING.md)
+[Contributing](CONTRIBUTING.md) •
+[Sponsors](#attribution--sponsors)
 
 </div>
 
@@ -75,6 +76,10 @@ $ npm run test:integration # make sure to build first
 $ npm run test # runs all of the above
 ```
 
-## Attribution
+## Attribution & sponsors
 
-A special thanks goes out to [Łukasz Gandecki](https://github.com/lgandecki) for developing and maintaining the cypress-cucumber integration before me, in addition to [all other contributors](https://github.com/badeball/cypress-cucumber-preprocessor/graphs/contributors). Some of the work has partially been sponsored by [Klaveness Digital](https://www.klavenessdigital.com/).
+A special thanks goes out to [Łukasz Gandecki](https://github.com/lgandecki) for developing and maintaining the cypress-cucumber integration before me, in addition to [all other contributors](https://github.com/badeball/cypress-cucumber-preprocessor/graphs/contributors). Some of the work has partially been sponsored by [Klaveness Digital](https://www.klavenessdigital.com/). This project is currently sponsored by [LambdaTest](https://www.lambdatest.com/?utm_source=cypress-cucumber-preprocessor&utm_medium=sponsor).
+
+<p align="center">
+  <a href="https://www.lambdatest.com/?utm_source=cypress-cucumber-preprocessor&utm_medium=sponsor"><img src="docs/lambdatest-logo.png"></a>
+</p>
