@@ -64,7 +64,7 @@
     "prepublishOnly": "npm run git:is-master && npm run git:empty-status && npm run git:not-diverged && npm run clean-install && npm run clear-dist && npm run build && npm run test"
   },
   "dependencies": {
-    "@cucumber/ci-environment": "^10.0.1",
+    "@cucumber/ci-environment": "^11.0.0",
     "@cucumber/cucumber": "^12.0.0",
     "@cucumber/cucumber-expressions": "^18.0.0",
     "@cucumber/gherkin": "^35.0.0",
