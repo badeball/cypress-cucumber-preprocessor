@@ -89,9 +89,6 @@ jobs:
         run: npm install --engine-strict
       - name: Build
         run: npm run build
-      # https://github.com/webpack/webpack/issues/12759
-      - name: Remove Webpack test
-        run: rm features/loaders/webpack.feature
       - name: Test
         run: npm run test:integration
       - name: Versions
