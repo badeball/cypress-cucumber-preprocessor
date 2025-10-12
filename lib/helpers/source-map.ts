@@ -2,7 +2,7 @@ import { toByteArray } from "base64-js";
 
 import ErrorStackParser from "error-stack-parser";
 
-import { SourceMapConsumer } from "source-map";
+import { originalPositionFor, TraceMap } from "@jridgewell/trace-mapping";
 
 export interface Position {
   line: number;
@@ -21,7 +21,7 @@ function sourceMapWarn(message: string) {
   isSourceMapWarned = true;
 }
 
-const cache = new Map<string, SourceMapConsumer | undefined>();
+const cache = new Map<string, TraceMap | undefined>();
 
 /**
  * Taken from https://github.com/evanw/node-source-map-support/blob/v0.5.21/source-map-support.js#L148-L177.
@@ -63,9 +63,7 @@ export function retrieveSourceMapURL(source: string) {
   return lastMatch[1];
 }
 
-export function createSourceMapConsumer(
-  source: string,
-): SourceMapConsumer | undefined {
+export function createTraceMap(source: string): TraceMap | undefined {
   const sourceMappingURL = retrieveSourceMapURL(source);
 
   if (!sourceMappingURL) {
@@ -78,21 +76,14 @@ export function createSourceMapConsumer(
     ),
   );
 
-  // Why? Because of Vite. Vite fails building the source-map module properly and this errors with "x is not a constructor".
-  if (typeof SourceMapConsumer !== "function") {
-    return;
-  }
-
-  return new SourceMapConsumer(rawSourceMap);
+  return new TraceMap(rawSourceMap);
 }
 
-export function cachedCreateSourceMapConsumer(
-  source: string,
-): SourceMapConsumer | undefined {
+export function cachedCreateTraceMap(source: string): TraceMap | undefined {
   if (cache.has(source)) {
     return cache.get(source);
   } else {
-    const result = createSourceMapConsumer(source);
+    const result = createTraceMap(source);
     cache.set(source, result);
     return result;
   }
@@ -107,18 +98,26 @@ export function maybeRetrievePositionFromSourceMap(): Position | undefined {
     return;
   }
 
-  const sourceMap = cachedCreateSourceMapConsumer(relevantFrame.fileName);
+  const sourceMap = cachedCreateTraceMap(relevantFrame.fileName);
 
   if (!sourceMap) {
     return;
   }
 
-  const position = sourceMap.originalPositionFor({
+  const position = originalPositionFor(sourceMap, {
     line: relevantFrame.getLineNumber()!,
     column: relevantFrame.getColumnNumber()!,
   });
 
+  if (position.source === null) {
+    return;
+  }
+
   position.source = position.source.replace(/^webpack:\/\/\//, "");
 
-  return position;
+  return {
+    line: position.line,
+    column: position.column,
+    source: position.source,
+  };
 }
