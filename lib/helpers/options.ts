@@ -23,9 +23,3 @@ export function isNotExclusivelySuiteConfiguration(entry: ConfigurationEntry) {
   // TODO: Remove type cast once support for v10 is removed.
   return entry[0] !== (TEST_ISOLATION_CONFIGURATION_OPTION as string);
 }
-
-export function hasExclusivelySuiteConfiguration(
-  config: Cypress.TestConfigOverrides,
-) {
-  return Object.keys(config).includes(TEST_ISOLATION_CONFIGURATION_OPTION);
-}
