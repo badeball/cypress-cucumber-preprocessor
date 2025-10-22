@@ -177,18 +177,12 @@ export async function addCucumberPreprocessorPlugin(
 
     debug(`Resolved specs ${inspect(testFiles)}`);
 
-    const propertyName = "specPattern" in config ? "specPattern" : "testFiles";
-
     /**
      * The preprocessor needs the original value at a later point in order to determine the implicit
      * integration folder correctly. Otherwise, scoping test files using tags would affect definition
      * resolvement and yield surprising results.
      */
-    mutateConfigObjectPreservingly(
-      config,
-      propertyName as keyof Cypress.PluginConfigOptions,
-      testFiles,
-    );
+    mutateConfigObjectPreservingly(config, "specPattern", testFiles);
   }
 
   if (preprocessor.dryRun) {

@@ -52,8 +52,7 @@ Let's consider the following directory structure.
 
 1. The project root (`"/home/john.doe/my-project"`) is subtracted from the full path of the feature file, leaving us with with `"cypress/e2e/foo/a.feature"`.
 2. The *integration directory* (`"cypress/e2e"`) is subtracted from above result, resulting in `"foo/a.feature"`.
-   - For Cypress v9 users and below, the *integration directory* is an explicitly configured path.
-   - For Cypress v10 users and higher, this is implicitly calculated and is the *common ancestor path* of all feature files found. For the example above, this is `"cypress/e2e"`. Thus we're left with `"foo/a.feature"`.
+   - This is implicitly calculated and is the *common ancestor path* of all feature files found. For the example above, this is `"cypress/e2e"`. Thus we're left with `"foo/a.feature"`.
 3. The file extension is removed, leaving us with `"foo/a"`.
 
 The last value is used to replace `[filepath]` in each member of the configured `stepDefinitions`. For our example above this would yield `["cypress/e2e/foo/a.js"]`. This resulting array is used as search patterns for files containing step definitions (internally using [glob](https://github.com/isaacs/node-glob)).
