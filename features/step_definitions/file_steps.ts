@@ -1,6 +1,6 @@
 import { Given } from "@cucumber/cucumber";
 import stripIndent from "strip-indent";
-import path from "path";
+import path from "node:path";
 import { writeFile } from "../support/helpers";
 import ICustomWorld from "../support/ICustomWorld";
 

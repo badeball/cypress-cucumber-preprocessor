@@ -1,6 +1,6 @@
-import util from "util";
+import util from "node:util";
 
-import assert from "assert/strict";
+import assert from "node:assert/strict";
 
 import {
   ICypressRuntimeConfiguration,

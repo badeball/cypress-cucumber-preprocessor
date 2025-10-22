@@ -1,4 +1,4 @@
-import { PassThrough, Transform, TransformCallback } from "stream";
+import { PassThrough, Transform, TransformCallback } from "node:stream";
 
 import debug from "../helpers/debug";
 

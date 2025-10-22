@@ -5,7 +5,7 @@ Feature: absolute paths in `stepDefinitions`
   Scenario: absolute paths in `stepDefinitions`
     Given a file named "cypress-cucumber-preprocessor.config.js" with:
       """
-      const path = require("path")
+      const path = require("node:path")
 
       module.exports = {
         stepDefinitions: [

@@ -1,6 +1,6 @@
 import { Given } from "@cucumber/cucumber";
-import path from "path";
-import fs from "fs/promises";
+import path from "node:path";
+import fs from "node:fs/promises";
 import { insertValuesInConfigFile } from "../support/configFileUpdater";
 import ICustomWorld from "../support/ICustomWorld";
 

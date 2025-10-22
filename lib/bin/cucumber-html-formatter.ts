@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import stream from "stream/promises";
+import stream from "node:stream/promises";
 
 import { NdjsonToMessageStream } from "@cucumber/message-streams";
 

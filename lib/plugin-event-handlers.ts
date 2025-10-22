@@ -1,16 +1,16 @@
-import syncFs, { promises as fs } from "fs";
+import syncFs, { promises as fs } from "node:fs";
 
-import os from "os";
+import os from "node:os";
 
-import path from "path";
+import path from "node:path";
 
-import { pipeline } from "stream/promises";
+import { pipeline } from "node:stream/promises";
 
-import stream from "stream";
+import stream from "node:stream";
 
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 
-import { inspect } from "util";
+import { inspect } from "node:util";
 
 import chalk from "chalk";
 

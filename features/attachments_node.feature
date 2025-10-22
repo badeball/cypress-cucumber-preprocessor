@@ -129,7 +129,7 @@ Feature: attachments
     Scenario: etc arguments
       Given a file named "setupNodeEvents.js" with:
         """
-        const assert = require("assert/strict");
+        const assert = require("node:assert/strict");
         const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
         const { addCucumberPreprocessorPlugin } = require("@badeball/cypress-cucumber-preprocessor");
         const { createEsbuildPlugin } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
@@ -172,7 +172,7 @@ Feature: attachments
     Scenario: passing step
       Given a file named "setupNodeEvents.js" with:
         """
-        const assert = require("assert/strict");
+        const assert = require("node:assert/strict");
         const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
         const { addCucumberPreprocessorPlugin } = require("@badeball/cypress-cucumber-preprocessor");
         const { createEsbuildPlugin } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
@@ -216,7 +216,7 @@ Feature: attachments
         """
       And a file named "setupNodeEvents.js" with:
         """
-        const assert = require("assert/strict");
+        const assert = require("node:assert/strict");
         const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
         const { addCucumberPreprocessorPlugin } = require("@badeball/cypress-cucumber-preprocessor");
         const { createEsbuildPlugin } = require("@badeball/cypress-cucumber-preprocessor/esbuild");

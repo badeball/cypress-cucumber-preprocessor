@@ -1,6 +1,6 @@
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 
-import assert from "assert/strict";
+import assert from "node:assert/strict";
 
 import { WritableStreamBuffer } from "stream-buffers";
 

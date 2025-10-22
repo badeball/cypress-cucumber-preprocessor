@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 import { parse } from "@babel/parser";
 import type { File } from "@babel/types";
 import type { NodePath } from "ast-types/lib/node-path";

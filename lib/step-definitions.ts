@@ -1,10 +1,10 @@
-import path from "path";
+import path from "node:path";
 
 import * as glob from "glob";
 
-import util from "util";
+import util from "node:util";
 
-import assert from "assert/strict";
+import assert from "node:assert/strict";
 
 import debug from "./helpers/debug";
 

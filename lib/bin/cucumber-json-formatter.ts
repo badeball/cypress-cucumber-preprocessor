@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { pipeline } from "stream/promises";
+import { pipeline } from "node:stream/promises";
 
-import { Writable } from "stream";
+import { Writable } from "node:stream";
 
 import { NdjsonToMessageStream } from "@cucumber/message-streams";
 

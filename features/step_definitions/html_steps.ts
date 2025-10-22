@@ -1,8 +1,8 @@
 import { Then } from "@cucumber/cucumber";
 import { JSDOM } from "jsdom";
-import path from "path";
-import fs from "fs/promises";
-import assert from "assert";
+import path from "node:path";
+import fs from "node:fs/promises";
+import assert from "node:assert";
 import {
   findAllByLabelText,
   findAllByText,

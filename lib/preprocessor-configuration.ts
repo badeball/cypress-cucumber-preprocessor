@@ -1,6 +1,6 @@
 import { cosmiconfig } from "cosmiconfig";
 
-import util from "util";
+import util from "node:util";
 
 import debug from "./helpers/debug";
 

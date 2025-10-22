@@ -1,6 +1,6 @@
-import util from "util";
+import util from "node:util";
 
-import assert from "assert";
+import assert from "node:assert/strict";
 
 import { tagToCypressOptions } from "./tag-parser";
 
@@ -8,7 +8,7 @@ function example(tag: string, expectedOptions: [string, unknown]) {
   it(`should return ${util.inspect(expectedOptions)} for ${tag}`, () => {
     const actualOptions = tagToCypressOptions(tag);
 
-    assert.deepStrictEqual(actualOptions, expectedOptions);
+    assert.deepEqual(actualOptions, expectedOptions);
   });
 }
 

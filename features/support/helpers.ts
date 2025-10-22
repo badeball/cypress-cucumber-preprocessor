@@ -1,7 +1,7 @@
-import assert from "assert";
+import assert from "node:assert";
 import { version as cypressVersion } from "cypress/package.json";
-import fs from "fs/promises";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import ICustomWorld from "./ICustomWorld";
 
 export async function writeFile(filePath: string, fileContent: string) {

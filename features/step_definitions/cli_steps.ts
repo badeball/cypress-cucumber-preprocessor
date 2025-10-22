@@ -1,9 +1,9 @@
-import fs from "fs/promises";
-import util from "util";
-import path from "path";
+import fs from "node:fs/promises";
+import util from "node:util";
+import path from "node:path";
 import { When, Then } from "@cucumber/cucumber";
-import assert from "assert";
-import childProcess from "child_process";
+import assert from "node:assert";
+import childProcess from "node:child_process";
 import stripAnsi from "strip-ansi";
 import * as glob from "glob";
 import ICustomWorld from "../support/ICustomWorld";

@@ -1,7 +1,7 @@
 import { setWorldConstructor } from "@cucumber/cucumber";
-import path from "path";
-import childProcess from "child_process";
-import { PassThrough, Readable } from "stream";
+import path from "node:path";
+import childProcess from "node:child_process";
+import { PassThrough, Readable } from "node:stream";
 import { WritableStreamBuffer } from "stream-buffers";
 import { bin } from "../../package.json";
 import ICustomWorld, { ExtraOptions } from "./ICustomWorld";
