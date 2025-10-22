@@ -1,5 +1,5 @@
 import path from "path";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import child_process from "child_process";
 import { assertAndReturn } from "../lib/helpers/assertions";
 

@@ -1,7 +1,7 @@
 import { Then } from "@cucumber/cucumber";
 import messages from "@cucumber/messages";
 import path from "path";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import assert from "assert";
 import { toByteArray } from "base64-js";
 import { PNG } from "pngjs";

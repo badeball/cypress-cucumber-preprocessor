@@ -1,7 +1,7 @@
 import { Then } from "@cucumber/cucumber";
 import { JSDOM } from "jsdom";
 import path from "path";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import assert from "assert";
 import {
   findAllByLabelText,

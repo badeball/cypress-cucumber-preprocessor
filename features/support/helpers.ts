@@ -1,6 +1,6 @@
 import assert from "assert";
 import { version as cypressVersion } from "cypress/package.json";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import path from "path";
 import ICustomWorld from "./ICustomWorld";
 

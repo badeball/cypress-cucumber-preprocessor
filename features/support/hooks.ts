@@ -1,6 +1,6 @@
 import { After, Before, formatterHelpers } from "@cucumber/cucumber";
 import assert from "assert";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { isPre12, writeFile } from "./helpers";
 

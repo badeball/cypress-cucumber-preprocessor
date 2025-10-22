@@ -1,6 +1,6 @@
 import { Then } from "@cucumber/cucumber";
 import path from "path";
-import { promises as fs } from "fs";
+import fs from "fs/promises";
 import assert from "assert";
 import { PNG } from "pngjs";
 import ICustomWorld from "../support/ICustomWorld";
