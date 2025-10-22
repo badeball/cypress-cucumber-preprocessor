@@ -1,5 +1,6 @@
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
@@ -31,6 +32,7 @@ export default [
   {
     plugins: {
       "@typescript-eslint": typescriptEslint,
+      "simple-import-sort": simpleImportSort,
     },
 
     languageOptions: {
@@ -52,9 +54,10 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-
       "@typescript-eslint/no-explicit-any": 0,
       "@typescript-eslint/no-floating-promises": "error",
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
     },
   },
 ];
