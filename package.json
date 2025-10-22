@@ -54,7 +54,7 @@
     "test:types": "tsc -p test-d",
     "test:unit": "mocha --require ts-node/register \"lib/**/*.test.ts\"",
     "test:compatibility": "mocha --require ts-node/register --timeout 20000 \"compatibility/**/*_spec.ts\"",
-    "test:run-all-specs": "mocha --timeout 0 test/run-all-specs.ts",
+    "test:run-all-specs": "mocha --require ts-node/register --timeout 0 test/run-all-specs.ts",
     "test:integration": "cucumber-js",
     "test:parallel": "cucumber-js -p parallel",
     "test:actions:examples": "xvfb-run bash -c 'act -W \".github/workflows/examples-branch.yml\" --use-gitignore=false --artifact-server-path=tmp/artifacts --env DISPLAY=$DISPLAY'",

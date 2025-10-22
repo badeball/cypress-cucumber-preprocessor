@@ -2,7 +2,7 @@ import child_process from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { assertAndReturn } from "../lib/helpers/assertions";
+import { ensure } from "../lib/helpers/assertions";
 
 function aggregatedTitle(test: Mocha.Suite | Mocha.Test): string {
   if (test.parent?.title) {
@@ -22,7 +22,7 @@ const projectPath = path.join(__dirname, "..");
 describe("Run all specs", () => {
   beforeEach(async function () {
     const title = aggregatedTitle(
-      assertAndReturn(
+      ensure(
         this.test?.ctx?.currentTest,
         "Expected hook to have a context and a test",
       ),
