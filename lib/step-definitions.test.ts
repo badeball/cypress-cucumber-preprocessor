@@ -1,6 +1,6 @@
 import util from "util";
 
-import assert from "assert";
+import assert from "assert/strict";
 
 import {
   ICypressRuntimeConfiguration,
@@ -72,7 +72,7 @@ describe("pathParts()", () => {
   it(`should return ${util.inspect(expectedParts)} for ${util.inspect(
     relativePath,
   )}`, () => {
-    assert.deepStrictEqual(pathParts(relativePath), expectedParts);
+    assert.deepEqual(pathParts(relativePath), expectedParts);
   });
 });
 

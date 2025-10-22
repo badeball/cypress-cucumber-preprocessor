@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "assert/strict";
 
 import {
   COMPILED_REPORTER_ENTRYPOINT,
@@ -42,10 +42,7 @@ async function test<T>(options: {
     () => options.configuration,
   );
 
-  assert.deepStrictEqual(
-    options.getValueFn(configuration),
-    options.expectedValue,
-  );
+  assert.deepEqual(options.getValueFn(configuration), options.expectedValue);
 }
 
 function createUserConfiguration<T>(options: {

@@ -1,4 +1,4 @@
-import assert from "assert";
+import assert from "assert/strict";
 
 import * as messages from "@cucumber/messages";
 
@@ -22,7 +22,7 @@ describe("DataTable", () => {
 
     describe("rows", () => {
       it("returns a 2-D array without the header", () => {
-        assert.deepStrictEqual(new DataTable(dataTable).rows(), [
+        assert.deepEqual(new DataTable(dataTable).rows(), [
           ["row 1 col 1", "row 1 col 2"],
           ["row 2 col 1", "row 2 col 2"],
         ]);
@@ -31,7 +31,7 @@ describe("DataTable", () => {
 
     describe("hashes", () => {
       it("returns an array of object where the keys are the headers", () => {
-        assert.deepStrictEqual(new DataTable(dataTable).hashes(), [
+        assert.deepEqual(new DataTable(dataTable).hashes(), [
           { "header 1": "row 1 col 1", "header 2": "row 1 col 2" },
           { "header 1": "row 2 col 1", "header 2": "row 2 col 2" },
         ]);
@@ -40,7 +40,7 @@ describe("DataTable", () => {
 
     describe("transpose", () => {
       it("returns a new DataTable, with the data transposed", () => {
-        assert.deepStrictEqual(new DataTable(dataTable).transpose().raw(), [
+        assert.deepEqual(new DataTable(dataTable).transpose().raw(), [
           ["header 1", "row 1 col 1", "row 2 col 1"],
           ["header 2", "row 1 col 2", "row 2 col 2"],
         ]);
@@ -62,7 +62,7 @@ describe("DataTable", () => {
 
     describe("raw", () => {
       it("returns a 2-D array", () => {
-        assert.deepStrictEqual(new DataTable(dataTable).raw(), [
+        assert.deepEqual(new DataTable(dataTable).raw(), [
           ["row 1 col 1", "row 1 col 2"],
           ["row 2 col 1", "row 2 col 2"],
         ]);
@@ -71,7 +71,7 @@ describe("DataTable", () => {
 
     describe("rowsHash", () => {
       it("returns an object where the keys are the first column", () => {
-        assert.deepStrictEqual(new DataTable(dataTable).rowsHash(), {
+        assert.deepEqual(new DataTable(dataTable).rowsHash(), {
           "row 1 col 1": "row 1 col 2",
           "row 2 col 1": "row 2 col 2",
         });

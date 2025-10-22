@@ -4,7 +4,7 @@ import * as glob from "glob";
 
 import util from "util";
 
-import assert from "assert";
+import assert from "assert/strict";
 
 import debug from "./helpers/debug";
 
