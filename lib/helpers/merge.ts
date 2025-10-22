@@ -2,17 +2,14 @@ import fs from "node:fs/promises";
 
 import type * as messages from "@cucumber/messages";
 
-import { notNull } from "./type-guards";
-
+import { ensure } from "./assertions";
+import { CypressCucumberError } from "./error";
 import {
-  StrictTimestamp,
   durationToNanoseconds,
   orderMessages,
+  StrictTimestamp,
 } from "./messages";
-
-import { ensure } from "./assertions";
-
-import { CypressCucumberError } from "./error";
+import { notNull } from "./type-guards";
 
 function identity<T>(value: T): T {
   return value;

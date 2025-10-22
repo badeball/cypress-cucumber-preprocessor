@@ -1,4 +1,4 @@
-import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
+import { Given, Then, When } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("there are {int} cucumbers", function (initialCount: number) {
   this.count = initialCount;

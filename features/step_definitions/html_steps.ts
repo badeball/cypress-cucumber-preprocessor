@@ -1,15 +1,17 @@
-import { Then } from "@cucumber/cucumber";
-import { JSDOM } from "jsdom";
-import path from "node:path";
-import fs from "node:fs/promises";
 import assert from "node:assert";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { Then } from "@cucumber/cucumber";
 import {
   findAllByLabelText,
   findAllByText,
   findByText,
 } from "@testing-library/dom";
-import ICustomWorld from "../support/ICustomWorld";
+import { JSDOM } from "jsdom";
+
 import { findAllByAccordionComponent } from "../support/accordion";
+import ICustomWorld from "../support/ICustomWorld";
 
 Then("there should be a HTML report", async function (this: ICustomWorld) {
   await assert.doesNotReject(

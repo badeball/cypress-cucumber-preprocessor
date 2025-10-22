@@ -1,5 +1,4 @@
 import DataTable from "./data_table";
-
 import {
   ICaseHookBody,
   ICaseHookOptions,
@@ -11,20 +10,18 @@ import {
   IStepHookOptions,
 } from "./public-member-types";
 
-export {
-  resolve as resolvePreprocessorConfiguration,
-  IPreprocessorConfiguration,
-} from "./preprocessor-configuration";
-
 export { addCucumberPreprocessorPlugin } from "./add-cucumber-preprocessor-plugin";
-
 export {
-  beforeRunHandler,
   afterRunHandler,
-  beforeSpecHandler,
-  afterSpecHandler,
   afterScreenshotHandler,
+  afterSpecHandler,
+  beforeRunHandler,
+  beforeSpecHandler,
 } from "./plugin-event-handlers";
+export {
+  IPreprocessorConfiguration,
+  resolve as resolvePreprocessorConfiguration,
+} from "./preprocessor-configuration";
 
 /**
  * Everything below exist merely for the purpose of being nice with TypeScript. All of these methods
@@ -53,7 +50,7 @@ export function defineStep<T extends unknown[], C extends Mocha.Context>(
   throw createUnimplemented();
 }
 
-export { defineStep as Given, defineStep as When, defineStep as Then };
+export { defineStep as Given, defineStep as Then, defineStep as When };
 
 export function Step(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

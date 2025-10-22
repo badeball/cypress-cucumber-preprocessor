@@ -1,4 +1,4 @@
-import { Before, When, After } from "@badeball/cypress-cucumber-preprocessor";
+import { After, Before, When } from "@badeball/cypress-cucumber-preprocessor";
 
 Before({ name: "A named before hook" }, function () {
   // no-op

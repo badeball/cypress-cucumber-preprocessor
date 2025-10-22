@@ -1,8 +1,8 @@
 import {
-  queryHelpers,
   buildQueries,
   Matcher,
   MatcherOptions,
+  queryHelpers,
 } from "@testing-library/dom";
 
 const queryAllByAccordionComponent = (
@@ -35,10 +35,10 @@ const [
 );
 
 export {
-  queryByAccordionComponent,
-  queryAllByAccordionComponent,
-  getByAccordionComponent,
-  getAllByAccordionComponent,
   findAllByAccordionComponent,
   findByAccordionComponent,
+  getAllByAccordionComponent,
+  getByAccordionComponent,
+  queryAllByAccordionComponent,
+  queryByAccordionComponent,
 };

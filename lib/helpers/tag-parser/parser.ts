@@ -1,5 +1,4 @@
 import { TagParserError } from "./errors";
-
 import {
   isAt,
   isClosingParenthesis,

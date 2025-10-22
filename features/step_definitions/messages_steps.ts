@@ -1,10 +1,12 @@
+import assert from "node:assert";
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import { Then } from "@cucumber/cucumber";
 import messages from "@cucumber/messages";
-import path from "node:path";
-import fs from "node:fs/promises";
-import assert from "node:assert";
 import { toByteArray } from "base64-js";
 import { PNG } from "pngjs";
+
 import {
   assertAndReturn,
   ndJsonToString,

@@ -1,4 +1,4 @@
-import { Registry, assignRegistry, freeRegistry } from "../registry";
+import { assignRegistry, freeRegistry, Registry } from "../registry";
 
 const registry = new Registry();
 

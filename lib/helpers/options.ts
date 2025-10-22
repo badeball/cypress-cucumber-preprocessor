@@ -1,13 +1,12 @@
 import type * as messages from "@cucumber/messages";
 
+import { TEST_ISOLATION_CONFIGURATION_OPTION } from "../constants";
 import { collectTagNames } from "./ast";
-
 import {
   ConfigurationEntry,
   looksLikeOptions,
   tagToCypressOptions,
 } from "./tag-parser";
-import { TEST_ISOLATION_CONFIGURATION_OPTION } from "../constants";
 
 export function tagsToOptions(tags: readonly messages.Tag[]) {
   return collectTagNames(tags)

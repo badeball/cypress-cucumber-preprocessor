@@ -1,14 +1,11 @@
 import fs from "node:fs/promises";
-
 import path from "node:path";
 
 import type esbuild from "esbuild";
 
-import { compile } from "../template";
-
 import { ensure } from "../helpers/assertions";
-
 import { default as origDebug } from "../helpers/debug";
+import { compile } from "../template";
 
 const debug = origDebug.extend("esbuild");
 

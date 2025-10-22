@@ -1,13 +1,9 @@
+import assert from "node:assert/strict";
+import childProcess from "node:child_process";
 import fs from "node:fs/promises";
-
 import path from "node:path";
 
-import assert from "node:assert/strict";
-
-import childProcess from "node:child_process";
-
 import * as messages from "@cucumber/messages";
-
 import * as glob from "glob";
 
 import { stringToNdJson } from "../features/support/helpers";

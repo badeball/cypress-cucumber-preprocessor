@@ -1,7 +1,9 @@
-import { Then } from "@cucumber/cucumber";
-import path from "node:path";
-import fs from "node:fs/promises";
 import assert from "node:assert";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { Then } from "@cucumber/cucumber";
+
 import { expectLastRun, rescape } from "../support/helpers";
 import ICustomWorld from "../support/ICustomWorld";
 

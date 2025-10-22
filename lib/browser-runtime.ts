@@ -1,47 +1,19 @@
-import type * as messages from "@cucumber/messages";
-
-import parse from "@cucumber/tag-expressions";
-
 import {
   CucumberExpressionGenerator,
   Group,
   ParameterTypeRegistry,
   RegularExpression,
 } from "@cucumber/cucumber-expressions";
-
-import { v4 as uuid } from "uuid";
-
+import type * as messages from "@cucumber/messages";
+import parse from "@cucumber/tag-expressions";
 import random from "seedrandom";
-
-import {
-  assert,
-  CypressCucumberAssertionError,
-  ensure,
-  fail,
-} from "./helpers/assertions";
-
-import DataTable from "./data_table";
-
-import {
-  assignRegistry,
-  freeRegistry,
-  ICaseHook,
-  MissingDefinitionError,
-  Registry,
-} from "./registry";
-
-import {
-  collectTagNames,
-  createAstIdMap,
-  traverseGherkinDocument,
-} from "./helpers/ast";
+import { v4 as uuid } from "uuid";
 
 import {
   HOOK_FAILURE_EXPR,
   INTERNAL_SPEC_PROPERTIES,
   INTERNAL_SUITE_PROPERTIES,
 } from "./constants";
-
 import {
   ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
@@ -56,36 +28,45 @@ import {
   TASK_TEST_STEP_FINISHED,
   TASK_TEST_STEP_STARTED,
 } from "./cypress-task-definitions";
-
-import { notNull } from "./helpers/type-guards";
-
-import { looksLikeOptions, tagToCypressOptions } from "./helpers/tag-parser";
-
-import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
-
-import { indent, stripIndent } from "./helpers/strings";
-
-import { generateSnippet } from "./helpers/snippets";
-
-import { runStepWithLogGroup } from "./helpers/cypress";
-
-import { getTags } from "./helpers/environment";
-
-import { ICaseHookParameter, IStepHookParameter } from "./public-member-types";
-
+import DataTable from "./data_table";
 import {
-  isExclusivelySuiteConfiguration,
-  isNotExclusivelySuiteConfiguration,
-  tagsToOptions,
-} from "./helpers/options";
-import { Position } from "./helpers/source-map";
-
+  assert,
+  CypressCucumberAssertionError,
+  ensure,
+  fail,
+} from "./helpers/assertions";
+import {
+  collectTagNames,
+  createAstIdMap,
+  traverseGherkinDocument,
+} from "./helpers/ast";
+import { runStepWithLogGroup } from "./helpers/cypress";
+import { getTags } from "./helpers/environment";
+import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
 import {
   HookType,
   SourceMediaType,
   StepDefinitionPatternType,
   TestStepResultStatus,
 } from "./helpers/messages-enums";
+import {
+  isExclusivelySuiteConfiguration,
+  isNotExclusivelySuiteConfiguration,
+  tagsToOptions,
+} from "./helpers/options";
+import { generateSnippet } from "./helpers/snippets";
+import { Position } from "./helpers/source-map";
+import { indent, stripIndent } from "./helpers/strings";
+import { looksLikeOptions, tagToCypressOptions } from "./helpers/tag-parser";
+import { notNull } from "./helpers/type-guards";
+import { ICaseHookParameter, IStepHookParameter } from "./public-member-types";
+import {
+  assignRegistry,
+  freeRegistry,
+  ICaseHook,
+  MissingDefinitionError,
+  Registry,
+} from "./registry";
 
 type Node = ReturnType<typeof parse>;
 

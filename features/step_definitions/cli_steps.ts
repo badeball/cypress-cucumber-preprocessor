@@ -1,13 +1,15 @@
-import fs from "node:fs/promises";
-import util from "node:util";
-import path from "node:path";
-import { When, Then } from "@cucumber/cucumber";
 import assert from "node:assert";
 import childProcess from "node:child_process";
-import stripAnsi from "strip-ansi";
+import fs from "node:fs/promises";
+import path from "node:path";
+import util from "node:util";
+
+import { Then, When } from "@cucumber/cucumber";
 import * as glob from "glob";
-import ICustomWorld from "../support/ICustomWorld";
+import stripAnsi from "strip-ansi";
+
 import { expectLastRun, rescape } from "../support/helpers";
+import ICustomWorld from "../support/ICustomWorld";
 
 const isCI = process.env.CI === "true";
 

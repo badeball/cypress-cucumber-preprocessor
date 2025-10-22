@@ -1,28 +1,24 @@
 import type * as messages from "@cucumber/messages";
-
 import parse from "@cucumber/tag-expressions";
-
 import { fromByteArray } from "base64-js";
 
-import { createError } from "./helpers/error";
-
-import { collectTagNames } from "./helpers/ast";
-
+import { AddOptions } from "./add-cucumber-preprocessor-plugin";
+import { retrieveInternalSpecProperties } from "./browser-runtime";
 import { INTERNAL_SPEC_PROPERTIES } from "./constants";
-
 import {
   ITaskCreateStringAttachment,
   TASK_CREATE_STRING_ATTACHMENT,
 } from "./cypress-task-definitions";
-
-import { retrieveInternalSpecProperties } from "./browser-runtime";
-
-import { runStepWithLogGroup } from "./helpers/cypress";
-
 import DataTable from "./data_table";
-
-import { getRegistry } from "./registry";
-
+import { collectTagNames } from "./helpers/ast";
+import { runStepWithLogGroup } from "./helpers/cypress";
+import { createError } from "./helpers/error";
+import { AttachmentContentEncoding } from "./helpers/messages-enums";
+import {
+  ConfigurationFileResolver,
+  ICypressRuntimeConfiguration,
+  IPreprocessorConfiguration,
+} from "./preprocessor-configuration";
 import {
   ICaseHookBody,
   ICaseHookOptions,
@@ -33,16 +29,7 @@ import {
   IStepHookBody,
   IStepHookOptions,
 } from "./public-member-types";
-
-import {
-  ConfigurationFileResolver,
-  ICypressRuntimeConfiguration,
-  IPreprocessorConfiguration,
-} from "./preprocessor-configuration";
-
-import { AddOptions } from "./add-cucumber-preprocessor-plugin";
-
-import { AttachmentContentEncoding } from "./helpers/messages-enums";
+import { getRegistry } from "./registry";
 
 function defineStep<T extends unknown[], C extends Mocha.Context>(
   description: string | RegExp,
@@ -301,21 +288,21 @@ function doesFeatureMatch(expression: string) {
 }
 
 export {
+  defineAfter as After,
+  defineAfterAll as AfterAll,
+  defineAfterStep as AfterStep,
+  defineBefore as Before,
+  defineBeforeAll as BeforeAll,
+  defineBeforeStep as BeforeStep,
   DataTable,
-  isFeature,
+  defineParameterType,
+  defineStep,
   doesFeatureMatch,
   defineStep as Given,
-  defineStep as When,
-  defineStep as Then,
-  defineStep,
+  isFeature,
   runStepDefinition as Step,
-  defineParameterType,
-  defineBefore as Before,
-  defineAfter as After,
-  defineBeforeStep as BeforeStep,
-  defineAfterStep as AfterStep,
-  defineBeforeAll as BeforeAll,
-  defineAfterAll as AfterAll,
+  defineStep as Then,
+  defineStep as When,
 };
 
 /**

@@ -1,7 +1,9 @@
-import { After, Before, formatterHelpers } from "@cucumber/cucumber";
 import assert from "node:assert";
 import fs from "node:fs/promises";
 import path from "node:path";
+
+import { After, Before, formatterHelpers } from "@cucumber/cucumber";
+
 import { isPre12, writeFile } from "./helpers";
 
 const projectPath = path.join(__dirname, "..", "..");

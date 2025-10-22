@@ -1,8 +1,8 @@
 import {
-  When,
   attach,
-  log,
   link,
+  log,
+  When,
 } from "@badeball/cypress-cucumber-preprocessor";
 
 When(

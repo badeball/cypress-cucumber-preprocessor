@@ -1,8 +1,6 @@
-import { toByteArray } from "base64-js";
-
-import ErrorStackParser from "error-stack-parser";
-
 import { originalPositionFor, TraceMap } from "@jridgewell/trace-mapping";
+import { toByteArray } from "base64-js";
+import ErrorStackParser from "error-stack-parser";
 
 export interface Position {
   line: number;

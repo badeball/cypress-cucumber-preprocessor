@@ -1,4 +1,4 @@
-import { When, attach } from "@badeball/cypress-cucumber-preprocessor";
+import { attach, When } from "@badeball/cypress-cucumber-preprocessor";
 
 When("a JPEG image is attached", function () {
   cy.readFile("cucumber.jpeg", "base64").then((file) =>

@@ -1,72 +1,49 @@
-import syncFs, { promises as fs } from "node:fs";
-
-import os from "node:os";
-
-import path from "node:path";
-
-import { pipeline } from "node:stream/promises";
-
-import stream from "node:stream";
-
 import { EventEmitter } from "node:events";
-
+import syncFs, { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import stream from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { inspect } from "node:util";
 
-import chalk from "chalk";
-
-import * as messages from "@cucumber/messages";
-
 import detectCiEnvironment from "@cucumber/ci-environment";
-
+import * as messages from "@cucumber/messages";
+import chalk from "chalk";
 import split from "split";
 
 import { HOOK_FAILURE_EXPR, INTERNAL_PROPERTY_NAME } from "./constants";
-
 import {
-  ITaskSpecEnvelopes,
   ITaskCreateStringAttachment,
-  ITaskTestCaseStarted,
-  ITaskTestStepStarted,
-  ITaskTestStepFinished,
-  ITaskTestCaseFinished,
   ITaskFrontendTrackingError,
+  ITaskSpecEnvelopes,
+  ITaskTestCaseFinished,
+  ITaskTestCaseStarted,
+  ITaskTestStepFinished,
+  ITaskTestStepStarted,
 } from "./cypress-task-definitions";
-
-import { resolve as origResolve } from "./preprocessor-configuration";
-
-import { ensureIsAbsolute } from "./helpers/paths";
-
-import {
-  createTimestamp,
-  orderMessages,
-  removeDuplicatedStepDefinitions,
-  removeUnusedDefinitions,
-} from "./helpers/messages";
-
-import { memoize } from "./helpers/memoize";
-
+import { assert, assertIsString, ensure } from "./helpers/assertions";
+import { useColors } from "./helpers/colors";
 import debug from "./helpers/debug";
-
 import { CypressCucumberError, homepage } from "./helpers/error";
-
-import { assert, ensure, assertIsString } from "./helpers/assertions";
-
 import {
   createHtmlStream,
   createJsonFormatter,
   createPrettyFormatter,
   createUsageFormatter,
 } from "./helpers/formatters";
-
-import { useColors } from "./helpers/colors";
-
-import { notNull } from "./helpers/type-guards";
-
+import { memoize } from "./helpers/memoize";
+import {
+  createTimestamp,
+  orderMessages,
+  removeDuplicatedStepDefinitions,
+  removeUnusedDefinitions,
+} from "./helpers/messages";
+import { ensureIsAbsolute } from "./helpers/paths";
 import { indent } from "./helpers/strings";
-
-import { version as packageVersion } from "./version";
-
+import { notNull } from "./helpers/type-guards";
+import { resolve as origResolve } from "./preprocessor-configuration";
 import { IStepHookParameter } from "./public-member-types";
+import { version as packageVersion } from "./version";
 
 const resolve = memoize(origResolve);
 

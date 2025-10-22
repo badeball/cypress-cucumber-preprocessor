@@ -3,34 +3,33 @@
  * without a corresponding change in the other, IE. their type declarations should remain identical.
  */
 
+import messages from "@cucumber/messages";
 import { expectType } from "tsd";
 
-import messages from "@cucumber/messages";
-
 import {
-  resolvePreprocessorConfiguration,
-  IPreprocessorConfiguration,
   addCucumberPreprocessorPlugin,
-  beforeRunHandler,
-  afterRunHandler,
-  beforeSpecHandler,
-  afterSpecHandler,
-  afterScreenshotHandler,
-  Given,
-  When,
-  Then,
-  Step,
-  defineParameterType,
-  Before,
   After,
-  BeforeStep,
-  AfterStep,
-  BeforeAll,
   AfterAll,
-  DataTable,
+  afterRunHandler,
+  afterScreenshotHandler,
+  afterSpecHandler,
+  AfterStep,
   attach,
-  log,
+  Before,
+  BeforeAll,
+  beforeRunHandler,
+  beforeSpecHandler,
+  BeforeStep,
+  DataTable,
+  defineParameterType,
+  Given,
+  IPreprocessorConfiguration,
   link,
+  log,
+  resolvePreprocessorConfiguration,
+  Step,
+  Then,
+  When,
 } from "../lib/entrypoint-node";
 
 declare const config: Cypress.PluginConfigOptions;

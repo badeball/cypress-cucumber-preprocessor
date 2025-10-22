@@ -1,4 +1,4 @@
-import { When, Before, After } from "@badeball/cypress-cucumber-preprocessor";
+import { After, Before, When } from "@badeball/cypress-cucumber-preprocessor";
 
 Before({}, function () {
   // no-op

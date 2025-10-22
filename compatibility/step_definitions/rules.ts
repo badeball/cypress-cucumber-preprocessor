@@ -1,4 +1,4 @@
-import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
+import { Given, Then, When } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("the customer has {int} cents", function (money) {
   this.money = money;

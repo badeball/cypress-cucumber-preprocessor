@@ -1,15 +1,13 @@
 import assert from "node:assert";
 
-import * as messages from "@cucumber/messages";
-
 import {
   CucumberExpressionGenerator,
   ParameterTypeRegistry,
 } from "@cucumber/cucumber-expressions";
-
-import { stripIndent } from "./strings";
+import * as messages from "@cucumber/messages";
 
 import { generateSnippet } from "./snippets";
+import { stripIndent } from "./strings";
 
 function example(options: {
   description: string;

@@ -1,16 +1,13 @@
 #!/usr/bin/env node
 
+import { Writable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-import { Writable } from "node:stream";
-
 import { NdjsonToMessageStream } from "@cucumber/message-streams";
-
 import type * as messages from "@cucumber/messages";
 
-import { createJsonFormatter } from "../helpers/formatters";
-
 import { assertIsString } from "../helpers/assertions";
+import { createJsonFormatter } from "../helpers/formatters";
 
 const envelopes: messages.Envelope[] = [];
 

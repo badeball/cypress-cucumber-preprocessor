@@ -1,8 +1,8 @@
 import {
-  Before,
-  When,
   After,
   attach,
+  Before,
+  When,
 } from "@badeball/cypress-cucumber-preprocessor";
 
 Before(function () {

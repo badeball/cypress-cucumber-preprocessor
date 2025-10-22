@@ -1,4 +1,4 @@
-import { When, Then, DataTable } from "@badeball/cypress-cucumber-preprocessor";
+import { DataTable, Then, When } from "@badeball/cypress-cucumber-preprocessor";
 
 When("the following table is transposed:", function (table: DataTable) {
   this.transposed = table.transpose();

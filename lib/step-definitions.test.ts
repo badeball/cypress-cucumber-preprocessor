@@ -1,13 +1,11 @@
+import assert from "node:assert/strict";
 import util from "node:util";
 
-import assert from "node:assert/strict";
-
 import {
+  combineIntoConfiguration,
   ICypressRuntimeConfiguration,
   IUserConfiguration,
-  combineIntoConfiguration,
 } from "./preprocessor-configuration";
-
 import { getStepDefinitionPatterns, pathParts } from "./step-definitions";
 
 const DUMMY_CONFIG: ICypressRuntimeConfiguration = {

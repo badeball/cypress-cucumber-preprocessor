@@ -1,13 +1,10 @@
+import assert from "node:assert/strict";
 import path from "node:path";
+import util from "node:util";
 
 import * as glob from "glob";
 
-import util from "node:util";
-
-import assert from "node:assert/strict";
-
 import debug from "./helpers/debug";
-
 import { IPreprocessorConfiguration } from "./preprocessor-configuration";
 
 export async function getStepDefinitionPaths(

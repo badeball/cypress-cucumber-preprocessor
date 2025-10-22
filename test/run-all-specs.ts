@@ -1,6 +1,7 @@
-import path from "node:path";
-import fs from "node:fs/promises";
 import child_process from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+
 import { assertAndReturn } from "../lib/helpers/assertions";
 
 function aggregatedTitle(test: Mocha.Suite | Mocha.Test): string {

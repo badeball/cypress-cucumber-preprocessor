@@ -1,6 +1,6 @@
 import {
-  Given,
   defineParameterType,
+  Given,
 } from "@badeball/cypress-cucumber-preprocessor";
 
 class Flight {

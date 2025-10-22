@@ -1,12 +1,10 @@
-import fs from "node:fs/promises";
-
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
 
 import { WritableStreamBuffer } from "stream-buffers";
 
-import { mergeMessagesArgs } from "./merge";
-
 import { stringToNdJson } from "../../features/support/helpers";
+import { mergeMessagesArgs } from "./merge";
 
 // TODO: Implement these.
 describe.skip("mergeMessages()", () => {

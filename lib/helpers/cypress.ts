@@ -1,5 +1,4 @@
 import DataTable from "../data_table";
-
 import { CypressCucumberError } from "./error";
 
 const ensureChain = (value: unknown): Cypress.Chainable<unknown> =>

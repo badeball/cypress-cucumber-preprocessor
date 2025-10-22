@@ -1,7 +1,6 @@
 import { PassThrough, Transform, TransformCallback } from "node:stream";
 
 import debug from "../helpers/debug";
-
 import { compile } from "../template";
 
 export default function transform(

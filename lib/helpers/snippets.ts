@@ -1,5 +1,4 @@
 import { GeneratedExpression } from "@cucumber/cucumber-expressions";
-
 import type * as messages from "@cucumber/messages";
 
 import { PickleStepType } from "./messages-enums";

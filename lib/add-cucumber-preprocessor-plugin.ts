@@ -1,54 +1,42 @@
 import fs from "node:fs";
-
 import { inspect } from "node:util";
 
-import { IdGenerator, SourceMediaType } from "@cucumber/messages";
-
-import parse from "@cucumber/tag-expressions";
-
 import { generateMessages } from "@cucumber/gherkin";
-
+import { IdGenerator, SourceMediaType } from "@cucumber/messages";
+import parse from "@cucumber/tag-expressions";
 import { getSpecs } from "find-cypress-specs";
 
 import { INTERNAL_PROPERTY_NAME, INTERNAL_SUITE_PROPERTIES } from "./constants";
-
 import {
-  TASK_SPEC_ENVELOPES,
   TASK_CREATE_STRING_ATTACHMENT,
-  TASK_TEST_CASE_STARTED,
-  TASK_TEST_STEP_STARTED,
-  TASK_TEST_STEP_FINISHED,
-  TASK_TEST_CASE_FINISHED,
   TASK_FRONTEND_TRACKING_ERROR,
+  TASK_SPEC_ENVELOPES,
+  TASK_TEST_CASE_FINISHED,
+  TASK_TEST_CASE_STARTED,
+  TASK_TEST_STEP_FINISHED,
+  TASK_TEST_STEP_STARTED,
 } from "./cypress-task-definitions";
-
+import { assertNever } from "./helpers/assertions";
+import debug from "./helpers/debug";
+import { getTags } from "./helpers/environment";
+import { memoize } from "./helpers/memoize";
+import { notNull } from "./helpers/type-guards";
 import {
   afterRunHandler,
   afterScreenshotHandler,
   afterSpecHandler,
-  specEnvelopesHandler,
   beforeRunHandler,
   beforeSpecHandler,
   createStringAttachmentHandler,
-  testCaseStartedHandler,
-  testStepStartedHandler,
-  testStepFinishedHandler,
-  testCaseFinishedHandler,
-  OnAfterStep,
   frontendTrackingErrorHandler,
+  OnAfterStep,
+  specEnvelopesHandler,
+  testCaseFinishedHandler,
+  testCaseStartedHandler,
+  testStepFinishedHandler,
+  testStepStartedHandler,
 } from "./plugin-event-handlers";
-
 import { resolve as origResolve } from "./preprocessor-configuration";
-
-import { notNull } from "./helpers/type-guards";
-
-import { getTags } from "./helpers/environment";
-
-import { memoize } from "./helpers/memoize";
-
-import { assertNever } from "./helpers/assertions";
-
-import debug from "./helpers/debug";
 
 const resolve = memoize(origResolve);
 

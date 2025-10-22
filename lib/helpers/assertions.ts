@@ -1,5 +1,4 @@
 import { createError, CypressCucumberError } from "./error";
-
 import { isString } from "./type-guards";
 
 export class CypressCucumberAssertionError extends CypressCucumberError {}

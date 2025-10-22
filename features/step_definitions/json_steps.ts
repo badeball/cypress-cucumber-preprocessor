@@ -1,8 +1,10 @@
-import { Then } from "@cucumber/cucumber";
-import path from "node:path";
-import fs from "node:fs/promises";
 import assert from "node:assert";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import { Then } from "@cucumber/cucumber";
 import { PNG } from "pngjs";
+
 import ICustomWorld from "../support/ICustomWorld";
 
 function isObject(object: any): object is object {

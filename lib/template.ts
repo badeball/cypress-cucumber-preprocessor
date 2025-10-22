@@ -1,33 +1,22 @@
 import path from "node:path";
-
 import { inspect } from "node:util";
 
 import { generateMessages } from "@cucumber/gherkin";
-
 import { IdGenerator, SourceMediaType } from "@cucumber/messages";
-
+import ancestor from "common-ancestor-path";
 import { getSpecs } from "find-cypress-specs";
 
-import ancestor from "common-ancestor-path";
-
+import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin";
+import type { CreateTestsOptions } from "./browser-runtime";
 import { ensure } from "./helpers/assertions";
-
+import debug from "./helpers/debug";
+import { ensureIsRelative } from "./helpers/paths";
+import { notNull } from "./helpers/type-guards";
 import { resolve } from "./preprocessor-configuration";
-
 import {
   getStepDefinitionPaths,
   getStepDefinitionPatterns,
 } from "./step-definitions";
-
-import { notNull } from "./helpers/type-guards";
-
-import { ensureIsRelative } from "./helpers/paths";
-
-import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin";
-
-import debug from "./helpers/debug";
-
-import type { CreateTestsOptions } from "./browser-runtime";
 
 const { stringify } = JSON;
 

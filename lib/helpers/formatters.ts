@@ -1,23 +1,18 @@
 import { EventEmitter } from "node:events";
 
-import { CucumberHtmlStream } from "@cucumber/html-formatter";
-
-import PrettyFormatter from "@cucumber/pretty-formatter";
-
 import {
   formatterHelpers,
   IFormatterOptions,
   JsonFormatter,
   UsageFormatter,
 } from "@cucumber/cucumber";
-
+import { CucumberHtmlStream } from "@cucumber/html-formatter";
 import type * as messages from "@cucumber/messages";
-
+import PrettyFormatter from "@cucumber/pretty-formatter";
 import chalk from "chalk";
 
-import { notNull } from "./type-guards";
-
 import { assertIsString } from "./assertions";
+import { notNull } from "./type-guards";
 
 export function createHtmlStream(): CucumberHtmlStream {
   return new CucumberHtmlStream(

@@ -1,21 +1,20 @@
 import {
   CucumberExpression,
-  RegularExpression,
   Expression,
-  ParameterTypeRegistry,
   ParameterType,
+  ParameterTypeRegistry,
+  RegularExpression,
 } from "@cucumber/cucumber-expressions";
-
+import type { IdGenerator } from "@cucumber/messages";
 import parse from "@cucumber/tag-expressions";
 
-import type { IdGenerator } from "@cucumber/messages";
-
-import { ensure } from "./helpers/assertions";
-
 import DataTable from "./data_table";
-
+import { ensure } from "./helpers/assertions";
 import { CypressCucumberError } from "./helpers/error";
-
+import {
+  maybeRetrievePositionFromSourceMap,
+  Position,
+} from "./helpers/source-map";
 import {
   ICaseHookBody,
   ICaseHookOptions,
@@ -27,11 +26,6 @@ import {
   IStepHookBody,
   IStepHookParameter,
 } from "./public-member-types";
-
-import {
-  maybeRetrievePositionFromSourceMap,
-  Position,
-} from "./helpers/source-map";
 
 export interface IStepDefinition<T extends unknown[], C extends Mocha.Context> {
   id: string;
