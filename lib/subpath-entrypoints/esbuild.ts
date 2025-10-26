@@ -5,12 +5,10 @@ import type esbuild from "esbuild";
 
 import { ensure } from "../helpers/assertions";
 import { default as origDebug } from "../helpers/debug";
+import { toPosix } from "../helpers/paths";
 import { compile } from "../template";
 
 const debug = origDebug.extend("esbuild");
-
-const toPosix = (location: string) =>
-  path.sep === "\\" ? location.replaceAll("\\", "/") : location;
 
 export function createEsbuildPlugin(
   configuration: Cypress.PluginConfigOptions,

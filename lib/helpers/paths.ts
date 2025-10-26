@@ -15,3 +15,6 @@ export function ensureIsRelative(root: string, maybeRelativePath: string) {
     return maybeRelativePath;
   }
 }
+
+export const toPosix = (location: string) =>
+  path.sep === "\\" ? location.replaceAll("\\", "/") : location;

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import util from "node:util";
 
+import { toPosix } from "./helpers/paths";
 import {
   combineIntoConfiguration,
   ICypressRuntimeConfiguration,
@@ -56,7 +57,7 @@ function example(
     }
 
     for (let i = 0; i < expected.length; i++) {
-      if (expected[i] !== actual[i]) {
+      if (expected[i] !== toPosix(actual[i])) {
         throwUnequal();
       }
     }
@@ -70,7 +71,7 @@ describe("pathParts()", () => {
   it(`should return ${util.inspect(expectedParts)} for ${util.inspect(
     relativePath,
   )}`, () => {
-    assert.deepEqual(pathParts(relativePath), expectedParts);
+    assert.deepEqual(pathParts(relativePath).map(toPosix), expectedParts);
   });
 });
 

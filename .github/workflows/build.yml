@@ -89,7 +89,9 @@ jobs:
         run: npm install --engine-strict
       - name: Build
         run: npm run build
-      - name: Test
+      - name: Test (unit)
+        run: npm run test:unit
+      - name: Test (integration)
         run: npm run test:integration
       - name: Versions
         run: |
