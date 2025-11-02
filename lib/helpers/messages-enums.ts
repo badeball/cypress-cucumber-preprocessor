@@ -38,3 +38,21 @@ export enum HookType {
   BEFORE_TEST_STEP = "BEFORE_TEST_STEP",
   AFTER_TEST_STEP = "AFTER_TEST_STEP",
 }
+
+export function getWorstTestStepResult(
+  testStepResults: readonly TestStepResultStatus[],
+): TestStepResultStatus {
+  return testStepResults.slice().sort((r1, r2) => ordinal(r2) - ordinal(r1))[0];
+}
+
+function ordinal(status: TestStepResultStatus) {
+  return [
+    TestStepResultStatus.UNKNOWN,
+    TestStepResultStatus.PASSED,
+    TestStepResultStatus.SKIPPED,
+    TestStepResultStatus.PENDING,
+    TestStepResultStatus.UNDEFINED,
+    TestStepResultStatus.AMBIGUOUS,
+    TestStepResultStatus.FAILED,
+  ].indexOf(status);
+}

@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 - Run hooks (BeforeAll/AfterAll) may now be optionally named. This is in line with how cucumber-js behaves.
 
+- Allow step hooks to return skipped / pending.
+
+  - This is similar to how steps themselves can also return the above mentioned literals. This is in line with how cucumber-js behaves.
+
 ## v23.2.1
 
 - Determine interactive mode correctly, fixes [#1323](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1323).

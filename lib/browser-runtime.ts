@@ -44,6 +44,7 @@ import { runStepWithLogGroup } from "./helpers/cypress";
 import { getTags } from "./helpers/environment";
 import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
 import {
+  getWorstTestStepResult,
   HookType,
   SourceMediaType,
   StepDefinitionPatternType,
@@ -106,6 +107,18 @@ function getSourceReferenceFromPosition(
       uri: "not available",
       location: { line: 0, column: 0 },
     };
+  }
+}
+
+function convertReturnValueToTestStepResultStatus(
+  retval: any,
+): TestStepResultStatus {
+  if (retval === "skipped") {
+    return TestStepResultStatus.SKIPPED;
+  } else if (retval === "pending") {
+    return TestStepResultStatus.PENDING;
+  } else {
+    return TestStepResultStatus.PASSED;
   }
 }
 
@@ -582,14 +595,17 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     const onAfterStep = (options: {
       testStepId: string;
       start: messages.Timestamp;
-      result: any;
+      result: TestStepResultStatus;
     }) => {
       const { testStepId, start, result } = options;
 
       const end = createTimestamp();
 
-      if (result === "pending" || result === "skipped") {
-        if (result === "pending") {
+      if (
+        result === TestStepResultStatus.PENDING ||
+        result === TestStepResultStatus.SKIPPED
+      ) {
+        if (result === TestStepResultStatus.PENDING) {
           taskTestStepFinished(context, {
             testStepId,
             testCaseStartedId,
@@ -703,9 +719,11 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
                 : () => registry.runCaseHook(this, hook, options),
               keyword: hook.keyword,
               text: createStepDescription(hook),
-            }).then((result) => {
-              return { start, result };
-            });
+            })
+              .then(convertReturnValueToTestStepResultStatus)
+              .then((result) => {
+                return { start, result };
+              });
           })
           .then(({ start, result }) =>
             onAfterStep({ start, result, testStepId }),
@@ -768,9 +786,11 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
               testStepId,
             };
 
-            const beforeHooksChain = beforeStepHooks.reduce(
+            const beforeHooksChain = beforeStepHooks.reduce<
+              Cypress.Chainable<TestStepResultStatus[]>
+            >(
               (chain, beforeStepHook) => {
-                return chain.then(() =>
+                return chain.then((results) =>
                   runStepWithLogGroup({
                     keyword: "BeforeStep",
                     text: createStepDescription(beforeStepHook),
@@ -778,13 +798,16 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
                       ? noopFn
                       : () =>
                           registry.runStepHook(this, beforeStepHook, options),
-                  }),
+                  }).then((result) => [
+                    ...results,
+                    convertReturnValueToTestStepResultStatus(result),
+                  ]),
                 );
               },
-              cy.wrap({} as unknown, { log: false }),
+              cy.wrap<TestStepResultStatus[]>([], { log: false }),
             );
 
-            return beforeHooksChain.then(() => {
+            return beforeHooksChain.then((beforeStepHookResults) => {
               try {
                 return runStepWithLogGroup({
                   keyword: ensure(
@@ -795,11 +818,14 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
                   text,
                   fn: () =>
                     registry.runStepDefinition(this, text, dryRun, argument),
-                }).then((result) => {
-                  return afterStepHooks
-                    .reduce(
+                })
+                  .then(convertReturnValueToTestStepResultStatus)
+                  .then((stepResult) => {
+                    const afterStepHooksChain = afterStepHooks.reduce<
+                      Cypress.Chainable<TestStepResultStatus[]>
+                    >(
                       (chain, afterStepHook) => {
-                        return chain.then(() =>
+                        return chain.then((results) =>
                           runStepWithLogGroup({
                             keyword: "AfterStep",
                             text: createStepDescription(afterStepHook),
@@ -811,15 +837,26 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
                                     afterStepHook,
                                     options,
                                   ),
-                          }),
+                          }).then((result) => [
+                            ...results,
+                            convertReturnValueToTestStepResultStatus(result),
+                          ]),
                         );
                       },
-                      cy.wrap({} as unknown, { log: false }),
-                    )
-                    .then(() => {
-                      return { start, result };
+                      cy.wrap<TestStepResultStatus[]>([], { log: false }),
+                    );
+
+                    return afterStepHooksChain.then((afterStepHookResults) => {
+                      return {
+                        start,
+                        result: getWorstTestStepResult([
+                          ...beforeStepHookResults,
+                          stepResult,
+                          ...afterStepHookResults,
+                        ]),
+                      };
                     });
-                });
+                  });
               } catch (e) {
                 if (e instanceof MissingDefinitionError) {
                   throw new Error(
