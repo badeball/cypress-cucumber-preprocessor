@@ -4,7 +4,7 @@ import {
   ParameterTypeRegistry,
   RegularExpression,
 } from "@cucumber/cucumber-expressions";
-import type * as messages from "@cucumber/messages";
+import * as messages from "@cucumber/messages";
 import parse from "@cucumber/tag-expressions";
 import random from "seedrandom";
 import { v4 as uuid } from "uuid";
@@ -43,13 +43,6 @@ import {
 import { runStepWithLogGroup } from "./helpers/cypress";
 import { getTags } from "./helpers/environment";
 import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
-import {
-  getWorstTestStepResult,
-  HookType,
-  SourceMediaType,
-  StepDefinitionPatternType,
-  TestStepResultStatus,
-} from "./helpers/messages-enums";
 import {
   isExclusivelySuiteConfiguration,
   isNotExclusivelySuiteConfiguration,
@@ -112,13 +105,13 @@ function getSourceReferenceFromPosition(
 
 function convertReturnValueToTestStepResultStatus(
   retval: any,
-): TestStepResultStatus {
+): messages.TestStepResultStatus {
   if (retval === "skipped") {
-    return TestStepResultStatus.SKIPPED;
+    return messages.TestStepResultStatus.SKIPPED;
   } else if (retval === "pending") {
-    return TestStepResultStatus.PENDING;
+    return messages.TestStepResultStatus.PENDING;
   } else {
-    return TestStepResultStatus.PASSED;
+    return messages.TestStepResultStatus.PASSED;
   }
 }
 
@@ -288,7 +281,7 @@ function emitSkippedPickle(
       testStepId,
       testCaseStartedId,
       testStepResult: {
-        status: TestStepResultStatus.SKIPPED,
+        status: messages.TestStepResultStatus.SKIPPED,
         duration: {
           seconds: 0,
           nanos: 0,
@@ -594,38 +587,22 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
     const onAfterStep = (options: {
       testStepId: string;
-      start: messages.Timestamp;
-      result: TestStepResultStatus;
+      testStepResult: messages.TestStepResult;
     }) => {
-      const { testStepId, start, result } = options;
+      const { testStepId, testStepResult } = options;
 
       const end = createTimestamp();
 
       if (
-        result === TestStepResultStatus.PENDING ||
-        result === TestStepResultStatus.SKIPPED
+        testStepResult.status === messages.TestStepResultStatus.PENDING ||
+        testStepResult.status === messages.TestStepResultStatus.SKIPPED
       ) {
-        if (result === TestStepResultStatus.PENDING) {
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: TestStepResultStatus.PENDING,
-              duration: duration(start, end),
-            },
-            timestamp: end,
-          });
-        } else {
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: TestStepResultStatus.SKIPPED,
-              duration: duration(start, end),
-            },
-            timestamp: end,
-          });
-        }
+        taskTestStepFinished(context, {
+          testStepId,
+          testCaseStartedId,
+          testStepResult,
+          timestamp: end,
+        });
 
         remainingSteps.shift();
 
@@ -651,7 +628,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: TestStepResultStatus.SKIPPED,
+              status: messages.TestStepResultStatus.SKIPPED,
               duration: {
                 seconds: 0,
                 nanos: 0,
@@ -670,11 +647,8 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
         taskTestStepFinished(context, {
           testStepId,
           testCaseStartedId,
-          testStepResult: {
-            status: TestStepResultStatus.PASSED,
-            duration: duration(start, end),
-          },
-          timestamp: end,
+          testStepResult,
+          timestamp: createTimestamp(),
         });
 
         remainingSteps.shift();
@@ -721,12 +695,18 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
               text: createStepDescription(hook),
             })
               .then(convertReturnValueToTestStepResultStatus)
-              .then((result) => {
-                return { start, result };
+              .then((status) => {
+                return { start, status };
               });
           })
-          .then(({ start, result }) =>
-            onAfterStep({ start, result, testStepId }),
+          .then(({ start, status }) =>
+            onAfterStep({
+              testStepResult: {
+                status,
+                duration: duration(start, createTimestamp()),
+              },
+              testStepId,
+            }),
           );
       } else if (step.pickleStep) {
         const pickleStep = step.pickleStep;
@@ -786,94 +766,115 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
               testStepId,
             };
 
-            const beforeHooksChain = beforeStepHooks.reduce<
-              Cypress.Chainable<TestStepResultStatus[]>
-            >(
-              (chain, beforeStepHook) => {
-                return chain.then((results) =>
-                  runStepWithLogGroup({
-                    keyword: "BeforeStep",
-                    text: createStepDescription(beforeStepHook),
-                    fn: dryRun
-                      ? noopFn
-                      : () =>
-                          registry.runStepHook(this, beforeStepHook, options),
-                  }).then((result) => [
-                    ...results,
-                    convertReturnValueToTestStepResultStatus(result),
-                  ]),
-                );
-              },
-              cy.wrap<TestStepResultStatus[]>([], { log: false }),
-            );
+            const beforeHooksChain = () =>
+              beforeStepHooks.reduce<
+                Cypress.Chainable<messages.TestStepResult[]>
+              >(
+                (chain, beforeStepHook) => {
+                  return chain.then((results) => {
+                    const start = createTimestamp();
 
-            return beforeHooksChain.then((beforeStepHookResults) => {
-              try {
-                return runStepWithLogGroup({
-                  keyword: ensure(
-                    "keyword" in scenarioStep && scenarioStep.keyword,
-                    "Expected to find a keyword in the scenario step",
-                  ),
-                  argument,
-                  text,
-                  fn: () =>
-                    registry.runStepDefinition(this, text, dryRun, argument),
-                })
-                  .then(convertReturnValueToTestStepResultStatus)
-                  .then((stepResult) => {
-                    const afterStepHooksChain = afterStepHooks.reduce<
-                      Cypress.Chainable<TestStepResultStatus[]>
-                    >(
-                      (chain, afterStepHook) => {
-                        return chain.then((results) =>
-                          runStepWithLogGroup({
-                            keyword: "AfterStep",
-                            text: createStepDescription(afterStepHook),
-                            fn: dryRun
-                              ? noopFn
-                              : () =>
-                                  registry.runStepHook(
-                                    this,
-                                    afterStepHook,
-                                    options,
-                                  ),
-                          }).then((result) => [
-                            ...results,
-                            convertReturnValueToTestStepResultStatus(result),
-                          ]),
-                        );
-                      },
-                      cy.wrap<TestStepResultStatus[]>([], { log: false }),
-                    );
+                    return runStepWithLogGroup({
+                      keyword: "BeforeStep",
+                      text: createStepDescription(beforeStepHook),
+                      fn: dryRun
+                        ? noopFn
+                        : () =>
+                            registry.runStepHook(this, beforeStepHook, options),
+                    })
+                      .then(convertReturnValueToTestStepResultStatus)
+                      .then((status) =>
+                        results.concat({
+                          status,
+                          duration: duration(start, createTimestamp()),
+                        }),
+                      );
+                  });
+                },
+                cy.wrap<messages.TestStepResult[]>([], { log: false }),
+              );
 
-                    return afterStepHooksChain.then((afterStepHookResults) => {
+            const afterStepHooksChain = () =>
+              afterStepHooks.reduce<
+                Cypress.Chainable<messages.TestStepResult[]>
+              >(
+                (chain, afterStepHook) => {
+                  return chain.then((results) => {
+                    const start = createTimestamp();
+
+                    return runStepWithLogGroup({
+                      keyword: "AfterStep",
+                      text: createStepDescription(afterStepHook),
+                      fn: dryRun
+                        ? noopFn
+                        : () =>
+                            registry.runStepHook(this, afterStepHook, options),
+                    })
+                      .then(convertReturnValueToTestStepResultStatus)
+                      .then((status) =>
+                        results.concat({
+                          status,
+                          duration: duration(start, createTimestamp()),
+                        }),
+                      );
+                  });
+                },
+                cy.wrap<messages.TestStepResult[]>([], {
+                  log: false,
+                }),
+              );
+
+            return beforeHooksChain()
+              .then((beforeStepHookResults) => {
+                try {
+                  return runStepWithLogGroup({
+                    keyword: ensure(
+                      "keyword" in scenarioStep && scenarioStep.keyword,
+                      "Expected to find a keyword in the scenario step",
+                    ),
+                    argument,
+                    text,
+                    fn: () =>
+                      registry.runStepDefinition(this, text, dryRun, argument),
+                  })
+                    .then(convertReturnValueToTestStepResultStatus)
+                    .then((status) => {
+                      const testStepResult = {
+                        status,
+                        duration: duration(start, createTimestamp()),
+                      };
+
                       return {
-                        start,
-                        result: getWorstTestStepResult([
-                          ...beforeStepHookResults,
-                          stepResult,
-                          ...afterStepHookResults,
-                        ]),
+                        beforeStepHookResults,
+                        testStepResult,
                       };
                     });
-                  });
-              } catch (e) {
-                if (e instanceof MissingDefinitionError) {
-                  throw new Error(
-                    createMissingStepDefinitionMessage(
-                      context,
-                      pickleStep,
-                      context.registry.parameterTypeRegistry,
-                    ),
-                  );
-                } else {
-                  throw e;
+                } catch (e) {
+                  if (e instanceof MissingDefinitionError) {
+                    throw new Error(
+                      createMissingStepDefinitionMessage(
+                        context,
+                        pickleStep,
+                        context.registry.parameterTypeRegistry,
+                      ),
+                    );
+                  } else {
+                    throw e;
+                  }
                 }
-              }
-            });
+              })
+              .then(({ beforeStepHookResults, testStepResult }) => {
+                return afterStepHooksChain().then((afterStepHookResults) => {
+                  return messages.getWorstTestStepResult([
+                    ...beforeStepHookResults,
+                    testStepResult,
+                    ...afterStepHookResults,
+                  ]);
+                });
+              });
           })
-          .then(({ start, result }) =>
-            onAfterStep({ start, result, testStepId }),
+          .then((testStepResult) =>
+            onAfterStep({ testStepResult, testStepId }),
           );
       }
     }
@@ -1003,7 +1004,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                 testStepId,
                 testCaseStartedId,
                 testStepResult: {
-                  status: TestStepResultStatus.UNDEFINED,
+                  status: messages.TestStepResultStatus.UNDEFINED,
                   duration: {
                     seconds: 0,
                     nanos: 0,
@@ -1017,11 +1018,11 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                 testStepResult: {
                   ...(message.includes("Multiple matching step definitions for")
                     ? {
-                        status: TestStepResultStatus.AMBIGUOUS,
+                        status: messages.TestStepResultStatus.AMBIGUOUS,
                         message,
                       }
                     : {
-                        status: TestStepResultStatus.FAILED,
+                        status: messages.TestStepResultStatus.FAILED,
                         exception: { type: error.name || "Error", message },
                         message,
                       }),
@@ -1070,7 +1071,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: TestStepResultStatus.SKIPPED,
+              status: messages.TestStepResultStatus.SKIPPED,
               duration: {
                 seconds: 0,
                 nanos: 0,
@@ -1101,7 +1102,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: TestStepResultStatus.SKIPPED,
+              status: messages.TestStepResultStatus.SKIPPED,
               duration: duration(currentStepStartedAt, endTimestamp),
             },
             timestamp: endTimestamp,
@@ -1130,7 +1131,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: TestStepResultStatus.SKIPPED,
+              status: messages.TestStepResultStatus.SKIPPED,
               duration: {
                 seconds: 0,
                 nanos: 0,
@@ -1162,7 +1163,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
             testStepId,
             testCaseStartedId,
             testStepResult: {
-              status: TestStepResultStatus.UNKNOWN,
+              status: messages.TestStepResultStatus.UNKNOWN,
               duration: {
                 seconds: 0,
                 nanos: 0,
@@ -1271,8 +1272,8 @@ export default function createTests(
     registry.stepDefinitions.map((stepDefinition) => {
       const type: messages.StepDefinitionPatternType =
         stepDefinition.expression instanceof RegularExpression
-          ? StepDefinitionPatternType.REGULAR_EXPRESSION
-          : StepDefinitionPatternType.CUCUMBER_EXPRESSION;
+          ? messages.StepDefinitionPatternType.REGULAR_EXPRESSION
+          : messages.StepDefinitionPatternType.CUCUMBER_EXPRESSION;
 
       return {
         id: stepDefinition.id,
@@ -1359,7 +1360,7 @@ export default function createTests(
     source: {
       data: source,
       uri: ensure(gherkinDocument.uri, "Expected gherkin document to have URI"),
-      mediaType: SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
+      mediaType: messages.SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN,
     },
   });
 
@@ -1382,8 +1383,8 @@ export default function createTests(
         tagExpression: hook.tags,
         type:
           hook.keyword === "Before"
-            ? HookType.BEFORE_TEST_CASE
-            : HookType.AFTER_TEST_CASE,
+            ? messages.HookType.BEFORE_TEST_CASE
+            : messages.HookType.AFTER_TEST_CASE,
       },
     });
   }
