@@ -1,5 +1,3 @@
-declare module "@cypress/browserify-preprocessor";
-
 declare module "find-cypress-specs" {
   export function getSpecs(
     config: Cypress.ConfigOptions,

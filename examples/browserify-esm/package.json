@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@badeball/cypress-cucumber-preprocessor": "latest",
-    "@cypress/browserify-preprocessor": "latest",
-    "cypress": "latest"
-  }
-}

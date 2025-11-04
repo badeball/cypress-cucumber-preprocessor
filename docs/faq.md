@@ -15,6 +15,7 @@
 - [I get `Webpack Compilation Error` (shown below)](#i-get-webpack-compilation-error-shown-below)
 - [Why is `cypress-tags` missing?](#why-is-cypress-tags-missing)
 - [Function members `And(..)` and `But(..)` are missing](#function-members-and-and-but-are-missing)
+- [Can I use Browserify as a bundler?](#can-i-use-browserify-as-a-bundler)
 - [Which preprocessor version should I choose?](#which-preprocessor-version-should-i-choose)
 
 <!-- Node requirements -->
@@ -149,6 +150,16 @@ The `cypress-tags` executable has been removed and made redundant. Specs contain
 These have been [deprecated](https://github.com/badeball/cypress-cucumber-preprocessor/issues/821) to reflect cucumber-js' behavior. You can still however use the `And` keyword in `.feature` files. As explained on [SO](https://stackoverflow.com/questions/24747464/how-to-use-and-in-a-gherkin-using-cucumber-js#comment38690100_24748612),
 
 > `And` is only used in scenarios, not as step definition methods. Semantically it means "same keyword as in previous step"; technically it is just another step. In fact, you can use `Given()`, `When()` and `Then()` interchangeably in your step definitions, Cucumber will not enforce a match between the step keyword and the step definition function.
+
+## Can I use Browserify as a bundler?
+
+Yes. Support for Browserify was removed in v24.0.0, but you can still use v23.x.y. Updates to this library will seldomly be backported to the v23-line of versions, so users are recommended to switch bundler. Moreever, this line is _not_ subject to semver, so pinning to the current minor version is also recommended (IE. `~23.x.y` instead of `^23.x.y` in package.json).
+
+```
+$ npm install @badeball/cypress-cucumber-preprocessor@23
+```
+
+Examples illustrating use of Browserify can be found [here](https://github.com/badeball/cypress-cucumber-preprocessor/blob/v23.x.y/examples/readme.md).
 
 ## Which preprocessor version should I choose?
 
