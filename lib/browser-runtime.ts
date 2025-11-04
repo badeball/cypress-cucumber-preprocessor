@@ -1261,7 +1261,9 @@ export default function createTests(
 
   const newId: messages.IdGenerator.NewId = () =>
     uuid({
-      random: Array.from({ length: 16 }, () => Math.floor(prng() * 256)),
+      random: Uint8Array.of(
+        ...Array.from({ length: 16 }, () => Math.floor(prng() * 256)),
+      ),
     });
 
   registry.finalize(newId);
