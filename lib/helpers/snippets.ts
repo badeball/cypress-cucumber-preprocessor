@@ -1,7 +1,5 @@
 import { GeneratedExpression } from "@cucumber/cucumber-expressions";
-import type * as messages from "@cucumber/messages";
-
-import { PickleStepType } from "./messages-enums";
+import * as messages from "@cucumber/messages";
 
 const TEMPLATE = `
 [function]("[definition]", function ([arguments]) {
@@ -11,13 +9,13 @@ const TEMPLATE = `
 
 export function getFunctionName(type: messages.PickleStepType) {
   switch (type) {
-    case PickleStepType.CONTEXT:
+    case messages.PickleStepType.CONTEXT:
       return "Given";
-    case PickleStepType.ACTION:
+    case messages.PickleStepType.ACTION:
       return "When";
-    case PickleStepType.OUTCOME:
+    case messages.PickleStepType.OUTCOME:
       return "Then";
-    case PickleStepType.UNKNOWN:
+    case messages.PickleStepType.UNKNOWN:
       return "Given";
     default:
       throw "Unknown PickleStepType: " + type;

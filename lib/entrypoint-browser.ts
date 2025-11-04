@@ -1,4 +1,4 @@
-import type * as messages from "@cucumber/messages";
+import * as messages from "@cucumber/messages";
 import parse from "@cucumber/tag-expressions";
 import { fromByteArray } from "base64-js";
 
@@ -13,7 +13,6 @@ import DataTable from "./data_table";
 import { collectTagNames } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
 import { createError } from "./helpers/error";
-import { AttachmentContentEncoding } from "./helpers/messages-enums";
 import {
   ConfigurationFileResolver,
   ICypressRuntimeConfiguration,
@@ -234,14 +233,14 @@ export function attach(
         data,
         fileName,
         mediaType.replace("base64:", ""),
-        AttachmentContentEncoding.BASE64,
+        messages.AttachmentContentEncoding.BASE64,
       );
     } else {
       createStringAttachment(
         data,
         fileName,
         mediaType ?? "text/plain",
-        AttachmentContentEncoding.IDENTITY,
+        messages.AttachmentContentEncoding.IDENTITY,
       );
     }
   } else if (data instanceof ArrayBuffer) {
@@ -253,7 +252,7 @@ export function attach(
       fromByteArray(new Uint8Array(data)),
       fileName,
       mediaType,
-      AttachmentContentEncoding.BASE64,
+      messages.AttachmentContentEncoding.BASE64,
     );
   } else {
     throw Error("Invalid attachment data: must be a ArrayBuffer or string");
