@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+Breaking changes:
+
+- Removed support for using browserify as a bundler.
+
+  - Browserify is largely unmaintained at this point and is making it impossible to keep dependencies up-to-date as Browserify itself does not do that. Furthermore, the Browserify bundler is deprecated by Cypress. If you'd still like to use Browserify, you can pin your dependency on `@badeball/cypress-cucumber-preprocessor` to `~23.x.y`.
+
+  - A branch named `v23.x.y` has been created to continue illustrating how to use Browserify. This is mentioned in the FAQ.
+
+Other changes:
+
 - Run hooks (BeforeAll/AfterAll) may now be optionally named. This is in line with how cucumber-js behaves.
 
 - Allow step hooks to return skipped / pending.
