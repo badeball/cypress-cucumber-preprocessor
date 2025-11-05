@@ -18,12 +18,9 @@ The examples illustrates using each bundler in each language flavor.
 
 ## Component testing
 
-Component testing works with both Webpack and Vite[^1] as a bundler.
+Component testing works with both Webpack and Vite as a bundler.
 
 |                 | CJS                    | ESM                    | TS                          |
 |-----------------|------------------------|------------------------|-----------------------------|
 | React + Webpack |                        |                        | [Link](ct-webpack-react-ts) |
 | React + Vite    |                        |                        | [Link](ct-vite-react-ts)    |
-
-[patch-package]: https://github.com/ds300/patch-package
-[^1]: Using Vite requires patching `@cypress/vite-dev-server`, something which is easily achieved using [`patch-package`][patch-package] as the example illustrates.

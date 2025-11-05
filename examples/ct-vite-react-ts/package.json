@@ -1,14 +1,10 @@
 {
-  "scripts": {
-    "postinstall": "patch-package"
-  },
   "dependencies": {
     "@badeball/cypress-cucumber-preprocessor": "latest",
     "@cypress/vite-dev-server": "latest",
     "@originjs/vite-plugin-commonjs": "latest",
     "@vitejs/plugin-react": "latest",
     "cypress": "latest",
-    "patch-package": "latest",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest"
