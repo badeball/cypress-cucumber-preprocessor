@@ -107,7 +107,7 @@ jobs:
         working-directory: examples/${{ matrix.example }}
         run: |
           if [[ "${{ matrix.example }}" == ct-* ]]; then
-            npx cypress run --component
+            DEBUG=cypress:* npx cypress run --component
           else
             npx cypress run --e2e
           fi
