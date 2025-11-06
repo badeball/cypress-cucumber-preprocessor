@@ -1,5 +1,7 @@
 # Contributing to this project
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 Please take a moment to review this document in order to make the contribution
 process easy and effective for everyone involved.
 

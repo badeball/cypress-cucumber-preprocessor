@@ -2,6 +2,8 @@
 
 # Usage reports
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 > :warning: This requires you to have [source maps](source-maps.md) enabled.
 
 The usage report lists your step definitions and tells you about usages in your scenarios, including the duration of each usage, and any unused steps. Here's an example of the output:

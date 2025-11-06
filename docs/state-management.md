@@ -2,6 +2,8 @@
 
 # State management
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 A step definition can transfer state to a subsequent step definition by storing state in instance variables, as shown below.
 
 ```ts

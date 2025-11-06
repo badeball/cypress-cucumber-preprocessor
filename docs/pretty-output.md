@@ -2,6 +2,8 @@
 
 # Pretty output
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 Pretty output is an alternative Cypress reporter which will print steps as they are executed, like shown below.
 
 <p align="center">

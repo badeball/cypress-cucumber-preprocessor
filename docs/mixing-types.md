@@ -2,6 +2,8 @@
 
 # Mixing Cucumber and non-Cucumber specs
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 Mixing Cucumber and non-Cucumber specs are supported. Cypress can be configured with `specPattern` to resolve multiple spec types as shown below.
 
 ```js

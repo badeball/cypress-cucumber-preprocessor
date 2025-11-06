@@ -1,5 +1,7 @@
 # Examples
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 These are the *only* official examples at the time of writing. Any other example you come across is **not official** and might be severely outdated by now.
 
 ## Usage with other plugins

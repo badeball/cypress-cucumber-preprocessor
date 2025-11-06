@@ -1,5 +1,7 @@
 # Handling multiple Cypress configurations with distinct step definition directories
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 ## Details
 
 * **Original Issue:** [#1299](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1299)

@@ -2,6 +2,8 @@
 
 # Parallelization using Cypress Cloud & merging reports
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 > :warning: This feature is especially experimental, it's subject to change anytime and is not considered under semver.
 
 [Parallelization](https://docs.cypress.io/guides/cloud/smart-orchestration/parallelization) using Cypress Cloud is where you run `cypress run --record --parallel` on N machines in order to improve execution time. This typically generates N reports. These are obviously related to each other. They are unique sets of spec results, with no overlap, obtained through sharding (weighing and distribution by Cypress Cloud).

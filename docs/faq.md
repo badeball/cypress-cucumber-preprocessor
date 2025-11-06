@@ -2,6 +2,8 @@
 
 # Frequently asked questions <!-- omit from toc -->
 
+> :warning: You are currently viewing documentation for the v23.x.y branch of the library and it does not contain most recent changes. For the latest documentation, switch to viewing the master branch.
+
 - [I get `fs_1.promises.rm is not a function`](#i-get-fs_1promisesrm-is-not-a-function)
 - [I get `state.messages.current.findLastIndex is not a function`](#i-get-statemessagescurrentfindlastindex-is-not-a-function)
 - [`--env` / `tags` isn't picked up](#--env--tags-isnt-picked-up)
