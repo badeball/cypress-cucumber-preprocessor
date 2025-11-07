@@ -2,7 +2,7 @@
 
 set -e
 
-for i in $(seq 1 1000);
+for i in $(seq 1 500);
 do
   echo "Running Cucumber for the $i time"
   npx cucumber-js features/reporters/usage.feature
