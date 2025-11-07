@@ -37,11 +37,9 @@
   },
   "files": [
     "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "patches/patch.js"
+    "dist/**/*.d.ts"
   ],
   "scripts": {
-    "postinstall": "node patches/patch.js",
     "clear-dist": "rm -rf dist",
     "clean-install": "rm -rf node_modules && npm install",
     "genversion": "genversion --semi --double --es6 lib/version.ts",
@@ -119,7 +117,6 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "genversion": "^3.2.0",
     "jsdom": "^24.1.1",
-    "patch-package": "^8.0.0",
     "pngjs": "^7.0.0",
     "prettier": "^3.3.3",
     "recast": "^0.23.9",
