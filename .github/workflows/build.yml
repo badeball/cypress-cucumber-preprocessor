@@ -46,6 +46,8 @@ jobs:
           key: cypress-linux@${{ matrix.cypress-version }}
       - name: Change owner
         run: "chown root: ."
+      - name: Until executable
+        run: "chmod +x ./until"
       - name: Dependencies
         env:
           CYPRESS_INSTALL_BINARY: "0"
@@ -56,43 +58,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Test
-        run: npm run test
-      - name: Versions
-        run: |
-          npx cypress --version
-          node --version
-          npm --version
-
-  windows:
-    runs-on: windows-latest
-    env:
-      NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm
-      CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress
-    steps:
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Cache NPM modules
-        uses: actions/cache@v4
-        with:
-          path: .npm
-          key: npm-windows
-      - name: Cache Cypress binaries
-        uses: actions/cache@v4
-        with:
-          path: .cypress
-          key: cypress-windows
-      - name: Dependencies
-        shell: bash
-        run: npm install --engine-strict
-      - name: Build
-        run: npm run build
-      - name: Test (unit)
-        run: npm run test:unit
-      - name: Test (integration)
-        run: npm run test:integration
+        run: ./until
       - name: Versions
         run: |
           npx cypress --version

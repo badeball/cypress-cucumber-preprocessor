@@ -1,0 +1,9 @@
+#!/usr/bin/env -S bash
+
+set -e
+
+for i in $(seq 1 1000);
+do
+  echo "Running Cucumber for the $i time"
+  npx cucumber-js features/reporters/usage.feature
+done
