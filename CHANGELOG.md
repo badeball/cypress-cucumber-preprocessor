@@ -12,6 +12,10 @@ Breaking changes:
 
   - A branch named `v23.x.y` has been created to continue illustrating how to use Browserify. This is mentioned in the FAQ.
 
+- Bump node requirement from v20.0.0 to v20.12.0.
+
+  - This is in preperation of replacing `chalk` with `util.styleText`.
+
 Other changes:
 
 - Run hooks (BeforeAll/AfterAll) may now be optionally named. This is in line with how cucumber-js behaves.
