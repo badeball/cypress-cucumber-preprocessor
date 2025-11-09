@@ -73,7 +73,6 @@
     "@cucumber/tag-expressions": "^9.0.0",
     "@jridgewell/trace-mapping": "^0.3.31",
     "base64-js": "^1.5.1",
-    "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "common-ancestor-path": "^2.0.0",
     "cosmiconfig": "^9.0.0",

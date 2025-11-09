@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import stream from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { inspect } from "node:util";
+import { inspect, styleText } from "node:util";
 
 import detectCiEnvironment from "@cucumber/ci-environment";
 import * as messages from "@cucumber/messages";
@@ -523,7 +523,9 @@ export async function afterRunHandler(
         `JsonFormatter failed with an error shown below. This might be a bug, please report at ${homepage} and make sure to attach the messages report in your ticket (${messagesOutput}).\n`;
 
       if (preprocessor.messages.enabled) {
-        console.warn(chalk.yellow(message(preprocessor.messages.output)));
+        console.warn(
+          styleText("yellow", message(preprocessor.messages.output)),
+        );
       } else {
         const temporaryMessagesOutput = path.join(
           await fs.mkdtemp(
@@ -539,7 +541,7 @@ export async function afterRunHandler(
             .join("\n") + "\n",
         );
 
-        console.warn(chalk.yellow(message(temporaryMessagesOutput)));
+        console.warn(styleText("yellow", message(temporaryMessagesOutput)));
       }
 
       throw e;
@@ -721,7 +723,8 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
 
     if (error != null && browserCrashExprCol.some((expr) => expr.test(error))) {
       console.log(
-        chalk.yellow(
+        styleText(
+          "yellow",
           `\nDue to browser crash, no reports are created for ${spec.relative}.`,
         ),
       );
@@ -760,7 +763,8 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
 
     if (wasRemainingSkipped) {
       console.log(
-        chalk.yellow(
+        styleText(
+          "yellow",
           `  Hook failures can't be represented in any reports (messages / json / html), thus none is created for ${spec.relative}.`,
         ),
       );
