@@ -3,11 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { Then } from "@cucumber/cucumber";
-import {
-  findAllByLabelText,
-  findAllByText,
-  findByText,
-} from "@testing-library/dom";
+import { findAllByText, findByText } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 
 import { findAllByAccordionComponent } from "../support/accordion";
@@ -81,7 +77,7 @@ Then(
 
     const dd = await findByText(
       dom.window.document.documentElement,
-      /\d+% passed/,
+      /\d+% \(\d+ \/ \d+\) passed/,
       { selector: "span" },
     );
 
@@ -139,23 +135,8 @@ Then(
       }
     }
 
-    const stepsContainers = await findAllByLabelText(
-      dom.window.document.documentElement,
-      "Steps",
-    );
-
-    const matchingSteps = stepsContainers.reduce(
-      (matchingSteps: Element[], stepsContainer: HTMLElement) => {
-        return [
-          ...matchingSteps,
-          ...Array.from(
-            stepsContainer.querySelectorAll(
-              `[data-status="${status.toUpperCase()}"]`,
-            ),
-          ),
-        ];
-      },
-      [],
+    const matchingSteps = dom.window.document.querySelectorAll(
+      `li[data-status="${status.toUpperCase()}"]`,
     );
 
     assert.equal(matchingSteps.length, n);
