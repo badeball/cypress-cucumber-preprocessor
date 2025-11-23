@@ -16,7 +16,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - id: set-matrix
         name: Prepare
         run: echo "matrix=$(node -p "JSON.stringify(fs.readdirSync('examples').filter(f => f !== 'readme.md'))")" >> $GITHUB_OUTPUT
@@ -27,7 +27,7 @@ jobs:
       image: cypress/base:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Cache NPM modules
         uses: actions/cache@v4
         with:
@@ -73,7 +73,7 @@ jobs:
         with:
           node-version: 24
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Cache NPM modules
         uses: actions/cache@v4
         with:
