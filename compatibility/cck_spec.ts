@@ -45,6 +45,8 @@ const ignorableKeys = [
   // errors
   "message",
   "stackTrace",
+  // suggestions
+  "snippets",
 ];
 
 function isObject(object: any): object is object {
@@ -99,6 +101,7 @@ describe("Cucumber Compatibility Kit", () => {
       case "hooks-conditional": // Expections during hooks are difficult to mimick due to no try-catch
       case "global-hooks-beforeall-error": // See above
       case "global-hooks-afterall-error": // See above
+      case "hooks-undefined": // See above
       case "multiple-features": // The "correct" message order is difficult to mimick
       case "multiple-features-reversed": // Cypress has no `reversed` option
         it.skip(`passes the cck suite for '${suiteName}'`);
@@ -278,7 +281,7 @@ describe("Cucumber Compatibility Kit", () => {
         (await fs.readFile(ndjsonFile)).toString(),
       ).map(normalizeMessage);
 
-      if (suiteName === "pending") {
+      if (suiteName === "pending" || suiteName === "retry-pending") {
         /**
          * We can't control Cypress exit code without failing a test, thus is cucumber-js behavior
          * difficult to mimic.

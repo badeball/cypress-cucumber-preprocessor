@@ -12,6 +12,7 @@ import {
   TASK_CREATE_STRING_ATTACHMENT,
   TASK_FRONTEND_TRACKING_ERROR,
   TASK_SPEC_ENVELOPES,
+  TASK_SUGGESTION,
   TASK_TEST_CASE_FINISHED,
   TASK_TEST_CASE_STARTED,
   TASK_TEST_RUN_HOOK_FINISHED,
@@ -34,6 +35,7 @@ import {
   frontendTrackingErrorHandler,
   OnAfterStep,
   specEnvelopesHandler,
+  suggestion,
   testCaseFinishedHandler,
   testCaseStartedHandler,
   testRunHookFinishedHandler,
@@ -133,6 +135,7 @@ export async function addCucumberPreprocessorPlugin(
       null,
       config,
     ),
+    [TASK_SUGGESTION]: suggestion.bind(null, config),
   });
 
   const tags = getTags(config.env);

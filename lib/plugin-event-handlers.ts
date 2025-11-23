@@ -20,6 +20,7 @@ import {
   ITaskCreateStringAttachment,
   ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
+  ITaskSuggestion,
   ITaskTestCaseFinished,
   ITaskTestCaseStarted,
   ITaskTestRunHookFinished,
@@ -1270,3 +1271,25 @@ export function frontendTrackingErrorHandler(
 
   return true;
 }
+
+export const suggestion = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskSuggestion) => {
+    debug("suggestion()");
+
+    switch (state.state) {
+      case "step-started":
+        break;
+      default:
+        throw createStateError("suggestion", state.state);
+    }
+
+    const message: messages.Envelope = {
+      suggestion: data,
+    };
+
+    state.messages.current.push(message);
+
+    return true;
+  },
+  true,
+);

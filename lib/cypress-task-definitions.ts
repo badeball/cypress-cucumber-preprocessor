@@ -45,6 +45,10 @@ export const TASK_FRONTEND_TRACKING_ERROR =
 
 export type ITaskFrontendTrackingError = string;
 
+export const TASK_SUGGESTION = "cypress-cucumber-preprocessor:suggestion";
+
+export type ITaskSuggestion = messages.Suggestion;
+
 export interface ITaskCreateStringAttachment {
   data: string;
   fileName?: string;

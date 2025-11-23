@@ -10,6 +10,7 @@
 {"testStepStarted":{"testStepId":"id","testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testStepFinished":{"testStepId":"id","testCaseStartedId":"id","testStepResult":{"status":"PASSED","duration":0},"timestamp":{"seconds":0,"nanos":0}}}
 {"testStepStarted":{"testStepId":"id","testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0}}}
+{"suggestion":{"id":"id","pickleStepId":"id","snippets":[{"language":"javascript","code":"Given(\"an undefined step\", function () {\n  return \"pending\";\n});"}]}}
 {"testStepFinished":{"testStepId":"id","testCaseStartedId":"id","testStepResult":{"status":"UNDEFINED","duration":0},"timestamp":{"seconds":0,"nanos":0}}}
 {"testStepStarted":{"testStepId":"id","testCaseStartedId":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testStepFinished":{"testStepId":"id","testCaseStartedId":"id","testStepResult":{"status":"SKIPPED","duration":0},"timestamp":{"seconds":0,"nanos":0}}}

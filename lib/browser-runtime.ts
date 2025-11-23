@@ -1,7 +1,6 @@
 import {
   CucumberExpressionGenerator,
   Group,
-  ParameterTypeRegistry,
   RegularExpression,
 } from "@cucumber/cucumber-expressions";
 import * as messages from "@cucumber/messages";
@@ -18,6 +17,7 @@ import {
 import {
   ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
+  ITaskSuggestion,
   ITaskTestCaseFinished,
   ITaskTestCaseStarted,
   ITaskTestRunHookFinished,
@@ -26,6 +26,7 @@ import {
   ITaskTestStepStarted,
   TASK_FRONTEND_TRACKING_ERROR,
   TASK_SPEC_ENVELOPES,
+  TASK_SUGGESTION,
   TASK_TEST_CASE_FINISHED,
   TASK_TEST_CASE_STARTED,
   TASK_TEST_RUN_HOOK_FINISHED,
@@ -271,6 +272,19 @@ function taskFrontEndTrackingError(error: CypressCucumberAssertionError) {
       log: true,
     },
   );
+}
+
+function taskSuggestion(
+  context: CompositionContext,
+  suggestion: messages.Suggestion,
+) {
+  if (context.isTrackingState) {
+    return cy.task(TASK_SUGGESTION, suggestion satisfies ITaskSuggestion, {
+      log: false,
+    });
+  } else {
+    return cy.wrap({}, { log: false });
+  }
 }
 
 function emitSkippedPickle(
@@ -862,60 +876,94 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
             return beforeHooksChain()
               .then((beforeStepHookResults) => {
-                try {
-                  return runStepWithLogGroup({
-                    keyword: ensure(
-                      "keyword" in scenarioStep && scenarioStep.keyword,
-                      "Expected to find a keyword in the scenario step",
-                    ),
-                    argument,
-                    text,
-                    fn: () => {
-                      try {
-                        return registry.runStepDefinition(
-                          this,
-                          text,
-                          dryRun,
-                          argument,
-                        );
-                      } catch (e) {
-                        if (
-                          e instanceof MissingDefinitionError ||
-                          e instanceof MultipleDefinitionsError
-                        ) {
-                          (this.test as any)._retries = (
-                            this.test as any
-                          )._currentRetry;
+                return runStepWithLogGroup({
+                  keyword: ensure(
+                    "keyword" in scenarioStep && scenarioStep.keyword,
+                    "Expected to find a keyword in the scenario step",
+                  ),
+                  argument,
+                  text,
+                  fn: () => {
+                    try {
+                      return registry.runStepDefinition(
+                        this,
+                        text,
+                        dryRun,
+                        argument,
+                      );
+                    } catch (e) {
+                      if (
+                        e instanceof MissingDefinitionError ||
+                        e instanceof MultipleDefinitionsError
+                      ) {
+                        (this.test as any)._retries = (
+                          this.test as any
+                        )._currentRetry;
+                      }
+
+                      if (e instanceof MissingDefinitionError) {
+                        let parameterType: "dataTable" | "docString" | null =
+                          null;
+
+                        if (pickleStep.argument?.dataTable) {
+                          parameterType = "dataTable";
+                        } else if (pickleStep.argument?.docString) {
+                          parameterType = "docString";
                         }
+
+                        const snippets = new CucumberExpressionGenerator(
+                          () =>
+                            context.registry.parameterTypeRegistry
+                              .parameterTypes,
+                        )
+                          .generateExpressions(pickleStep.text)
+                          .map((expression) =>
+                            generateSnippet(
+                              expression,
+                              ensure(
+                                pickleStep.type,
+                                "Expected pickleStep to have a type",
+                              ),
+                              parameterType,
+                            ),
+                          );
+
+                        return taskSuggestion(context, {
+                          id: context.newId(),
+                          pickleStepId: pickleStep.id,
+                          snippets: snippets.map((code) => {
+                            return {
+                              language: "javascript",
+                              code,
+                            };
+                          }),
+                        }).then(() => {
+                          throw new Error(
+                            createMissingStepDefinitionMessage(
+                              context,
+                              pickleStep,
+                              snippets,
+                            ),
+                          );
+                        });
+                      } else {
                         throw e;
                       }
-                    },
-                  })
-                    .then(convertReturnValueToTestStepResultStatus)
-                    .then((status) => {
-                      const testStepResult = {
-                        status,
-                        duration: duration(start, createTimestamp()),
-                      };
+                    }
+                  },
+                })
+                  .then(convertReturnValueToTestStepResultStatus)
+                  .then((status) => {
+                    const testStepResult = {
+                      status,
+                      duration: duration(start, createTimestamp()),
+                    };
 
-                      return {
-                        beforeStepHookResults,
-                        testStepResult,
-                      };
-                    });
-                } catch (e) {
-                  if (e instanceof MissingDefinitionError) {
-                    throw new Error(
-                      createMissingStepDefinitionMessage(
-                        context,
-                        pickleStep,
-                        context.registry.parameterTypeRegistry,
-                      ),
-                    );
-                  } else {
-                    throw e;
-                  }
-                }
+                    return {
+                      beforeStepHookResults,
+                      testStepResult,
+                    };
+                  });
               })
               .then(({ beforeStepHookResults, testStepResult }) => {
                 return afterStepHooksChain().then((afterStepHookResults) => {
@@ -1574,7 +1622,7 @@ function strictIsTextTerminal(): boolean {
 function createMissingStepDefinitionMessage(
   context: CompositionContext,
   pickleStep: messages.PickleStep,
-  parameterTypeRegistry: ParameterTypeRegistry,
+  snippets: string[],
 ) {
   const noStepDefinitionPathsTemplate = `
     Step implementation missing for "<text>".
@@ -1629,28 +1677,6 @@ function createMissingStepDefinitionMessage(
   const prettyPrintList = (items: string[]) =>
     items.map((item) => "  - " + maybeEscape(item)).join("\n");
 
-  let parameter: "dataTable" | "docString" | null = null;
-
-  if (pickleStep.argument?.dataTable) {
-    parameter = "dataTable";
-  } else if (pickleStep.argument?.docString) {
-    parameter = "docString";
-  }
-
-  const snippets = new CucumberExpressionGenerator(
-    () => parameterTypeRegistry.parameterTypes,
-  )
-    .generateExpressions(pickleStep.text)
-    .map((expression) =>
-      generateSnippet(
-        expression,
-        ensure(pickleStep.type, "Expected pickleStep to have a type"),
-        parameter,
-      ),
-    )
-    .map((snippet) => indent(snippet, { count: 2 }))
-    .join("\n\n");
-
   return stripIndent(template)
     .replaceAll("<text>", pickleStep.text)
     .replaceAll(
@@ -1665,7 +1691,10 @@ function createMissingStepDefinitionMessage(
       "<step-definition-paths>",
       prettyPrintList(stepDefinitionHints.stepDefinitionPaths),
     )
-    .replaceAll("<snippets>", snippets);
+    .replaceAll(
+      "<snippets>",
+      snippets.map((snippet) => indent(snippet, { count: 2 })).join("\n\n"),
+    );
 }
 
 function mapArgumentGroup(group: Group): messages.Group {

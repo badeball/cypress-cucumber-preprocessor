@@ -1,9 +1,9 @@
 import { Given } from "@badeball/cypress-cucumber-preprocessor";
 
-Given(/^a (.*?) with (.*?)$/, function () {
+Given("an ambiguous step", function () {
   // first one
 });
 
-Given(/^a step with (.*)$/, function () {
+Given("an ambiguous step", function () {
   // second one
 });
