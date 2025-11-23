@@ -90,7 +90,7 @@
     "@babel/parser": "^7.25.3",
     "@babel/types": "^7.25.2",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.2",
-    "@cucumber/compatibility-kit": "^23.0.0",
+    "@cucumber/compatibility-kit": "^25.0.0",
     "@cypress/webpack-preprocessor": "^6.0.2",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.8.0",

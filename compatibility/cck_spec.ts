@@ -102,8 +102,10 @@ describe("Cucumber Compatibility Kit", () => {
       case "global-hooks-beforeall-error": // See above
       case "global-hooks-afterall-error": // See above
       case "hooks-undefined": // See above
+      case "hooks-skipped": // See above
       case "multiple-features": // The "correct" message order is difficult to mimick
       case "multiple-features-reversed": // Cypress has no `reversed` option
+      case "test-run-exception": // Difficult to reproduce such scenario
         it.skip(`passes the cck suite for '${suiteName}'`);
         continue;
     }
