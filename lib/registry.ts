@@ -49,6 +49,7 @@ type Node = ReturnType<typeof parse>;
 export const DEFAULT_HOOK_ORDER = 10000;
 
 export interface IRunHook<C extends Mocha.Context> {
+  id: string;
   implementation: IRunHookBody<C>;
   keyword: RunHookKeyword;
   order: number;
@@ -93,7 +94,9 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
 
   public stepDefinitions: IStepDefinition<T, C>[] = [];
 
-  private preliminaryHooks: Omit<ICaseHook<C>, "id">[] = [];
+  private preliminaryCaseHooks: Omit<ICaseHook<C>, "id">[] = [];
+
+  private preliminaryRunHooks: Omit<IRunHook<C>, "id">[] = [];
 
   public runHooks: IRunHook<C>[] = [];
 
@@ -137,10 +140,17 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
       }
     }
 
-    for (const preliminaryHook of this.preliminaryHooks) {
+    for (const preliminaryCaseHook of this.preliminaryCaseHooks) {
       this.caseHooks.push({
         id: newId(),
-        ...preliminaryHook,
+        ...preliminaryCaseHook,
+      });
+    }
+
+    for (const preliminaryRunHook of this.preliminaryRunHooks) {
+      this.runHooks.push({
+        id: newId(),
+        ...preliminaryRunHook,
       });
     }
   }
@@ -176,7 +186,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     fn: ICaseHookBody<C>,
   ) {
     const { order, ...remainingOptions } = options;
-    this.preliminaryHooks.push({
+    this.preliminaryCaseHooks.push({
       node: parseMaybeTags(options.tags),
       implementation: fn,
       keyword: keyword,
@@ -223,7 +233,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     options: IRunHookOptions,
     fn: IRunHookBody<C>,
   ) {
-    this.runHooks.push({
+    this.preliminaryRunHooks.push({
       implementation: fn,
       keyword: keyword,
       position: maybeRetrievePositionFromSourceMap(),

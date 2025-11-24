@@ -1,10 +1,10 @@
 {"meta":"meta"}
 {"source":{"data":"Feature: a feature\n  Scenario Outline: a scenario\n    Given a step\n    Examples:\n      | value |\n      | foo   |\n      | bar   |","uri":"cypress/e2e/a.feature","mediaType":"text/x.cucumber.gherkin+plain"}}
 {"gherkinDocument":{"feature":{"tags":[],"location":{"line":1,"column":1},"language":"en","keyword":"Feature","name":"a feature","description":"","children":[{"scenario":{"id":"id","tags":[],"location":{"line":2,"column":3},"keyword":"Scenario Outline","name":"a scenario","description":"","steps":[{"id":"id","location":{"line":3,"column":5},"keyword":"Given ","keywordType":"Context","text":"a step"}],"examples":[{"id":"id","tags":[],"location":{"line":4,"column":5},"keyword":"Examples","name":"","description":"","tableHeader":{"id":"id","location":{"line":5,"column":7},"cells":[{"location":{"line":5,"column":9},"value":"value"}]},"tableBody":[{"id":"id","location":{"line":6,"column":7},"cells":[{"location":{"line":6,"column":9},"value":"foo"}]},{"id":"id","location":{"line":7,"column":7},"cells":[{"location":{"line":7,"column":9},"value":"bar"}]}]}]}}]},"comments":[],"uri":"cypress/e2e/a.feature"}}
-{"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id","id"],"name":"a scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id","id"]}],"tags":[]}}
-{"pickle":{"id":"id","uri":"cypress/e2e/a.feature","astNodeIds":["id","id"],"name":"a scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id","id"]}],"tags":[]}}
+{"pickle":{"id":"id","uri":"cypress/e2e/a.feature","location":{"line":6,"column":7},"astNodeIds":["id","id"],"name":"a scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id","id"]}],"tags":[]}}
+{"pickle":{"id":"id","uri":"cypress/e2e/a.feature","location":{"line":7,"column":7},"astNodeIds":["id","id"],"name":"a scenario","language":"en","steps":[{"id":"id","text":"a step","type":"Context","astNodeIds":["id","id"]}],"tags":[]}}
 {"stepDefinition":{"id":"id","pattern":{"type":"CUCUMBER_EXPRESSION","source":"a step"},"sourceReference":{"uri":"not available","location":{"line":0,"column":0}}}}
-{"testRunStarted":{"timestamp":{"seconds":0,"nanos":0}}}
+{"testRunStarted":{"id":"id","timestamp":{"seconds":0,"nanos":0}}}
 {"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
 {"testCase":{"id":"id","pickleId":"id","testSteps":[{"id":"id","pickleStepId":"id","stepDefinitionIds":["id"],"stepMatchArgumentsLists":[{"stepMatchArguments":[]}]}]}}
 {"testCaseStarted":{"id":"id","testCaseId":"id","attempt":0,"timestamp":{"seconds":0,"nanos":0}}}

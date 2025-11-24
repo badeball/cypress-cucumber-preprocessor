@@ -11,13 +11,20 @@ import * as messages from "@cucumber/messages";
 import chalk from "chalk";
 import split from "split";
 
-import { HOOK_FAILURE_EXPR, INTERNAL_PROPERTY_NAME } from "./constants";
+import {
+  ALL_HOOK_FAILURE_EXPR,
+  EACH_HOOK_FAILURE_EXPR,
+  INTERNAL_PROPERTY_NAME,
+} from "./constants";
 import {
   ITaskCreateStringAttachment,
   ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
+  ITaskSuggestion,
   ITaskTestCaseFinished,
   ITaskTestCaseStarted,
+  ITaskTestRunHookFinished,
+  ITaskTestRunHookStarted,
   ITaskTestStepFinished,
   ITaskTestStepStarted,
 } from "./cypress-task-definitions";
@@ -36,7 +43,6 @@ import {
   createTimestamp,
   orderMessages,
   removeDuplicatedStepDefinitions,
-  removeUnusedDefinitions,
 } from "./helpers/messages";
 import { ensureIsAbsolute } from "./helpers/paths";
 import { indent } from "./helpers/strings";
@@ -124,6 +130,27 @@ interface StateStepFinished {
   testCaseStartedId: string;
 }
 
+interface StateRunHookStarted {
+  state: "run-hook-started";
+  pretty: PrettyState;
+  spec: Cypress.Spec;
+  messages: {
+    accumulation: messages.Envelope[];
+    current: messages.Envelope[];
+  };
+  testRunHookStartedId: string;
+}
+
+interface StateRunHookFinished {
+  state: "run-hook-finished";
+  pretty: PrettyState;
+  spec: Cypress.Spec;
+  messages: {
+    accumulation: messages.Envelope[];
+    current: messages.Envelope[];
+  };
+}
+
 interface StateTestFinished {
   state: "test-finished";
   pretty: PrettyState;
@@ -183,6 +210,8 @@ type State =
   | StateReceivedSpecEnvelopes
   | StateTestStarted
   | StateStepStarted
+  | StateRunHookStarted
+  | StateRunHookFinished
   | StateStepFinished
   | StateTestFinished
   | StateAfterSpec
@@ -297,6 +326,10 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
 
   const testRunStarted: messages.Envelope = {
     testRunStarted: {
+      id: ensure(
+        config.env["testRunStartedId"],
+        "Expected to find a testRunStartedId",
+      ),
       timestamp: createTimestamp(),
     },
   };
@@ -383,7 +416,6 @@ export async function afterRunHandler(
   };
 
   removeDuplicatedStepDefinitions(state.messages.accumulation);
-  removeUnusedDefinitions(state.messages.accumulation);
 
   if (preprocessor.messages.enabled) {
     const messagesPath = ensureIsAbsolute(
@@ -643,6 +675,7 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
 
     switch (state.state) {
       case "test-finished": // This is the normal case.
+      case "run-hook-finished": // In case of AfterAll hooks.
       case "before-spec": // This can happen if a spec doesn't contain any tests.
       case "received-envelopes": // This can happen in case of a failing beforeEach hook.
         break;
@@ -654,9 +687,12 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
     // However, `isTrackingState` is never true in open-mode, thus this should be defined.
     assert(results, "Expected results to be defined");
 
-    const wasRemainingSkipped = results.tests.some((test) =>
-      test.displayError?.match(HOOK_FAILURE_EXPR),
-    );
+    const wasRemainingSkipped = results.tests.some((test) => {
+      return (
+        test.displayError?.match(EACH_HOOK_FAILURE_EXPR) ??
+        test.displayError?.match(ALL_HOOK_FAILURE_EXPR)
+      );
+    });
 
     if (wasRemainingSkipped) {
       console.log(
@@ -793,6 +829,7 @@ export const testCaseStartedHandler = createGracefullPluginEventHandler(
     switch (state.state) {
       case "received-envelopes":
       case "test-finished":
+      case "run-hook-finished":
         break;
       case "has-reloaded-received-envelopes":
         {
@@ -1067,6 +1104,71 @@ export const testStepFinishedHandler = createGracefullPluginEventHandler(
   true,
 );
 
+export const testRunHookStartedHandler = createGracefullPluginEventHandler(
+  async (
+    config: Cypress.PluginConfigOptions,
+    data: ITaskTestRunHookStarted,
+  ) => {
+    debug("testRunHookStartedHandler()");
+
+    switch (state.state) {
+      case "received-envelopes": // Case of BeforeAll
+      case "test-finished": // Case of AfterAll
+      case "run-hook-finished": // Case of consequtive run hooks
+        break;
+      default:
+        throw createStateError("testRunHookStartedHandler", state.state);
+    }
+
+    state = {
+      state: "run-hook-started",
+      pretty: state.pretty,
+      spec: state.spec,
+      messages: {
+        current: state.messages.current.concat({
+          testRunHookStarted: data,
+        }),
+        accumulation: state.messages.accumulation,
+      },
+      testRunHookStartedId: data.id,
+    };
+
+    return true;
+  },
+  true,
+);
+
+export const testRunHookFinishedHandler = createGracefullPluginEventHandler(
+  async (
+    config: Cypress.PluginConfigOptions,
+    data: ITaskTestRunHookFinished,
+  ) => {
+    debug("testRunHookFinishedHandler()");
+
+    switch (state.state) {
+      case "run-hook-started":
+        break;
+      default:
+        throw createStateError("testRunHookFinishedHandler", state.state);
+    }
+
+    state = {
+      state: "run-hook-finished",
+      pretty: state.pretty,
+      spec: state.spec,
+      messages: {
+        current: state.messages.current.concat({
+          testRunHookFinished: data,
+        }),
+        accumulation: state.messages.accumulation,
+      },
+    };
+
+    return true;
+  },
+  true,
+);
+
 export const testCaseFinishedHandler = createGracefullPluginEventHandler(
   async (config: Cypress.PluginConfigOptions, data: ITaskTestCaseFinished) => {
     debug("testCaseFinishedHandler()");
@@ -1115,19 +1217,38 @@ export const createStringAttachmentHandler = createGracefullPluginEventHandler(
 
     switch (state.state) {
       case "step-started":
+      case "run-hook-started":
         break;
       default:
         throw createStateError("createStringAttachmentHandler", state.state);
     }
 
-    const message: messages.Envelope = {
-      attachment: {
+    let idProperties:
+      | {
+          testRunHookStartedId: string;
+        }
+      | {
+          testCaseStartedId: string;
+          testStepId: string;
+        };
+
+    if (state.state === "step-started") {
+      idProperties = {
         testCaseStartedId: state.testCaseStartedId,
         testStepId: state.testStepStartedId,
+      };
+    } else {
+      idProperties = { testRunHookStartedId: state.testRunHookStartedId };
+    }
+
+    const message: messages.Envelope = {
+      attachment: {
+        ...idProperties,
         body: data,
         fileName,
         mediaType: mediaType,
         contentEncoding: encoding,
+        timestamp: createTimestamp(),
       },
     };
 
@@ -1150,3 +1271,25 @@ export function frontendTrackingErrorHandler(
 
   return true;
 }
+
+export const suggestion = createGracefullPluginEventHandler(
+  async (config: Cypress.PluginConfigOptions, data: ITaskSuggestion) => {
+    debug("suggestion()");
+
+    switch (state.state) {
+      case "step-started":
+        break;
+      default:
+        throw createStateError("suggestion", state.state);
+    }
+
+    const message: messages.Envelope = {
+      suggestion: data,
+    };
+
+    state.messages.current.push(message);
+
+    return true;
+  },
+  true,
+);

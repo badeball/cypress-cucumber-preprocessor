@@ -1,7 +1,6 @@
 import {
   CucumberExpressionGenerator,
   Group,
-  ParameterTypeRegistry,
   RegularExpression,
 } from "@cucumber/cucumber-expressions";
 import * as messages from "@cucumber/messages";
@@ -10,21 +9,28 @@ import random from "seedrandom";
 import { v4 as uuid } from "uuid";
 
 import {
-  HOOK_FAILURE_EXPR,
+  ALL_HOOK_FAILURE_EXPR,
+  EACH_HOOK_FAILURE_EXPR,
   INTERNAL_SPEC_PROPERTIES,
   INTERNAL_SUITE_PROPERTIES,
 } from "./constants";
 import {
   ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
+  ITaskSuggestion,
   ITaskTestCaseFinished,
   ITaskTestCaseStarted,
+  ITaskTestRunHookFinished,
+  ITaskTestRunHookStarted,
   ITaskTestStepFinished,
   ITaskTestStepStarted,
   TASK_FRONTEND_TRACKING_ERROR,
   TASK_SPEC_ENVELOPES,
+  TASK_SUGGESTION,
   TASK_TEST_CASE_FINISHED,
   TASK_TEST_CASE_STARTED,
+  TASK_TEST_RUN_HOOK_FINISHED,
+  TASK_TEST_RUN_HOOK_STARTED,
   TASK_TEST_STEP_FINISHED,
   TASK_TEST_STEP_STARTED,
 } from "./cypress-task-definitions";
@@ -59,6 +65,7 @@ import {
   freeRegistry,
   ICaseHook,
   MissingDefinitionError,
+  MultipleDefinitionsError,
   Registry,
 } from "./registry";
 
@@ -227,6 +234,36 @@ function taskTestStepFinished(
   }
 }
 
+function taskRunHookStarted(
+  context: CompositionContext,
+  testRunHookStarted: messages.TestRunHookStarted,
+) {
+  if (context.isTrackingState) {
+    cy.task(
+      TASK_TEST_RUN_HOOK_STARTED,
+      testRunHookStarted satisfies ITaskTestRunHookStarted,
+      {
+        log: false,
+      },
+    );
+  }
+}
+
+function taskRunHookFinished(
+  context: CompositionContext,
+  testRunHookFinished: messages.TestRunHookFinished,
+) {
+  if (context.isTrackingState) {
+    cy.task(
+      TASK_TEST_RUN_HOOK_FINISHED,
+      testRunHookFinished satisfies ITaskTestRunHookFinished,
+      {
+        log: false,
+      },
+    );
+  }
+}
+
 function taskFrontEndTrackingError(error: CypressCucumberAssertionError) {
   cy.task(
     TASK_FRONTEND_TRACKING_ERROR,
@@ -235,6 +272,19 @@ function taskFrontEndTrackingError(error: CypressCucumberAssertionError) {
       log: true,
     },
   );
+}
+
+function taskSuggestion(
+  context: CompositionContext,
+  suggestion: messages.Suggestion,
+) {
+  if (context.isTrackingState) {
+    return cy.task(TASK_SUGGESTION, suggestion satisfies ITaskSuggestion, {
+      log: false,
+    });
+  } else {
+    return cy.wrap({}, { log: false });
+  }
 }
 
 function emitSkippedPickle(
@@ -826,42 +876,94 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
             return beforeHooksChain()
               .then((beforeStepHookResults) => {
-                try {
-                  return runStepWithLogGroup({
-                    keyword: ensure(
-                      "keyword" in scenarioStep && scenarioStep.keyword,
-                      "Expected to find a keyword in the scenario step",
-                    ),
-                    argument,
-                    text,
-                    fn: () =>
-                      registry.runStepDefinition(this, text, dryRun, argument),
-                  })
-                    .then(convertReturnValueToTestStepResultStatus)
-                    .then((status) => {
-                      const testStepResult = {
-                        status,
-                        duration: duration(start, createTimestamp()),
-                      };
+                return runStepWithLogGroup({
+                  keyword: ensure(
+                    "keyword" in scenarioStep && scenarioStep.keyword,
+                    "Expected to find a keyword in the scenario step",
+                  ),
+                  argument,
+                  text,
+                  fn: () => {
+                    try {
+                      return registry.runStepDefinition(
+                        this,
+                        text,
+                        dryRun,
+                        argument,
+                      );
+                    } catch (e) {
+                      if (
+                        e instanceof MissingDefinitionError ||
+                        e instanceof MultipleDefinitionsError
+                      ) {
+                        (this.test as any)._retries = (
+                          this.test as any
+                        )._currentRetry;
+                      }
 
-                      return {
-                        beforeStepHookResults,
-                        testStepResult,
-                      };
-                    });
-                } catch (e) {
-                  if (e instanceof MissingDefinitionError) {
-                    throw new Error(
-                      createMissingStepDefinitionMessage(
-                        context,
-                        pickleStep,
-                        context.registry.parameterTypeRegistry,
-                      ),
-                    );
-                  } else {
-                    throw e;
-                  }
-                }
+                      if (e instanceof MissingDefinitionError) {
+                        let parameterType: "dataTable" | "docString" | null =
+                          null;
+
+                        if (pickleStep.argument?.dataTable) {
+                          parameterType = "dataTable";
+                        } else if (pickleStep.argument?.docString) {
+                          parameterType = "docString";
+                        }
+
+                        const snippets = new CucumberExpressionGenerator(
+                          () =>
+                            context.registry.parameterTypeRegistry
+                              .parameterTypes,
+                        )
+                          .generateExpressions(pickleStep.text)
+                          .map((expression) =>
+                            generateSnippet(
+                              expression,
+                              ensure(
+                                pickleStep.type,
+                                "Expected pickleStep to have a type",
+                              ),
+                              parameterType,
+                            ),
+                          );
+
+                        return taskSuggestion(context, {
+                          id: context.newId(),
+                          pickleStepId: pickleStep.id,
+                          snippets: snippets.map((code) => {
+                            return {
+                              language: "javascript",
+                              code,
+                            };
+                          }),
+                        }).then(() => {
+                          throw new Error(
+                            createMissingStepDefinitionMessage(
+                              context,
+                              pickleStep,
+                              snippets,
+                            ),
+                          );
+                        });
+                      } else {
+                        throw e;
+                      }
+                    }
+                  },
+                })
+                  .then(convertReturnValueToTestStepResultStatus)
+                  .then((status) => {
+                    const testStepResult = {
+                      status,
+                      duration: duration(start, createTimestamp()),
+                    };
+
+                    return {
+                      beforeStepHookResults,
+                      testStepResult,
+                    };
+                  });
               })
               .then(({ beforeStepHookResults, testStepResult }) => {
                 return afterStepHooksChain().then((afterStepHookResults) => {
@@ -925,19 +1027,41 @@ function beforeHandler(this: Mocha.Context, context: CompositionContext) {
 
   const { registry } = context;
 
+  taskSpecEnvelopes(context);
+
   registry.resolveBeforeAllHooks().reduce(
     (chain, hook) => {
-      return chain.then(() =>
+      return chain.then(() => {
+        const testRunHookStartedId = context.newId();
+        const start = createTimestamp();
+
+        taskRunHookStarted(context, {
+          id: testRunHookStartedId,
+          hookId: hook.id,
+          testRunStartedId: ensure(
+            Cypress.env("testRunStartedId"),
+            "Expected to find a testRunStartedId",
+          ),
+          timestamp: start,
+        });
+
         runStepWithLogGroup({
           fn: context.dryRun ? noopFn : () => registry.runRunHook(this, hook),
           keyword: "BeforeAll",
-        }),
-      );
+        }).then(() => {
+          taskRunHookFinished(context, {
+            testRunHookStartedId,
+            timestamp: createTimestamp(),
+            result: {
+              duration: duration(start, createTimestamp()),
+              status: messages.TestStepResultStatus.PASSED,
+            },
+          });
+        });
+      });
     },
     cy.wrap({} as unknown, { log: false }),
   );
-
-  taskSpecEnvelopes(context);
 
   while (
     context.includedPickles.length > 0 &&
@@ -974,7 +1098,10 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
           "Expected to find an error message",
         );
 
-        if (HOOK_FAILURE_EXPR.test(message)) {
+        if (
+          EACH_HOOK_FAILURE_EXPR.test(message) ||
+          ALL_HOOK_FAILURE_EXPR.test(message)
+        ) {
           return;
         }
 
@@ -1036,16 +1163,6 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
                 },
                 timestamp: endTimestamp,
               };
-
-        if (wasUndefinedStepDefinition) {
-          /**
-           * Hack to abort any retry-attempts, as it won't help in this situation. There are no native
-           * way of doing this, ref. https://github.com/cypress-io/cypress/issues/19677.
-           */
-          (this.currentTest as any)!._retries = (
-            this.currentTest as any
-          )?._currentRetry;
-        }
 
         taskTestStepFinished(context, failedTestStepFinished);
 
@@ -1230,12 +1347,34 @@ function afterHandler(this: Mocha.Context, context: CompositionContext) {
 
   registry.resolveAfterAllHooks().reduce(
     (chain, hook) => {
-      return chain.then(() =>
+      return chain.then(() => {
+        const testRunHookStartedId = context.newId();
+        const start = createTimestamp();
+
+        taskRunHookStarted(context, {
+          id: testRunHookStartedId,
+          hookId: hook.id,
+          testRunStartedId: ensure(
+            Cypress.env("testRunStartedId"),
+            "Expected to find a testRunStartedId",
+          ),
+          timestamp: start,
+        });
+
         runStepWithLogGroup({
           fn: context.dryRun ? noopFn : () => registry.runRunHook(this, hook),
           keyword: "AfterAll",
-        }),
-      );
+        }).then(() => {
+          taskRunHookFinished(context, {
+            testRunHookStartedId,
+            timestamp: createTimestamp(),
+            result: {
+              duration: duration(start, createTimestamp()),
+              status: messages.TestStepResultStatus.PASSED,
+            },
+          });
+        });
+      });
     },
     cy.wrap({} as unknown, { log: false }),
   );
@@ -1288,6 +1427,17 @@ export default function createTests(
         ),
       };
     });
+
+  const runHooks: messages.Hook[] = registry.runHooks.map((runHook) => {
+    return {
+      id: runHook.id,
+      sourceReference: getSourceReferenceFromPosition(runHook.position),
+      type:
+        runHook.keyword === "BeforeAll"
+          ? messages.HookType.BEFORE_TEST_RUN
+          : messages.HookType.AFTER_TEST_RUN,
+    };
+  });
 
   const testStepIds: TestStepIds = new Map();
 
@@ -1415,6 +1565,12 @@ export default function createTests(
     });
   }
 
+  for (const hook of runHooks) {
+    specEnvelopes.push({
+      hook,
+    });
+  }
+
   for (const testCase of testCases) {
     specEnvelopes.push({
       testCase,
@@ -1466,7 +1622,7 @@ function strictIsTextTerminal(): boolean {
 function createMissingStepDefinitionMessage(
   context: CompositionContext,
   pickleStep: messages.PickleStep,
-  parameterTypeRegistry: ParameterTypeRegistry,
+  snippets: string[],
 ) {
   const noStepDefinitionPathsTemplate = `
     Step implementation missing for "<text>".
@@ -1521,28 +1677,6 @@ function createMissingStepDefinitionMessage(
   const prettyPrintList = (items: string[]) =>
     items.map((item) => "  - " + maybeEscape(item)).join("\n");
 
-  let parameter: "dataTable" | "docString" | null = null;
-
-  if (pickleStep.argument?.dataTable) {
-    parameter = "dataTable";
-  } else if (pickleStep.argument?.docString) {
-    parameter = "docString";
-  }
-
-  const snippets = new CucumberExpressionGenerator(
-    () => parameterTypeRegistry.parameterTypes,
-  )
-    .generateExpressions(pickleStep.text)
-    .map((expression) =>
-      generateSnippet(
-        expression,
-        ensure(pickleStep.type, "Expected pickleStep to have a type"),
-        parameter,
-      ),
-    )
-    .map((snippet) => indent(snippet, { count: 2 }))
-    .join("\n\n");
-
   return stripIndent(template)
     .replaceAll("<text>", pickleStep.text)
     .replaceAll(
@@ -1557,7 +1691,10 @@ function createMissingStepDefinitionMessage(
       "<step-definition-paths>",
       prettyPrintList(stepDefinitionHints.stepDefinitionPaths),
     )
-    .replaceAll("<snippets>", snippets);
+    .replaceAll(
+      "<snippets>",
+      snippets.map((snippet) => indent(snippet, { count: 2 })).join("\n\n"),
+    );
 }
 
 function mapArgumentGroup(group: Group): messages.Group {

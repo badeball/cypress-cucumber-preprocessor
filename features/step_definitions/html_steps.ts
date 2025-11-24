@@ -3,9 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { Then } from "@cucumber/cucumber";
-import { findAllByText, findByText } from "@testing-library/dom";
+import { findByText } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 
+import { ensure } from "../../lib/helpers/assertions";
 import { findAllByAccordionComponent } from "../support/accordion";
 import ICustomWorld from "../support/ICustomWorld";
 
@@ -36,7 +37,7 @@ Then(
 
 Then(
   "the HTML should display {int} executed scenario(s)",
-  async function (this: ICustomWorld, n: number) {
+  async function (this: ICustomWorld, expected: number) {
     const dom = await JSDOM.fromFile(
       path.join(this.tmpDir, "cucumber-report.html"),
       { runScripts: "dangerously" },
@@ -44,26 +45,18 @@ Then(
 
     // configure({ defaultIgnore: "comments, script, style, link, g, path" });
 
-    const AccordionItemButtons = await findAllByAccordionComponent(
+    const dd = await findByText(
       dom.window.document.documentElement,
-      "AccordionItemButton",
+      /\d+% \(\d+ \/ \d+\) passed/,
+      { selector: "span" },
     );
 
-    for (const AccordionItemButton of AccordionItemButtons) {
-      if (
-        AccordionItemButton.attributes.getNamedItem("aria-expanded")?.value ===
-        "false"
-      ) {
-        AccordionItemButton.click();
-      }
-    }
-
-    const spans = await findAllByText(
-      dom.window.document.documentElement,
-      /Scenario/,
+    const [, actual] = ensure(
+      dd.textContent!.match(/\d+% \(\d+ \/ (\d+)\) passed/),
+      "Expected a match",
     );
 
-    assert.equal(spans.length, n);
+    assert.equal(actual, expected);
   },
 );
 

@@ -1,8 +1,4 @@
-import { Before, Given } from "@badeball/cypress-cucumber-preprocessor";
-
-Before("@skip", function () {
-  return "skipped";
-});
+import { Given } from "@badeball/cypress-cucumber-preprocessor";
 
 Given("a step that does not skip", function () {
   // no-op

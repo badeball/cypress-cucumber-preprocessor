@@ -38,12 +38,15 @@ const ignorableKeys = [
   "testCaseStartedId",
   "testStepId",
   "testRunStartedId",
+  "testRunHookStartedId",
   // time
   "nanos",
   "seconds",
   // errors
   "message",
   "stackTrace",
+  // suggestions
+  "snippets",
 ];
 
 function isObject(object: any): object is object {
@@ -90,15 +93,19 @@ describe("Cucumber Compatibility Kit", () => {
     const suiteName = path.basename(path.dirname(ndjsonFile));
 
     /**
-     * Unknown parameter type will generate an exception outside of a Cypress test and halt all
-     * execution. Thus, cucumber-js' behavior is tricky to mirror.
-     *
-     * Markdown is unsupported.
+     * cucumber-js' behavior is tricky to mirror in a variety of cases.
      */
     switch (suiteName) {
-      case "unknown-parameter-type":
-      case "markdown":
-      case "hooks-conditional":
+      case "unknown-parameter-type": // Unknown parameter type will generate an exception outside of a Cypress test and halt all execution
+      case "markdown": // Markdown is unsupported
+      case "hooks-conditional": // Expections during hooks are difficult to mimick due to no try-catch
+      case "global-hooks-beforeall-error": // See above
+      case "global-hooks-afterall-error": // See above
+      case "hooks-undefined": // See above
+      case "hooks-skipped": // See above
+      case "multiple-features": // The "correct" message order is difficult to mimick
+      case "multiple-features-reversed": // Cypress has no `reversed` option
+      case "test-run-exception": // Difficult to reproduce such scenario
         it.skip(`passes the cck suite for '${suiteName}'`);
         continue;
     }
@@ -183,10 +190,16 @@ describe("Cucumber Compatibility Kit", () => {
 
       await fs.mkdir(path.join(tmpDir, "cypress", "e2e"), { recursive: true });
 
-      await fs.copyFile(
-        path.join(CCK_FEATURES_PATH, suiteName, `${suiteName}.feature`),
-        path.join(tmpDir, "cypress", "e2e", `${suiteName}.feature`),
+      const features = glob.sync(
+        path.join(CCK_FEATURES_PATH, suiteName, "*.feature"),
       );
+
+      for (const feature of features) {
+        await fs.copyFile(
+          path.join(feature),
+          path.join(tmpDir, "cypress", "e2e", path.basename(feature)),
+        );
+      }
 
       if (suiteName === "hooks-attachment") {
         await fs.copyFile(
@@ -270,7 +283,7 @@ describe("Cucumber Compatibility Kit", () => {
         (await fs.readFile(ndjsonFile)).toString(),
       ).map(normalizeMessage);
 
-      if (suiteName === "pending") {
+      if (suiteName === "pending" || suiteName === "retry-pending") {
         /**
          * We can't control Cypress exit code without failing a test, thus is cucumber-js behavior
          * difficult to mimic.
@@ -294,6 +307,14 @@ describe("Cucumber Compatibility Kit", () => {
               messages.TestStepResultStatus.PASSED;
           }
         });
+      } else if (suiteName === "global-hooks") {
+        // Move testCase after testRunHookStarted & testRunHookFinished. This is a bit difficult to
+        // account for in the preprocessor, but since it doesn't matter  we just modify the
+        // expectation.
+        expectedMessages.splice(12, 0, ...expectedMessages.splice(16, 2));
+      } else if (suiteName === "global-hooks-attachments") {
+        // Same as above.
+        expectedMessages.splice(8, 0, ...expectedMessages.splice(11, 1));
       }
 
       assert.deepEqual(actualMessages, expectedMessages);

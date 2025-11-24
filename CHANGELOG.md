@@ -24,6 +24,8 @@ Other changes:
 
   - This is similar to how steps themselves can also return the above mentioned literals. This is in line with how cucumber-js behaves.
 
+- Attachments (using log(), link() or attach()) can be added in test run hooks (BeforeAll/AfterAll). This is in line with how cucumber-js behaves.
+
 - Remove use of patch-package in development mode, which was causing some issues, closes [#1255](https://github.com/badeball/cypress-cucumber-preprocessor/pull/1255).
 
 ## v23.2.1
