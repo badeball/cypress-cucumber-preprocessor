@@ -75,7 +75,7 @@
     "base64-js": "^1.5.1",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
-    "common-ancestor-path": "^1.0.1",
+    "common-ancestor-path": "^2.0.0",
     "cosmiconfig": "^9.0.0",
     "debug": "^4.3.6",
     "error-stack-parser": "^2.1.4",
