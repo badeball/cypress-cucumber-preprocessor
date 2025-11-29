@@ -3,7 +3,7 @@ import { inspect } from "node:util";
 
 import { generateMessages } from "@cucumber/gherkin";
 import { IdGenerator, SourceMediaType } from "@cucumber/messages";
-import ancestor from "common-ancestor-path";
+import { commonAncestorPath as ancestor } from "common-ancestor-path";
 import { getSpecs } from "find-cypress-specs";
 
 import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin";
