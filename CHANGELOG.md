@@ -12,7 +12,7 @@ Breaking changes:
 
   - A branch named `v23.x.y` has been created to continue illustrating how to use Browserify. This is mentioned in the FAQ.
 
-- Bump node requirement from v20.0.0 to v20.12.0.
+- Bump node requirement slightly from v20.0.0 to ^20.12.0, ^21.7.0 or >=22.
 
   - This is in preperation of replacing `chalk` with `util.styleText`.
 
