@@ -18,6 +18,10 @@ The report is outputted to `cucumber-report.html` in the project directory, but 
 
 Screenshots are automatically added to HTML reports, including that of failed tests (unless you have disabled `screenshotOnRunFailure`). This can be turned off using the `attachments.addScreenshots` property, which defaults to `true`.
 
+## Videos
+
+Videos are not automatically added to reports, but can be turned on using the `attachments.addVideos` property. This assumes you've configured Cypress to [capture videos](https://docs.cypress.io/app/guides/screenshots-and-videos#Videos). Videos are base-64 encoded and included in the files, which may affect size and performance.
+
 ## Attachments
 
 Attachments can also be added to HTML reports through an API. This API is further explained in [JSON report](json-report.md), but applies to HTML reports as well.

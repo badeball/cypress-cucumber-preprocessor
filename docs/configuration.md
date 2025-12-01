@@ -89,6 +89,7 @@ Every configuration option has a similar key which can be use to override it, sh
 | `omitFiltered`               | `omitFiltered`              | `true`, `false`                          |
 | `dryRun`                     | `dryRun`                    | `true`, `false`                          |
 | `attachments.addScreenshots` | `attachmentsAddScreenshots` | `true`, `false`                          |
+| `attachments.addVideos`      | `attachmentsAddVideos`      | `true`, `false`                          |
 
 ## Test configuration
 
