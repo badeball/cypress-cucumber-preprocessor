@@ -98,6 +98,23 @@ Then(
   },
 );
 
+Then(
+  "the report should have a video attachment",
+  async function (this: ICustomWorld) {
+    const dom = await JSDOM.fromFile(
+      path.join(this.tmpDir, "cucumber-report.html"),
+      { runScripts: "dangerously" },
+    );
+
+    const el = await findByText(
+      dom.window.document.documentElement,
+      /\w+\.feature\.mp4/,
+    );
+
+    assert(el);
+  },
+);
+
 /**
  * This is rather fudgy, due to number of X steps no longer being displayed in the reports after
  * a major refactor of @cucumber/react-components.

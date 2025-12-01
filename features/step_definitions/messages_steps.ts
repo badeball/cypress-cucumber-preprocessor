@@ -104,6 +104,23 @@ Then(
 );
 
 Then(
+  "the messages report should contain no attachments",
+  async function (this: ICustomWorld) {
+    const messages = await readMessagesReport(this.tmpDir);
+
+    const attachments: messages.Attachment[] = messages
+      .map((m) => m.attachment)
+      .filter(notEmpty);
+
+    if (attachments.length > 0) {
+      throw new Error(
+        `Expected to find np attachments, but found ${attachments.length}`,
+      );
+    }
+  },
+);
+
+Then(
   "the messages report should contain an image attachment for what appears to be a screenshot",
   async function (this: ICustomWorld) {
     const messages = await readMessagesReport(this.tmpDir);
@@ -146,6 +163,29 @@ Then(
 
     assert.strictEqual(actualWidth, expectedDimensions.width);
     assert.strictEqual(actualHeight, expectedDimensions.height);
+  },
+);
+
+Then(
+  "the messages report should contain a video attachment",
+  async function (this: ICustomWorld) {
+    const messages = await readMessagesReport(this.tmpDir);
+
+    const attachments: messages.Attachment[] = messages
+      .map((m) => m.attachment)
+      .filter(notEmpty);
+
+    if (attachments.length === 0) {
+      throw new Error("Expected to find an attachment, but found none");
+    } else if (attachments.length > 1) {
+      throw new Error(
+        "Expected to find a single attachment, but found " + attachments.length,
+      );
+    }
+
+    const [attachment] = attachments;
+
+    assert.strictEqual(attachment.mediaType, "video/mp4");
   },
 );
 

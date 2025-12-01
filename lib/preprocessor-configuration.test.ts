@@ -1007,6 +1007,25 @@ describe("resolve()", () => {
             setValueFn,
           });
         });
+
+        describe("addVideos", () => {
+          const getValueFn = (
+            configuration: IPreprocessorConfiguration,
+          ): boolean => configuration.attachments.addVideos;
+
+          const setValueFn = (
+            configuration: IBaseUserConfiguration,
+            value: boolean,
+          ) => (configuration.attachments = { addVideos: value });
+
+          basicBooleanExample({
+            testingType,
+            default: false,
+            environmentKey: "attachmentsAddVideos",
+            getValueFn,
+            setValueFn,
+          });
+        });
       });
     });
   }

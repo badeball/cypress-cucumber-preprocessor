@@ -757,3 +757,55 @@ Feature: messages report
       When I run cypress
       Then it passes
       And there should be a messages similar to "fixtures/multiple-scenarios-reloaded.ndjson"
+
+  Rule: it should allow for videos to be attached
+
+    Background:
+      Given additional Cypress configuration
+        """
+        {
+          "e2e": {
+            "video": true
+          }
+        }
+        """
+
+    Scenario: with addVideos disabled (default)
+      Given a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature
+          Scenario: a scenario
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        Given("a step", function() {});
+        """
+      When I run cypress
+      Then it passes
+      And there should be a messages similar to "fixtures/passed-example.ndjson"
+
+    Scenario: with addVideos enabled
+      Given additional preprocessor configuration
+        """
+        {
+          "attachments": {
+            "addVideos": true
+          }
+        }
+        """
+      And a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature
+          Scenario: a scenario
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        Given("a step", function() {});
+        """
+      When I run cypress
+      Then it passes
+      And the messages report should contain a video attachment

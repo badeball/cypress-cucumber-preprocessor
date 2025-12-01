@@ -28,6 +28,12 @@ Other changes:
 
 - Remove use of patch-package in development mode, which was causing some issues, closes [#1255](https://github.com/badeball/cypress-cucumber-preprocessor/pull/1255).
 
+- Add rudimentary support for videos in reports (messages & HTML), fixes [#1139](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1139).
+
+  - This can be enabled by setting `attachments.addVideos` to `true`.
+
+  - Videos, as with screenshots, are base64-encoded inline within the reports, making them bigger. I suspect size might be an issue for large attachments and this is why I consider this to be rudimentary to begin with. As issues arise, options to externalize attachments might be considered.
+
 ## v23.2.1
 
 - Determine interactive mode correctly, fixes [#1323](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1323).

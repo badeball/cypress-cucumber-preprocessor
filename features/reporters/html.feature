@@ -41,6 +41,50 @@ Feature: html report
     Then it passes
     And the report should display when last run
 
+  Scenario: videos
+    Given additional Cypress configuration
+      """
+      {
+        "e2e": {
+          "video": true
+        }
+      }
+      """
+    And additional preprocessor configuration
+      """
+      {
+        "attachments": {
+          "addVideos": true
+        }
+      }
+      """
+    And a file named "cypress/e2e/duckduckgo.feature" with:
+      """
+      Feature: duckduckgo.com
+        Scenario: visiting the frontpage
+          When I visit duckduckgo.com
+          Then I should see a search bar
+      """
+    And a file named "cypress/support/step_definitions/steps.js" with:
+      """
+      import { When, Then } from "@badeball/cypress-cucumber-preprocessor";
+      When("I visit duckduckgo.com", () => {
+        cy.visit("https://duckduckgo.com/");
+      });
+      Then("I should see a search bar", () => {
+        cy.get("input[type=text]")
+          .should("have.attr", "placeholder")
+          .and(
+            "match",
+            /Search the web without being tracked|Search without being tracked/,
+          );
+      });
+
+      """
+    When I run cypress
+    Then it passes
+    And the report should have a video attachment
+
   Rule: it should obey `omitFiltered`
     Background:
       Given additional preprocessor configuration

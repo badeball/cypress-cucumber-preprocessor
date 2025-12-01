@@ -80,6 +80,7 @@ const EnvironmentOverrides = D.partial({
   omitFiltered: StringishToBoolean,
   dryRun: StringishToBoolean,
   attachmentsAddScreenshots: StringishToBoolean,
+  attachmentsAddVideos: StringishToBoolean,
 });
 
 type IEnvironmentOverrides = D.TypeOf<typeof EnvironmentOverrides>;
@@ -114,6 +115,7 @@ const BaseConfiguration = D.partial({
   dryRun: D.boolean,
   attachments: D.partial({
     addScreenshots: D.boolean,
+    addVideos: D.boolean,
   }),
 });
 
@@ -160,6 +162,7 @@ export interface IPreprocessorConfiguration {
   readonly dryRun: boolean;
   readonly attachments: {
     addScreenshots: boolean;
+    addVideos: boolean;
   };
 }
 
@@ -308,6 +311,11 @@ export function combineIntoConfiguration(
       specific?.attachments?.addScreenshots ??
       unspecific.attachments?.addScreenshots ??
       true,
+    addVideos:
+      overrides.attachmentsAddVideos ??
+      specific?.attachments?.addVideos ??
+      unspecific.attachments?.addVideos ??
+      false,
   };
 
   return {
