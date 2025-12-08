@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import stripIndent from "strip-indent";
+import { dedent } from "strip-indent";
 
 import {
   COMPILED_REPORTER_ENTRYPOINT,
@@ -727,7 +727,7 @@ describe("resolve()", () => {
                 () => ({ filterSpecsMixedMode: "foobar" }),
               ),
             {
-              message: stripIndent(
+              message: dedent(
                 `
                   optional property "filterSpecsMixedMode"
                   ├─ member 0
@@ -736,7 +736,7 @@ describe("resolve()", () => {
                   │  └─ cannot decode "foobar", should be "show"
                   └─ member 2
                      └─ cannot decode "foobar", should be "empty-set"
-                `.replaceAll(/^\s*\n|\n\s*$/gm, ""),
+                `,
               ),
             },
           ));
