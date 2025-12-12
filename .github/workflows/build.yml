@@ -35,12 +35,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Cache NPM modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-linux@${{ matrix.cypress-version }}
       - name: Cache Cypress binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/Cypress
           key: cypress-linux@${{ matrix.cypress-version }}
@@ -75,12 +75,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Cache NPM modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .npm
           key: npm-windows
       - name: Cache Cypress binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .cypress
           key: cypress-windows
