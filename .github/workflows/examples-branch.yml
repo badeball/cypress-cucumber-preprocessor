@@ -50,7 +50,7 @@ jobs:
       - name: Pack
         run: npm pack
       - name: Store dirty build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build
           path: badeball-*
@@ -91,7 +91,7 @@ jobs:
           rm -rf examples/!(${{ matrix.example }})
           rm -rf !(examples)
       - name: Retrieve dirty build
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build
           path: examples/${{ matrix.example }}
