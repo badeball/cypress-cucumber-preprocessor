@@ -1,0 +1,13 @@
+diff --git a/node_modules/@cypress/vite-dev-server/client/initCypressTests.js b/node_modules/@cypress/vite-dev-server/client/initCypressTests.js
+index fe44e14..386b20c 100644
+--- a/node_modules/@cypress/vite-dev-server/client/initCypressTests.js
++++ b/node_modules/@cypress/vite-dev-server/client/initCypressTests.js
+@@ -74,7 +74,7 @@ if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
+   // So we use the "@fs" bit to load the test file using its absolute path
+   // Normalize path to not include a leading slash (different on Win32 vs Unix)
+   const normalizedAbsolutePath = CypressInstance.spec.absolute.replace(/^\//, '')
+-  const testFileAbsolutePathRoute = `${devServerPublicPathBase}/@fs/${normalizedAbsolutePath}`
++  const testFileAbsolutePathRoute = `${devServerPublicPathBase}/@fs/${normalizedAbsolutePath}?import`
+ 
+   // We need a slash before /src/my-spec.js, this does not happen by default.
+   importsToLoad.push({
