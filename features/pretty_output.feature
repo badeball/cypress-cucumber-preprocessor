@@ -272,6 +272,27 @@ Feature: pretty output
                   some error
       """
 
+    Scenario: execution summary
+      Given a file named "cypress/e2e/a.feature" with:
+        """
+        Feature: a feature name
+          Scenario: a scenario name
+            Given a step
+        """
+      And a file named "cypress/support/step_definitions/steps.js" with:
+        """
+        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        Given("a step", function() { throw "some error" });
+        """
+      When I run cypress
+      Then it fails
+      And the output should contain
+      """
+        1) a feature name
+             a scenario name:
+           Error: some error
+      """
+
     Scenario: failing before hook
       Given a file named "cypress/e2e/a.feature" with:
         """
