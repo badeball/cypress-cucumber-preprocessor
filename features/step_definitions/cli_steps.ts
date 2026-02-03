@@ -2,11 +2,10 @@ import assert from "node:assert";
 import childProcess from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import util from "node:util";
+import util, { stripVTControlCharacters } from "node:util";
 
 import { Then, When } from "@cucumber/cucumber";
 import * as glob from "glob";
-import stripAnsi from "strip-ansi";
 
 import { expectLastRun, rescape } from "../support/helpers";
 import ICustomWorld from "../support/ICustomWorld";
@@ -230,7 +229,7 @@ Then(
 );
 
 const normalizeOutput = (outout: string) =>
-  stripAnsi(outout).replaceAll("\\", "/").replaceAll("×", "✖");
+  stripVTControlCharacters(outout).replaceAll("\\", "/").replaceAll("×", "✖");
 
 Then("the output should contain", function (this: ICustomWorld, content) {
   assert.match(
