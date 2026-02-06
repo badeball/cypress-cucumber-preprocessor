@@ -50,3 +50,12 @@ When("a PDF document is attached and renamed", function () {
 When("a link to {string} is attached", function (uri: string) {
   link(uri);
 });
+
+When(
+  "the string {string} is attached as {string} before a failure",
+  function (text: string, mediaType: string) {
+    attach(text, mediaType).then(() => {
+      throw new Error("whoops");
+    });
+  },
+);

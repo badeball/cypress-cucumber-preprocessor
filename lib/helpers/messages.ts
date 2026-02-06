@@ -102,22 +102,20 @@ export function removeDuplicatedStepDefinitions(
  * Some messages are emitted out-of-order, but not all. The messages below are the ones that need
  * additional sorting. The remaining messages are untouched.
  */
-const MESSAGES_ORDER: (keyof messages.Envelope)[] = [
-  "meta",
-  "source",
+const BEFORE_TEST_RUN_STARTED = [
   "gherkinDocument",
-  "pickle",
-  "parameterType",
-  "stepDefinition",
   "hook",
-  "testRunStarted",
-  "testCase",
+  "meta",
+  "parameterType",
+  "pickle",
+  "source",
+  "stepDefinition",
 ];
 
 export function orderMessages(
   messages: messages.Envelope[],
 ): messages.Envelope[] {
-  const toBeSorted = messages.map((message, i) => {
+  const toBeSorted = messages.map((message, index) => {
     const keys = Object.keys(message) as (keyof messages.Envelope)[];
 
     assert(
@@ -125,30 +123,41 @@ export function orderMessages(
       "Expected a message to have one, and only one, property",
     );
 
-    const [key] = keys;
-
-    const primary = MESSAGES_ORDER.indexOf(key);
+    const [type] = keys;
 
     return {
-      primary: primary === -1 ? null : primary,
-      secondary: i,
+      index,
       message,
+      type,
     };
   });
 
+  const isTestRunStarted = (message: messages.Envelope) => {
+    return message.testRunStarted != null;
+  };
+
+  const isBeforeTestRunStarted = (type: keyof messages.Envelope) => {
+    return BEFORE_TEST_RUN_STARTED.indexOf(type) > -1;
+  };
+
   return toBeSorted
     .sort((a, b) => {
-      if (a.primary === null && b.primary === null) {
-        return a.secondary - b.secondary;
-      } else if (a.primary === null) {
-        return 1; // b comes first,
-      } else if (b.primary === null) {
-        return -1; // a comes first.
+      if (isTestRunStarted(a.message)) {
+        return isBeforeTestRunStarted(b.type) ? 1 : -1;
+      } else if (isTestRunStarted(b.message)) {
+        return isBeforeTestRunStarted(a.type) ? -1 : 1;
+      } else if (
+        isBeforeTestRunStarted(a.type) &&
+        !isBeforeTestRunStarted(b.type)
+      ) {
+        return -1;
+      } else if (
+        !isBeforeTestRunStarted(a.type) &&
+        isBeforeTestRunStarted(b.type)
+      ) {
+        return 1;
       } else {
-        const order = a.primary - b.primary;
-
-        // To get stable sorting out of a non-stable sorting function.
-        return order === 0 ? a.secondary - b.secondary : order;
+        return a.index - b.index;
       }
     })
     .map(({ message }) => message);

@@ -32,6 +32,7 @@ export interface IStepDefinition<T extends unknown[], C extends Mocha.Context> {
   expression: Expression;
   implementation: IStepDefinitionBody<T, C>;
   position?: Position;
+  lexicalOrder: number;
 }
 
 export class MissingDefinitionError extends CypressCucumberError {}
@@ -53,6 +54,7 @@ export interface IRunHook<C extends Mocha.Context> {
   implementation: IRunHookBody<C>;
   keyword: RunHookKeyword;
   order: number;
+  lexicalOrder: number;
   position?: Position;
 }
 
@@ -62,6 +64,7 @@ export interface ICaseHook<C extends Mocha.Context> {
   implementation: ICaseHookBody<C>;
   keyword: CaseHookKeyword;
   order: number;
+  lexicalOrder: number;
   position?: Position;
   tags?: string;
   name?: string;
@@ -79,6 +82,8 @@ export interface IStepHook<C extends Mocha.Context> {
 
 const noopNode = { evaluate: () => true };
 
+let userCodeLexicalOrder = 0;
+
 function parseMaybeTags(tags?: string): Node {
   return tags ? parse(tags) : noopNode;
 }
@@ -90,6 +95,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     description: string | RegExp;
     implementation: IStepDefinitionBody<T, C>;
     position?: Position;
+    lexicalOrder: number;
   }[] = [];
 
   public stepDefinitions: IStepDefinition<T, C>[] = [];
@@ -104,6 +110,8 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
 
   public stepHooks: IStepHook<C>[] = [];
 
+  public parameterTypeOrdering: Map<ParameterType<unknown>, number> = new Map();
+
   constructor(private experimentalSourceMap: boolean = true) {
     this.defineStep = this.defineStep.bind(this);
     this.runStepDefinition = this.runStepDefinition.bind(this);
@@ -115,7 +123,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
   }
 
   public finalize(newId: IdGenerator.NewId) {
-    for (const { description, implementation, position } of this
+    for (const { description, implementation, position, lexicalOrder } of this
       .preliminaryStepDefinitions) {
       if (typeof description === "string") {
         this.stepDefinitions.push({
@@ -126,6 +134,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
           ),
           implementation,
           position,
+          lexicalOrder,
         });
       } else {
         this.stepDefinitions.push({
@@ -136,6 +145,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
           ),
           implementation,
           position,
+          lexicalOrder,
         });
       }
     }
@@ -167,6 +177,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
       description,
       implementation,
       position: maybeRetrievePositionFromSourceMap(),
+      lexicalOrder: userCodeLexicalOrder++,
     });
   }
 
@@ -175,9 +186,18 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
     regexp,
     transformer,
   }: IParameterTypeDefinition<T, C>) {
-    this.parameterTypeRegistry.defineParameterType(
-      new ParameterType(name, regexp, null, transformer, true, false),
+    const parameterType = new ParameterType(
+      name,
+      regexp,
+      null,
+      transformer,
+      true,
+      false,
     );
+
+    this.parameterTypeOrdering.set(parameterType, userCodeLexicalOrder++);
+
+    this.parameterTypeRegistry.defineParameterType(parameterType);
   }
 
   public defineCaseHook(
@@ -192,6 +212,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
       keyword: keyword,
       position: maybeRetrievePositionFromSourceMap(),
       order: order ?? DEFAULT_HOOK_ORDER,
+      lexicalOrder: userCodeLexicalOrder++,
       ...remainingOptions,
     });
   }
@@ -238,6 +259,7 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
       keyword: keyword,
       position: maybeRetrievePositionFromSourceMap(),
       order: options.order ?? DEFAULT_HOOK_ORDER,
+      lexicalOrder: userCodeLexicalOrder++,
     });
   }
 

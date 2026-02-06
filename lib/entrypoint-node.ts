@@ -75,17 +75,17 @@ export function attach(
   data: string | ArrayBuffer,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   mediaTypeOrOptions?: string | { mediaType: string; fileName?: string },
-) {
+): Cypress.Chainable {
   throw createUnimplemented();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function log(text: string) {
+export function log(text: string): Cypress.Chainable {
   throw createUnimplemented();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function link(text: string) {
+export function link(text: string): Cypress.Chainable {
   throw createUnimplemented();
 }
 

@@ -197,7 +197,7 @@ function createStringAttachment(
   fileName: string | undefined,
   mediaType: string,
   encoding: messages.AttachmentContentEncoding,
-) {
+): Cypress.Chainable {
   const taskData: ITaskCreateStringAttachment = {
     data,
     fileName,
@@ -205,7 +205,7 @@ function createStringAttachment(
     encoding,
   };
 
-  cy.task(TASK_CREATE_STRING_ATTACHMENT, taskData, {
+  return cy.task(TASK_CREATE_STRING_ATTACHMENT, taskData, {
     log: false,
   });
 }
@@ -213,7 +213,7 @@ function createStringAttachment(
 export function attach(
   data: string | ArrayBuffer,
   mediaTypeOrOptions?: string | { mediaType: string; fileName?: string },
-) {
+): Cypress.Chainable {
   let mediaType, fileName;
 
   if (mediaTypeOrOptions != null) {
@@ -229,14 +229,14 @@ export function attach(
     mediaType = mediaType ?? "text/plain";
 
     if (mediaType.startsWith("base64:")) {
-      createStringAttachment(
+      return createStringAttachment(
         data,
         fileName,
         mediaType.replace("base64:", ""),
         messages.AttachmentContentEncoding.BASE64,
       );
     } else {
-      createStringAttachment(
+      return createStringAttachment(
         data,
         fileName,
         mediaType ?? "text/plain",
@@ -248,7 +248,7 @@ export function attach(
       throw Error("ArrayBuffer attachments must specify a media type");
     }
 
-    createStringAttachment(
+    return createStringAttachment(
       fromByteArray(new Uint8Array(data)),
       fileName,
       mediaType,
@@ -259,12 +259,12 @@ export function attach(
   }
 }
 
-export function log(text: string) {
-  attach(text, "text/x.cucumber.log+plain");
+export function log(text: string): Cypress.Chainable {
+  return attach(text, "text/x.cucumber.log+plain");
 }
 
-export function link(text: string) {
-  attach(text, "text/uri-list");
+export function link(text: string): Cypress.Chainable {
+  return attach(text, "text/uri-list");
 }
 
 function isFeature() {

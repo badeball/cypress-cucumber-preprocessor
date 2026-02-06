@@ -1406,9 +1406,11 @@ export default function createTests(
 
   registry.finalize(newId);
 
+  type LexicallyOrdered = { lexicalOrder: number };
+
   const testFilter = createTestFilter(gherkinDocument, Cypress.env());
 
-  const stepDefinitions: messages.StepDefinition[] =
+  const stepDefinitions: (messages.StepDefinition & LexicallyOrdered)[] =
     registry.stepDefinitions.map((stepDefinition) => {
       const type: messages.StepDefinitionPatternType =
         stepDefinition.expression instanceof RegularExpression
@@ -1424,19 +1426,23 @@ export default function createTests(
         sourceReference: getSourceReferenceFromPosition(
           stepDefinition.position,
         ),
+        lexicalOrder: stepDefinition.lexicalOrder,
       };
     });
 
-  const runHooks: messages.Hook[] = registry.runHooks.map((runHook) => {
-    return {
-      id: runHook.id,
-      sourceReference: getSourceReferenceFromPosition(runHook.position),
-      type:
-        runHook.keyword === "BeforeAll"
-          ? messages.HookType.BEFORE_TEST_RUN
-          : messages.HookType.AFTER_TEST_RUN,
-    };
-  });
+  const runHooks: (messages.Hook & LexicallyOrdered)[] = registry.runHooks.map(
+    (runHook) => {
+      return {
+        id: runHook.id,
+        sourceReference: getSourceReferenceFromPosition(runHook.position),
+        type:
+          runHook.keyword === "BeforeAll"
+            ? messages.HookType.BEFORE_TEST_RUN
+            : messages.HookType.AFTER_TEST_RUN,
+        lexicalOrder: runHook.lexicalOrder,
+      };
+    },
+  );
 
   const testStepIds: TestStepIds = new Map();
 
@@ -1525,9 +1531,27 @@ export default function createTests(
     });
   }
 
-  for (const hook of registry.caseHooks) {
-    specEnvelopes.push({
-      hook: {
+  const parameterTypes: (messages.ParameterType & LexicallyOrdered)[] =
+    Array.from(registry.parameterTypeRegistry.parameterTypes)
+      .filter((parameterType) => !parameterType.builtin)
+      .map((parameterType) => {
+        return {
+          id: newId(),
+          name: parameterType.name!,
+          preferForRegularExpressionMatch: parameterType.preferForRegexpMatch!,
+          regularExpressions: parameterType.regexpStrings,
+          useForSnippets: parameterType.useForSnippets!,
+          sourceReference: getSourceReferenceFromPosition(),
+          lexicalOrder: ensure(
+            registry.parameterTypeOrdering.get(parameterType),
+            "Expected parameter type to have a lexical order",
+          ),
+        };
+      });
+
+  const caseHooks: (messages.Hook & LexicallyOrdered)[] =
+    registry.caseHooks.map((hook) => {
+      return {
         id: hook.id,
         name: hook.name,
         sourceReference: getSourceReferenceFromPosition(hook.position),
@@ -1536,38 +1560,70 @@ export default function createTests(
           hook.keyword === "Before"
             ? messages.HookType.BEFORE_TEST_CASE
             : messages.HookType.AFTER_TEST_CASE,
-      },
+        lexicalOrder: hook.lexicalOrder,
+      };
     });
-  }
 
-  for (const parameterType of registry.parameterTypeRegistry.parameterTypes) {
-    if (parameterType.builtin) {
-      continue;
+  type UserCode = {
+    stepDefinition?: messages.StepDefinition & LexicallyOrdered;
+    runHook?: messages.Hook & LexicallyOrdered;
+    caseHook?: messages.Hook & LexicallyOrdered;
+    parameterType?: messages.ParameterType & LexicallyOrdered;
+  };
+
+  const userCode: UserCode[] = [
+    ...stepDefinitions.map((stepDefinition) => {
+      return { stepDefinition };
+    }),
+    ...runHooks.map((runHook) => {
+      return { runHook };
+    }),
+    ...caseHooks.map((caseHook) => {
+      return { caseHook };
+    }),
+    ...parameterTypes.map((parameterType) => {
+      return { parameterType };
+    }),
+  ];
+
+  console.log(...userCode);
+
+  userCode.sort((a, b) => {
+    const userCodeA =
+      a.stepDefinition || a.runHook || a.caseHook || a.parameterType;
+    const userCodeB =
+      b.stepDefinition || b.runHook || b.caseHook || b.parameterType;
+
+    return userCodeA!.lexicalOrder - userCodeB!.lexicalOrder;
+  });
+
+  const omit = <T, K extends keyof T>(obj: T, key: K): Omit<T, K> => {
+    const { [key]: _omitted, ...rest } = obj;
+    return rest;
+  };
+
+  for (const userCodeEl of userCode) {
+    const { stepDefinition, runHook, caseHook, parameterType } = userCodeEl;
+
+    console.log(userCodeEl);
+
+    if (stepDefinition) {
+      specEnvelopes.push({
+        stepDefinition: omit(stepDefinition, "lexicalOrder"),
+      });
+    } else if (runHook) {
+      specEnvelopes.push({
+        hook: omit(runHook, "lexicalOrder"),
+      });
+    } else if (caseHook) {
+      specEnvelopes.push({
+        hook: omit(caseHook, "lexicalOrder"),
+      });
+    } else if (parameterType) {
+      specEnvelopes.push({
+        parameterType: omit(parameterType, "lexicalOrder"),
+      });
     }
-
-    // ! to make TS happy.
-    specEnvelopes.push({
-      parameterType: {
-        id: newId(),
-        name: parameterType.name!,
-        preferForRegularExpressionMatch: parameterType.preferForRegexpMatch!,
-        regularExpressions: parameterType.regexpStrings,
-        useForSnippets: parameterType.useForSnippets!,
-        sourceReference: getSourceReferenceFromPosition(),
-      },
-    });
-  }
-
-  for (const stepDefinition of stepDefinitions) {
-    specEnvelopes.push({
-      stepDefinition,
-    });
-  }
-
-  for (const hook of runHooks) {
-    specEnvelopes.push({
-      hook,
-    });
   }
 
   for (const testCase of testCases) {
@@ -1575,6 +1631,8 @@ export default function createTests(
       testCase,
     });
   }
+
+  console.log(specEnvelopes);
 
   const context: CompositionContext = {
     registry,
