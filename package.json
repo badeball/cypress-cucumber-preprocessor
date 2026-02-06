@@ -64,7 +64,7 @@
   "dependencies": {
     "@cucumber/ci-environment": "^13.0.0",
     "@cucumber/cucumber": "^12.0.0",
-    "@cucumber/cucumber-expressions": "^18.0.0",
+    "@cucumber/cucumber-expressions": "^19.0.0",
     "@cucumber/gherkin": "^38.0.0",
     "@cucumber/html-formatter": "^23.0.0",
     "@cucumber/message-streams": "^4.0.1",
@@ -91,7 +91,7 @@
     "@babel/parser": "^7.25.3",
     "@babel/types": "^7.25.2",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.2",
-    "@cucumber/compatibility-kit": "^27.0.0",
+    "@cucumber/compatibility-kit": "^28.0.0",
     "@cypress/webpack-preprocessor": "^6.0.2",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.8.0",
