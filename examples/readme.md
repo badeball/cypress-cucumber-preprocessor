@@ -4,7 +4,7 @@ These are the *only* official examples at the time of writing. Any other example
 
 ## Usage with other plugins
 
-If you're using the preprocessor _with other plugins_, please read [docs/event-handlers.md: On event handlers](event-handlers.md) **carefully**.
+If you're using the preprocessor _with other plugins_, please read [docs/event-handlers.md: On event handlers](../docs/event-handlers.md) **carefully**.
 
 ## E2E testing
 
