@@ -1586,8 +1586,6 @@ export default function createTests(
     }),
   ];
 
-  console.log(...userCode);
-
   userCode.sort((a, b) => {
     const userCodeA =
       a.stepDefinition || a.runHook || a.caseHook || a.parameterType;
@@ -1604,8 +1602,6 @@ export default function createTests(
 
   for (const userCodeEl of userCode) {
     const { stepDefinition, runHook, caseHook, parameterType } = userCodeEl;
-
-    console.log(userCodeEl);
 
     if (stepDefinition) {
       specEnvelopes.push({
@@ -1631,8 +1627,6 @@ export default function createTests(
       testCase,
     });
   }
-
-  console.log(specEnvelopes);
 
   const context: CompositionContext = {
     registry,
