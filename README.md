@@ -78,7 +78,7 @@ $ npm run test # runs all of the above
 
 ## Attribution & sponsors
 
-A special thanks goes out to [Łukasz Gandecki](https://github.com/lgandecki) for developing and maintaining the cypress-cucumber integration before me, in addition to [all other contributors](https://github.com/badeball/cypress-cucumber-preprocessor/graphs/contributors). Some of the work has partially been sponsored by [Klaveness Digital](https://www.klavenessdigital.com/). This project is currently sponsored by [TestMu AI](https://www.testmu.ai/?utm_source=cypress-cucumber-preprocessor&utm_medium=sponsor).
+A special thanks goes out to [Łukasz Gandecki](https://github.com/lgandecki) for developing and maintaining the cypress-cucumber integration before me, in addition to [all other contributors](https://github.com/badeball/cypress-cucumber-preprocessor/graphs/contributors). Some of the work has partially been sponsored by [Klaveness Digital](https://www.klavenessdigital.com/). This project is currently sponsored by [TestMu AI](https://www.testmuai.com/?utm_medium=sponsor&utm_source=cypress-cucumber-preprocessor).
 
 <br />
 <br />
