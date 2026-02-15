@@ -1,12 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "npm:unpublishSafe", "schedule:daily"],
+  "extends": [
+    "config:recommended",
+    "security:minimumReleaseAgeNpm",
+    "schedule:daily"
+  ],
   "automerge": true,
   "automergeType": "branch",
   "packageRules": [
     {
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "enabled": false
     }
   ]
