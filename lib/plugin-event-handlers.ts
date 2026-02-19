@@ -1183,6 +1183,7 @@ export const testRunHookStartedHandler = createGracefullPluginEventHandler(
 
     switch (state.state) {
       case "received-envelopes": // Case of BeforeAll
+      case "has-reloaded-received-envelopes": // Another case of BeforeAll
       case "test-finished": // Case of AfterAll
       case "run-hook-finished": // Case of consequtive run hooks
         break;
