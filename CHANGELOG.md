@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unrelased
+## v24.0.1
 
 - Update dependency @cucumber/pretty-formatter to v3.
 
