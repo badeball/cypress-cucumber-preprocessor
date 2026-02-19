@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
   - This is not a breaking change, but warrants mentioning because the output is changed stylistically in some ways.
 
+- Correctly handle edge case related to reload-behavior with run hooks, fixes [#1344](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1344).
+
 ## v24.0.0
 
 Breaking changes:
