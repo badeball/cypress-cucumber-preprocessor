@@ -92,6 +92,9 @@ interface CompositionContext {
     stepDefinitionPaths: string[];
   };
   dryRun: boolean;
+  relativeSpecPath: string;
+  currentTitlePath: string[];
+  pickleLookup: Map<string, messages.Pickle>;
 }
 
 function getSourceReferenceFromPosition(
@@ -160,6 +163,35 @@ function retrieveInternalSuiteProperties():
   | InternalSuiteProperties
   | undefined {
   return Cypress.env(INTERNAL_SUITE_PROPERTIES);
+}
+
+export const NOT_FEATURE_ERROR =
+  "Expected to find internal properties, but didn't. This is likely because you're calling doesFeatureMatch() in a non-feature spec. Use doesFeatureMatch() in combination with isFeature() if you have both feature and non-feature specs";
+
+export function getStableTestKey(
+  relativeSpecPath: string,
+  titlePath: string[],
+): string {
+  return [relativeSpecPath, ...titlePath].join("#");
+}
+
+const PICKLE_LOOKUP_GLOBAL = "__cypress_cucumber_preprocessor_pickle_lookup_dont_use_this";
+
+const getPickleLookup = (): Map<string, messages.Pickle> => {
+  return ensure(globalThis[PICKLE_LOOKUP_GLOBAL], "Expected to find a global pickle lookup");
+}
+
+export function lookupPickle(
+  spec: Cypress.Spec,
+  test: { titlePath: string[] },
+): messages.Pickle {
+  const key = getStableTestKey(spec.relative, test.titlePath);
+
+  const pickle = getPickleLookup().get(key);
+  if (!pickle) {
+    throw new Error(NOT_FEATURE_ERROR);
+  }
+  return pickle;
 }
 
 function taskSpecEnvelopes(context: CompositionContext) {
@@ -436,6 +468,8 @@ function createFeature(context: CompositionContext, feature: messages.Feature) {
     globalThis;
 
   describe(feature.name || "<unamed feature>", suiteOptions, () => {
+    context.currentTitlePath = [feature.name || "<unamed feature>"];
+
     mochaGlobals.before(function () {
       beforeHandler.call(this, context);
     });
@@ -499,6 +533,7 @@ function createRule(context: CompositionContext, rule: messages.Rule) {
     tagsToOptions(rule.tags).filter(isExclusivelySuiteConfiguration),
   ) as Cypress.TestConfigOverrides;
 
+  context.currentTitlePath.push(rule.name || "<unamed rule>");
   describe(rule.name || "<unamed rule>", suiteOptions, () => {
     if (rule.children) {
       for (const child of rule.children) {
@@ -508,6 +543,7 @@ function createRule(context: CompositionContext, rule: messages.Rule) {
       }
     }
   });
+  context.currentTitlePath.pop();
 }
 function createScenario(
   context: CompositionContext,
@@ -547,6 +583,13 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     ...pickleSteps.map((pickleStep) => ({ pickleStep })),
     ...afterHooks.map((hook) => ({ hook })),
   ];
+
+  const stableKey = [
+    context.relativeSpecPath,
+    ...context.currentTitlePath,
+    scenarioName,
+  ].join("#");
+  context.pickleLookup.set(stableKey, pickle);
 
   if (shouldSkipPickle(testFilter, pickle)) {
     if (!context.omitFiltered) {
@@ -1628,6 +1671,9 @@ export default function createTests(
     });
   }
 
+  const pickleLookup = new Map<string, messages.Pickle>();
+  globalThis[PICKLE_LOOKUP_GLOBAL] = pickleLookup;
+
   const context: CompositionContext = {
     registry,
     newId,
@@ -1645,6 +1691,9 @@ export default function createTests(
     softErrors,
     stepDefinitionHints,
     dryRun,
+    relativeSpecPath: ensure(gherkinDocument.uri, "Expected gherkin document to have a uri"),
+    currentTitlePath: [],
+    pickleLookup,
   };
 
   if (gherkinDocument.feature) {

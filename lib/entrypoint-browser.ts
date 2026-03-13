@@ -1,18 +1,19 @@
 import * as messages from "@cucumber/messages";
-import parse from "@cucumber/tag-expressions";
+import { parse } from "@cucumber/tag-expressions";
 import { fromByteArray } from "base64-js";
 
 import { AddOptions } from "./add-cucumber-preprocessor-plugin";
-import { retrieveInternalSpecProperties } from "./browser-runtime";
-import { INTERNAL_SPEC_PROPERTIES } from "./constants";
+import {
+  lookupPickle,
+} from "./browser-runtime";
 import {
   ITaskCreateStringAttachment,
   TASK_CREATE_STRING_ATTACHMENT,
 } from "./cypress-task-definitions";
 import DataTable from "./data_table";
+import { ensure } from "./helpers/assertions";
 import { collectTagNames } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
-import { createError } from "./helpers/error";
 import {
   ConfigurationFileResolver,
   ICypressRuntimeConfiguration,
@@ -268,21 +269,22 @@ export function link(text: string): Cypress.Chainable {
 }
 
 function isFeature() {
-  return Cypress.env(INTERNAL_SPEC_PROPERTIES) != null;
+  if (!Cypress.spec || !Cypress.currentTest) {
+    return false;
+  }
+  try {
+    lookupPickle(Cypress.spec, Cypress.currentTest);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-const NOT_FEATURE_ERROR =
-  "Expected to find internal properties, but didn't. This is likely because you're calling doesFeatureMatch() in a non-feature spec. Use doesFeatureMatch() in combination with isFeature() if you have both feature and non-feature specs";
-
 function doesFeatureMatch(expression: string) {
-  let pickle: messages.Pickle;
-
-  try {
-    pickle = retrieveInternalSpecProperties().pickle;
-  } catch {
-    throw createError(NOT_FEATURE_ERROR);
-  }
-
+  const pickle = lookupPickle(
+    ensure(Cypress.spec, "Expected to find a spec"),
+    ensure(Cypress.currentTest, "Expected to find a current test"),
+  )
   return parse(expression).evaluate(collectTagNames(pickle.tags));
 }
 
@@ -299,6 +301,7 @@ export {
   doesFeatureMatch,
   defineStep as Given,
   isFeature,
+  lookupPickle,
   runStepDefinition as Step,
   defineStep as Then,
   defineStep as When,
