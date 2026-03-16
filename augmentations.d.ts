@@ -1,6 +1,7 @@
 import messages from "@cucumber/messages";
 
 import { Registry } from "./lib/registry";
+
 import { MochaGlobals } from "mocha";
 
 declare module "@cucumber/cucumber" {
@@ -29,10 +30,6 @@ declare global {
 
     var __cypress_cucumber_preprocessor_mocha_dont_use_this:
       | Pick<MochaGlobals, "before" | "beforeEach" | "after" | "afterEach">
-      | undefined;
-
-    var __cypress_cucumber_preprocessor_pickle_lookup_dont_use_this:
-      | Map<string, messages.Pickle>
       | undefined;
   }
 
