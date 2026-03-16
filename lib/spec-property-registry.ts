@@ -40,14 +40,14 @@ declare global {
     | undefined;
 }
 
-export class SpecConfigRegistry {
+export class SpecPropertyRegistry {
   private static cfgs: Map<string, InternalSpecProperties>;
 
   private constructor() {
     if (globalThis[GLOBAL_PROPERTY_NAME]) {
-      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
+      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
     } else {
-      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME] = new Map<
+      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME] = new Map<
         string,
         InternalSpecProperties
       >();
@@ -61,10 +61,10 @@ export class SpecConfigRegistry {
         InternalSpecProperties
       >();
     }
-    if (!SpecConfigRegistry.cfgs) {
-      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
+    if (!SpecPropertyRegistry.cfgs) {
+      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
     }
-    return SpecConfigRegistry.cfgs;
+    return SpecPropertyRegistry.cfgs;
   }
 
   private static composeKey(criteria: SpecLookupCriteria): string {

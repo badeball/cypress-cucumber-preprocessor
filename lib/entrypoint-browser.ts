@@ -11,6 +11,7 @@ import DataTable from "./data_table";
 import { ensure } from "./helpers/assertions";
 import { collectTagNames } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
+import { createError } from "./helpers/errors";
 import {
   ConfigurationFileResolver,
   ICypressRuntimeConfiguration,
@@ -27,7 +28,7 @@ import {
   IStepHookOptions,
 } from "./public-member-types";
 import { getRegistry } from "./registry";
-import { SpecConfigRegistry } from "./spec-config-registry";
+import { SpecPropertyRegistry } from "./spec-property-registry";
 
 function defineStep<T extends unknown[], C extends Mocha.Context>(
   description: string | RegExp,
@@ -271,7 +272,7 @@ function isFeature() {
     return false;
   }
   try {
-    SpecConfigRegistry.find(
+    SpecPropertyRegistry.find(
       ensure(Cypress.currentTest, "Expected to find a current test"),
     );
     return true;
@@ -280,11 +281,17 @@ function isFeature() {
   }
 }
 
+export const NOT_FEATURE_ERROR =
+  "Expected to find internal properties, but didn't. This is likely because you're calling doesFeatureMatch() in a non-feature spec. Use doesFeatureMatch() in combination with isFeature() if you have both feature and non-feature specs";
+
 function doesFeatureMatch(expression: string) {
-  const pickle = SpecConfigRegistry.find(
+  const pickle = SpecPropertyRegistry.find(
     ensure(Cypress.currentTest, "Expected to find a current test"),
   ).pickle;
 
+  if (!pickle) {
+    throw createError(NOT_FEATURE_ERROR)
+  }
   return parse(expression).evaluate(collectTagNames(pickle.tags));
 }
 

@@ -50,7 +50,6 @@ import { getTags } from "./helpers/environment";
 import { createTimestamp, duration } from "./helpers/messages";
 import {
   isExclusivelySuiteConfiguration,
-  isNotExclusivelySuiteConfiguration,
   tagsToOptions,
 } from "./helpers/options";
 import { generateSnippet } from "./helpers/snippets";
@@ -70,8 +69,9 @@ import {
   internalPropertiesReplacementText,
   InternalSpecProperties,
   IStep,
-  SpecConfigRegistry,
-} from "./spec-config-registry";
+  SpecPropertyRegistry,
+} from "./spec-property-registry";
+
 type Node = ReturnType<typeof parse>;
 
 type TestStepIds = Map<string, Map<string, string>>;
@@ -137,9 +137,6 @@ function retrieveInternalSuiteProperties():
   | undefined {
   return Cypress.expose(INTERNAL_SUITE_PROPERTIES);
 }
-
-export const NOT_FEATURE_ERROR =
-  "Expected to find internal properties, but didn't. This is likely because you're calling doesFeatureMatch() in a non-feature spec. Use doesFeatureMatch() in combination with isFeature() if you have both feature and non-feature specs";
 
 function taskSpecEnvelopes(context: CompositionContext) {
   if (context.isTrackingState) {
@@ -576,7 +573,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     }
   }
 
-  SpecConfigRegistry.register({
+  SpecPropertyRegistry.register({
     titlePath: [...context.currentTitlePath, scenarioName],
     specProperties: internalProperties,
   });
@@ -590,7 +587,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
       "Included pickle stack is unsynchronized",
     );
 
-    const { remainingSteps, testCaseStartedId } = SpecConfigRegistry.find(
+    const { remainingSteps, testCaseStartedId } = SpecPropertyRegistry.find(
       Cypress.currentTest,
     );
 
@@ -1050,7 +1047,7 @@ function beforeEachHandler(context: CompositionContext) {
 function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
   freeRegistry();
 
-  const properties = SpecConfigRegistry.find(Cypress.currentTest);
+  const properties = SpecPropertyRegistry.find(Cypress.currentTest);
 
   const { pickle, testCaseStartedId, currentStepStartedAt, remainingSteps } =
     properties;
@@ -1297,7 +1294,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
    * Repopulate internal properties in case previous test is retried.
    */
   if (willBeRetried) {
-    SpecConfigRegistry.update(Cypress.currentTest, {
+    SpecPropertyRegistry.update(Cypress.currentTest, {
       testCaseStartedId: context.newId(),
       remainingSteps: [...properties.allSteps],
     });
