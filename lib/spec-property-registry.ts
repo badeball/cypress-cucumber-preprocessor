@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Registry of internal spec properties keyed by test title path.
+ * Used by the browser runtime to store and retrieve per-scenario state (pickle,
+ * step list, test case id, etc.).
+ */
+
 import type { Pickle, PickleStep } from "@cucumber/messages";
 import merge from "lodash/merge";
 
@@ -5,14 +11,24 @@ import { ensure } from "./helpers/assertions";
 import type { StrictTimestamp } from "./helpers/messages";
 import type { ICaseHook } from "./registry";
 
+/**
+ * One slot in the scenario execution list: either a step hook (BeforeStep/AfterStep)
+ * or a Gherkin step (pickle step).
+ * 
+ */
 export interface IStep {
   hook?: ICaseHook<Mocha.Context>;
   pickleStep?: PickleStep;
 }
 
+/** Return value for InternalSpecProperties.toJSON to hide internals from reporters. */
 export const internalPropertiesReplacementText =
   "Internal properties of cypress-cucumber-preprocessor omitted from report.";
 
+/**
+ * Internal state stored per scenario (one entry per `it(...)` from a feature).
+ * Used by the browser runtime for step execution, timing, and reporting.
+ */
 export interface InternalSpecProperties {
   pickle: Pickle;
   testCaseStartedId: string;
@@ -23,12 +39,15 @@ export interface InternalSpecProperties {
   toJSON(): typeof internalPropertiesReplacementText;
 }
 
-/** Criteria for lookup (find/update). Key is titlePath only — one spec file runs at a time. */
-export interface SpecLookupCriteria {
+/**
+ * Criteria for lookup (find/update). Key is titlePath only — one spec file runs at a time.
+ */
+export interface LookupCriteria {
   titlePath: string[];
 }
 
-export interface SpecConfig extends SpecLookupCriteria {
+/** Full config for a single spec: lookup criteria plus its internal properties. */
+export interface RegistrationEntry extends LookupCriteria {
   specProperties: InternalSpecProperties;
 }
 
@@ -40,14 +59,18 @@ declare global {
     | undefined;
 }
 
-export class SpecPropertyRegistry {
+/**
+ * Global registry mapping test title path to internal spec properties.
+ * Stores one entry per scenario; find/update by SpecLookupCriteria (titlePath).
+ */
+export class SpecConfigRegistry {
   private static cfgs: Map<string, InternalSpecProperties>;
 
   private constructor() {
     if (globalThis[GLOBAL_PROPERTY_NAME]) {
-      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
+      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
     } else {
-      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME] = new Map<
+      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME] = new Map<
         string,
         InternalSpecProperties
       >();
@@ -61,17 +84,21 @@ export class SpecPropertyRegistry {
         InternalSpecProperties
       >();
     }
-    if (!SpecPropertyRegistry.cfgs) {
-      SpecPropertyRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
+    if (!SpecConfigRegistry.cfgs) {
+      SpecConfigRegistry.cfgs = globalThis[GLOBAL_PROPERTY_NAME];
     }
-    return SpecPropertyRegistry.cfgs;
+    return SpecConfigRegistry.cfgs;
   }
 
-  private static composeKey(criteria: SpecLookupCriteria): string {
+  private static composeKey(criteria: LookupCriteria): string {
     return criteria.titlePath.join("#");
   }
 
-  static find(criteria: SpecLookupCriteria): InternalSpecProperties {
+  /**
+   * Returns the internal properties for the spec matching the given criteria.
+   * Throws if no config is registered for that title path.
+   */
+  static find(criteria: LookupCriteria): InternalSpecProperties {
     const key = this.composeKey(criteria);
     return ensure(
       this.configs.get(key),
@@ -79,15 +106,23 @@ export class SpecPropertyRegistry {
     );
   }
 
-  static register(config: SpecConfig) {
+  /**
+   * Registers internal properties for a spec. Overwrites any existing entry
+   * for the same title path.
+   */
+  static register(config: RegistrationEntry): void {
     const key = this.composeKey(config);
     this.configs.set(key, config.specProperties);
   }
 
+  /**
+   * Merges partial properties into the existing config for the given spec.
+   * Throws if no config is registered for that title path.
+   */
   static update(
-    spec: SpecLookupCriteria,
+    spec: LookupCriteria,
     config: Partial<InternalSpecProperties>,
-  ) {
+  ): void {
     const key = this.composeKey(spec);
 
     const merged = merge(
