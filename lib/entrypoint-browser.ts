@@ -272,9 +272,7 @@ function isFeature() {
     return false;
   }
   try {
-    SpecPropertyRegistry.find(
-      ensure(Cypress.currentTest, "Expected to find a current test"),
-    );
+    SpecPropertyRegistry.find(Cypress.currentTest);
     return true;
   } catch {
     return false;
