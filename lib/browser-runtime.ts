@@ -11,7 +11,6 @@ import { v4 as uuid } from "uuid";
 import {
   ALL_HOOK_FAILURE_EXPR,
   EACH_HOOK_FAILURE_EXPR,
-  INTERNAL_SPEC_PROPERTIES,
   INTERNAL_SUITE_PROPERTIES,
 } from "./constants";
 import {
@@ -48,7 +47,7 @@ import {
 } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
 import { getTags } from "./helpers/environment";
-import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
+import { createTimestamp, duration } from "./helpers/messages";
 import {
   isExclusivelySuiteConfiguration,
   isNotExclusivelySuiteConfiguration,
@@ -57,7 +56,6 @@ import {
 import { generateSnippet } from "./helpers/snippets";
 import { Position } from "./helpers/source-map";
 import { indent, stripIndent } from "./helpers/strings";
-import { looksLikeOptions, tagToCypressOptions } from "./helpers/tag-parser";
 import { notNull } from "./helpers/type-guards";
 import { ICaseHookParameter, IStepHookParameter } from "./public-member-types";
 import {
@@ -68,7 +66,12 @@ import {
   MultipleDefinitionsError,
   Registry,
 } from "./registry";
-
+import {
+  internalPropertiesReplacementText,
+  InternalSpecProperties,
+  IStep,
+  SpecConfigRegistry,
+} from "./spec-config-registry";
 type Node = ReturnType<typeof parse>;
 
 type TestStepIds = Map<string, Map<string, string>>;
@@ -92,9 +95,7 @@ interface CompositionContext {
     stepDefinitionPaths: string[];
   };
   dryRun: boolean;
-  relativeSpecPath: string;
   currentTitlePath: string[];
-  pickleLookup: Map<string, messages.Pickle>;
 }
 
 function getSourceReferenceFromPosition(
@@ -125,74 +126,20 @@ function convertReturnValueToTestStepResultStatus(
   }
 }
 
-interface IStep {
-  hook?: ICaseHook<Mocha.Context>;
-  pickleStep?: messages.PickleStep;
-}
-
-const internalPropertiesReplacementText =
-  "Internal properties of cypress-cucumber-preprocessor omitted from report.";
-
 const noopFn = () => {};
-
-export interface InternalSpecProperties {
-  pickle: messages.Pickle;
-  testCaseStartedId: string;
-  currentStepStartedAt?: StrictTimestamp;
-  currentStep?: IStep;
-  allSteps: IStep[];
-  remainingSteps: IStep[];
-  toJSON(): typeof internalPropertiesReplacementText;
-}
 
 export interface InternalSuiteProperties {
   isEventHandlersAttached?: boolean;
 }
 
-export function retrieveInternalSpecProperties(): InternalSpecProperties {
-  return Cypress.env(INTERNAL_SPEC_PROPERTIES) as InternalSpecProperties;
-}
-
-function updateInternalSpecProperties(
-  newProperties: Partial<InternalSpecProperties>,
-): void {
-  Object.assign(retrieveInternalSpecProperties(), newProperties);
-}
-
 function retrieveInternalSuiteProperties():
   | InternalSuiteProperties
   | undefined {
-  return Cypress.env(INTERNAL_SUITE_PROPERTIES);
+  return Cypress.expose(INTERNAL_SUITE_PROPERTIES);
 }
 
 export const NOT_FEATURE_ERROR =
   "Expected to find internal properties, but didn't. This is likely because you're calling doesFeatureMatch() in a non-feature spec. Use doesFeatureMatch() in combination with isFeature() if you have both feature and non-feature specs";
-
-export function getStableTestKey(
-  relativeSpecPath: string,
-  titlePath: string[],
-): string {
-  return [relativeSpecPath, ...titlePath].join("#");
-}
-
-const PICKLE_LOOKUP_GLOBAL = "__cypress_cucumber_preprocessor_pickle_lookup_dont_use_this";
-
-const getPickleLookup = (): Map<string, messages.Pickle> => {
-  return ensure(globalThis[PICKLE_LOOKUP_GLOBAL], "Expected to find a global pickle lookup");
-}
-
-export function lookupPickle(
-  spec: Cypress.Spec,
-  test: { titlePath: string[] },
-): messages.Pickle {
-  const key = getStableTestKey(spec.relative, test.titlePath);
-
-  const pickle = getPickleLookup().get(key);
-  if (!pickle) {
-    throw new Error(NOT_FEATURE_ERROR);
-  }
-  return pickle;
-}
 
 function taskSpecEnvelopes(context: CompositionContext) {
   if (context.isTrackingState) {
@@ -584,13 +531,6 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     ...afterHooks.map((hook) => ({ hook })),
   ];
 
-  const stableKey = [
-    context.relativeSpecPath,
-    ...context.currentTitlePath,
-    scenarioName,
-  ].join("#");
-  context.pickleLookup.set(stableKey, pickle);
-
   if (shouldSkipPickle(testFilter, pickle)) {
     if (!context.omitFiltered) {
       it.skip(scenarioName);
@@ -607,10 +547,6 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     allSteps: steps,
     remainingSteps: [...steps],
     toJSON: () => internalPropertiesReplacementText,
-  };
-
-  const internalEnv = {
-    [INTERNAL_SPEC_PROPERTIES]: internalProperties,
   };
 
   const scenario = ensure(
@@ -640,20 +576,12 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     }
   }
 
-  const inheritedTestOptions = Object.fromEntries(
-    tags
-      .filter(looksLikeOptions)
-      .map(tagToCypressOptions)
-      .filter(isNotExclusivelySuiteConfiguration),
-  ) as Cypress.TestConfigOverrides;
+  SpecConfigRegistry.register({
+    titlePath: [...context.currentTitlePath, scenarioName],
+    specProperties: internalProperties,
+  });
 
-  if (inheritedTestOptions.env) {
-    Object.assign(inheritedTestOptions.env, internalEnv);
-  } else {
-    inheritedTestOptions.env = internalEnv;
-  }
-
-  it(scenarioName, inheritedTestOptions, function () {
+  it(scenarioName, function () {
     /**
      * This must always be true, otherwise something is off.
      */
@@ -662,8 +590,9 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
       "Included pickle stack is unsynchronized",
     );
 
-    const { remainingSteps, testCaseStartedId } =
-      retrieveInternalSpecProperties();
+    const { remainingSteps, testCaseStartedId } = SpecConfigRegistry.find(
+      Cypress.currentTest,
+    );
 
     taskTestCaseStarted(context, {
       id: testCaseStartedId,
@@ -1121,7 +1050,7 @@ function beforeEachHandler(context: CompositionContext) {
 function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
   freeRegistry();
 
-  const properties = retrieveInternalSpecProperties();
+  const properties = SpecConfigRegistry.find(Cypress.currentTest);
 
   const { pickle, testCaseStartedId, currentStepStartedAt, remainingSteps } =
     properties;
@@ -1368,7 +1297,7 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
    * Repopulate internal properties in case previous test is retried.
    */
   if (willBeRetried) {
-    updateInternalSpecProperties({
+    SpecConfigRegistry.update(Cypress.currentTest, {
       testCaseStartedId: context.newId(),
       remainingSteps: [...properties.allSteps],
     });
@@ -1671,9 +1600,6 @@ export default function createTests(
     });
   }
 
-  const pickleLookup = new Map<string, messages.Pickle>();
-  globalThis[PICKLE_LOOKUP_GLOBAL] = pickleLookup;
-
   const context: CompositionContext = {
     registry,
     newId,
@@ -1691,9 +1617,7 @@ export default function createTests(
     softErrors,
     stepDefinitionHints,
     dryRun,
-    relativeSpecPath: ensure(gherkinDocument.uri, "Expected gherkin document to have a uri"),
     currentTitlePath: [],
-    pickleLookup,
   };
 
   if (gherkinDocument.feature) {

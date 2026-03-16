@@ -84,7 +84,10 @@ export async function addCucumberPreprocessorPlugin(
   config: Cypress.PluginConfigOptions,
   options: AddOptions = {},
 ) {
-  config.env[INTERNAL_SUITE_PROPERTIES] = { isEventHandlersAttached: true };
+  if (!config.expose) {
+    config.expose = {};
+  }
+  config.expose[INTERNAL_SUITE_PROPERTIES] = { isEventHandlersAttached: true };
 
   const preprocessor = await resolve(config, config.env, "/");
 

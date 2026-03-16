@@ -4,9 +4,6 @@ import { fromByteArray } from "base64-js";
 
 import { AddOptions } from "./add-cucumber-preprocessor-plugin";
 import {
-  lookupPickle,
-} from "./browser-runtime";
-import {
   ITaskCreateStringAttachment,
   TASK_CREATE_STRING_ATTACHMENT,
 } from "./cypress-task-definitions";
@@ -30,6 +27,7 @@ import {
   IStepHookOptions,
 } from "./public-member-types";
 import { getRegistry } from "./registry";
+import { SpecConfigRegistry } from "./spec-config-registry";
 
 function defineStep<T extends unknown[], C extends Mocha.Context>(
   description: string | RegExp,
@@ -269,11 +267,13 @@ export function link(text: string): Cypress.Chainable {
 }
 
 function isFeature() {
-  if (!Cypress.spec || !Cypress.currentTest) {
+  if (!Cypress.currentTest) {
     return false;
   }
   try {
-    lookupPickle(Cypress.spec, Cypress.currentTest);
+    SpecConfigRegistry.find(
+      ensure(Cypress.currentTest, "Expected to find a current test"),
+    );
     return true;
   } catch {
     return false;
@@ -281,10 +281,10 @@ function isFeature() {
 }
 
 function doesFeatureMatch(expression: string) {
-  const pickle = lookupPickle(
-    ensure(Cypress.spec, "Expected to find a spec"),
+  const pickle = SpecConfigRegistry.find(
     ensure(Cypress.currentTest, "Expected to find a current test"),
-  )
+  ).pickle;
+
   return parse(expression).evaluate(collectTagNames(pickle.tags));
 }
 
@@ -301,7 +301,6 @@ export {
   doesFeatureMatch,
   defineStep as Given,
   isFeature,
-  lookupPickle,
   runStepDefinition as Step,
   defineStep as Then,
   defineStep as When,
