@@ -3,11 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { Then } from "@cucumber/cucumber";
-import { findByText } from "@testing-library/dom";
+import { findByText, waitFor } from "@testing-library/dom";
 import { JSDOM } from "jsdom";
 
 import { ensure } from "../../lib/helpers/assertions";
-import { findAllByAccordionComponent } from "../support/accordion";
 import ICustomWorld from "../support/ICustomWorld";
 
 Then("there should be a HTML report", async function (this: ICustomWorld) {
@@ -88,13 +87,12 @@ Then(
       { runScripts: "dangerously" },
     );
 
-    const AccordionItemPanel = await findByText(
+    const summaryEl = await findByText(
       dom.window.document.documentElement,
-      (_, element) => element?.textContent?.includes("Attached Image") ?? false,
-      { selector: '[data-accordion-component="AccordionItemPanel"]' },
+      /Attached Image/,
     );
 
-    assert(AccordionItemPanel);
+    assert(summaryEl);
   },
 );
 
@@ -131,22 +129,23 @@ Then(
 
     // configure({ defaultIgnore: "comments, script, style, link, g, path" });
 
-    const AccordionItemButtons = await findAllByAccordionComponent(
-      dom.window.document.documentElement,
-      "AccordionItemButton",
-    );
-
-    for (const AccordionItemButton of AccordionItemButtons) {
-      if (
-        AccordionItemButton.attributes.getNamedItem("aria-expanded")?.value ===
-        "false"
-      ) {
-        AccordionItemButton.click();
+    const ensureNonEmpty = <T extends Node>(nodelist: NodeListOf<T>) => {
+      if (nodelist.length === 0) {
+        throw new Error("Expected a non-empty nodelist");
       }
-    }
 
-    const matchingSteps = dom.window.document.querySelectorAll(
-      `li[data-status="${status.toUpperCase()}"]`,
+      return nodelist;
+    };
+
+    const matchingSteps = await waitFor(
+      () => {
+        return ensureNonEmpty(
+          dom.window.document.querySelectorAll(
+            `li[data-status="${status.toUpperCase()}"]`,
+          ),
+        );
+      },
+      { container: dom.window.document.body },
     );
 
     assert.equal(matchingSteps.length, n);
