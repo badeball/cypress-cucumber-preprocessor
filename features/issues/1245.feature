@@ -23,8 +23,9 @@ Feature: cached source maps
       };
       """
     When I run cypress with environment variables
-      | name  | value                       |
-      | DEBUG | cypress:server:preprocessor |
+      | name                    | value                       |
+      | DEBUG                   | cypress:server:preprocessor |
+      | ELECTRON_ENABLE_LOGGING | 1                           |
     Then it passes
     # Why two? Who knows. Cypress requests this file twice and the library once.
     And I should see exactly 2 instances of "headless and already processed" in stderr
