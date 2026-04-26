@@ -126,3 +126,6 @@ export const rescape = (s: string) =>
 
 export const expectLastRun = (world: ICustomWorld) =>
   assertAndReturn(world.lastRun, "Expected to find information about last run");
+
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
