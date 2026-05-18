@@ -22,8 +22,6 @@ jobs:
   test:
     needs: prepare-versions
     runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:latest
     strategy:
       fail-fast: false
       matrix:
@@ -44,8 +42,6 @@ jobs:
         with:
           path: ~/.cache/Cypress
           key: cypress-linux@${{ matrix.cypress-version }}
-      - name: Change owner
-        run: "chown root: ."
       - name: Dependencies
         env:
           CYPRESS_INSTALL_BINARY: "0"
@@ -53,6 +49,12 @@ jobs:
           npm install --engine-strict && \
           npm install --no-save cypress@${{ matrix.cypress-version }} && \
           env -u CYPRESS_INSTALL_BINARY npx cypress install
+      # Ensures that the 1st test doesn't take abnormally long time and risk timing out.
+      - name: Cypress verify
+        run: npx cypress verify
+      # Ensures no core is dumped during features/browser_crash.feature, during which it would time out.
+      - name: Disable coredump
+        run: printf "[Coredump]\nStorage=none\nProcessSizeMax=0\n" | sudo tee /etc/systemd/coredump.conf
       - name: Build
         run: npm run build
       - name: Test
