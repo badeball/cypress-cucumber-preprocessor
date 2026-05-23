@@ -17,6 +17,7 @@
 - [Function members `And(..)` and `But(..)` are missing](#function-members-and-and-but-are-missing)
 - [Can I use Browserify as a bundler?](#can-i-use-browserify-as-a-bundler)
 - [Which preprocessor version should I choose?](#which-preprocessor-version-should-i-choose)
+- [Incompatibility with `@cypress/grep`](#incompatibility-with-cypressgrep)
 
 <!-- Node requirements -->
 
@@ -166,3 +167,9 @@ Examples illustrating use of Browserify can be found [here](https://github.com/b
 The observant reader might have noticed that there's a NPM package named `cypress-cucumber-preprocessor` and `@badeball/cypress-cucumber-preprocessor`. This is merely a result of maintainer and ownership transfer. The package `cypress-cucumber-preprocessor` is severely outdated by now and as far as I (the current maintainer) know, there's no reason to be using it.
 
 In any case, choose one over the other and don't attempt to mix these, essentially different packages, in the same project.
+
+<!-- Other -->
+
+## Incompatibility with `@cypress/grep`
+
+Unfortunately, `@cypress/grep` is fundamentally unsupported together with this library. While your code might not error, the reports generated are likely erroneous and nonsensical.
