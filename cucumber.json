@@ -1,6 +1,6 @@
 {
   "default": {
-    "format": ["@cucumber/pretty-formatter"],
+    "format": ["pretty"],
     "formatOptions": {
       "colorsEnabled": true
     },
