@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Breaking changes:
+
+- Tags are no longer configurable using capital "TAGS", ie. `cypress run -e TAGS=@foo`, only lowercase.
+
 ## v24.0.1
 
 - Update dependency @cucumber/pretty-formatter to v3.
