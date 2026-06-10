@@ -21,7 +21,6 @@ Feature: soft state errors
     Scenario: throw during Cypress' events
       Given a file named "cypress/e2e/a.feature" with:
         """
-        @env(origin="https://google.com/")
         Feature: a feature
           Scenario: a scenario
             Given a step
