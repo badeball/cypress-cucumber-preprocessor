@@ -76,7 +76,7 @@ Feature: step definitions
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
         Given("a step", function() {});
         """
-      When I run cypress with "-e tags=@a"
+      When I run cypress with env "tags" = "@a"
       Then it passes
 
     Scenario: second level
@@ -85,7 +85,7 @@ Feature: step definitions
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
         Given("a step", function() {});
         """
-      When I run cypress with "-e tags=@a"
+      When I run cypress with env "tags" = "@a"
       Then it passes
 
     Scenario: third level
@@ -94,7 +94,7 @@ Feature: step definitions
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
         Given("a step", function() {});
         """
-      When I run cypress with "-e tags=@a"
+      When I run cypress with env "tags" = "@a"
       Then it passes
 
     Scenario: fourth level
@@ -103,5 +103,5 @@ Feature: step definitions
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
         Given("a step", function() {});
         """
-      When I run cypress with "-e tags=@a"
+      When I run cypress with env "tags" = "@a"
       Then it passes

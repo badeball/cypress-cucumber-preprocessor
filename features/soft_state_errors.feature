@@ -61,7 +61,7 @@ Feature: soft state errors
 
         Given("a step", function() {})
         """
-      When I run cypress with "-e __cypress_cucumber_preprocessor_dont_use_this_simulate_backend_error=true"
+      When I run cypress with env "__cypress_cucumber_preprocessor_dont_use_this_simulate_backend_error" = "true"
       Then it fails
       And the output should contain
         """
@@ -128,7 +128,7 @@ Feature: soft state errors
 
         Given("a step", function() {})
         """
-      When I run cypress with "-e __cypress_cucumber_preprocessor_dont_use_this_simulate_backend_error=true"
+      When I run cypress with env "__cypress_cucumber_preprocessor_dont_use_this_simulate_backend_error" = "true"
       Then it passes
       And stderr should contain
         """

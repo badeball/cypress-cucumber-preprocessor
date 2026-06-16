@@ -22,7 +22,6 @@ import {
 } from "./cypress-task-definitions";
 import { assertNever } from "./helpers/assertions";
 import debug from "./helpers/debug";
-import { getTags } from "./helpers/environment";
 import { memoize } from "./helpers/memoize";
 import { notNull } from "./helpers/type-guards";
 import {
@@ -84,9 +83,12 @@ export async function addCucumberPreprocessorPlugin(
   config: Cypress.PluginConfigOptions,
   options: AddOptions = {},
 ) {
-  config.env[INTERNAL_SUITE_PROPERTIES] = { isEventHandlersAttached: true };
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
 
-  const preprocessor = await resolve(config, config.env, "/");
+  env[INTERNAL_SUITE_PROPERTIES] = { isEventHandlersAttached: true };
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!options.omitBeforeRunHandler) {
     on("before:run", () => beforeRunHandler(config));
@@ -138,9 +140,9 @@ export async function addCucumberPreprocessorPlugin(
     [TASK_SUGGESTION]: suggestion.bind(null, config),
   });
 
-  const tags = getTags(config.env);
+  const tags = env.tags;
 
-  if (tags !== null && preprocessor.filterSpecs) {
+  if (tags != null && preprocessor.filterSpecs) {
     debug(`Filtering specs using expression ${inspect(tags)}`);
 
     const node = parse(tags);
@@ -202,7 +204,7 @@ export async function addCucumberPreprocessorPlugin(
     config.supportFile = false;
   }
 
-  config.env["testRunStartedId"] = uuid();
+  env.testRunStartedId = uuid();
 
   return config;
 }

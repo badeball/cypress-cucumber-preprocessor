@@ -601,10 +601,12 @@ Feature: pretty output
         """
         Feature: a feature
           @env(origin="https://duckduckgo.com/")
+          @expose(origin="https://duckduckgo.com/")
           Scenario: a scenario
             Given a step
 
           @env(origin="https://google.com/")
+          @expose(origin="https://google.com/")
           Scenario: another scenario
             Given another step
         """
@@ -624,12 +626,12 @@ Feature: pretty output
       """
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
             ✔ Given a step     # not available:0
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
       """
 
@@ -652,26 +654,26 @@ Feature: pretty output
       """
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
 
         Reloading..
 
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
             ✔ Given a step     # not available:0
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
 
         Reloading..
 
         Feature: a feature
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
       """
 
@@ -711,20 +713,20 @@ Feature: pretty output
       """
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
             ✔ Given a step     # not available:0
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
 
         Reloading..
 
         Feature: a feature
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
       """
 
@@ -734,7 +736,7 @@ Feature: pretty output
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
 
         beforeEach(() => {
-          cy.visit(Cypress.env("origin"));
+          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
         });
 
         Given("a step", function() {});
@@ -751,7 +753,7 @@ Feature: pretty output
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
 
         afterEach(() => {
-          cy.visit(Cypress.env("origin"));
+          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
         });
 
         Given("a step", function() {});
@@ -764,27 +766,27 @@ Feature: pretty output
       """
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
             ✔ Given a step     # not available:0
 
         Reloading..
 
         Feature: a feature
 
-          @env(origin="https://duckduckgo.com/")
-          Scenario: a scenario # cypress/e2e/a.feature:3
+          @env(origin="https://duckduckgo.com/") @expose(origin="https://duckduckgo.com/")
+          Scenario: a scenario # cypress/e2e/a.feature:4
             ✔ Given a step     # not available:0
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
 
         Reloading..
 
         Feature: a feature
 
-          @env(origin="https://google.com/")
-          Scenario: another scenario # cypress/e2e/a.feature:7
+          @env(origin="https://google.com/") @expose(origin="https://google.com/")
+          Scenario: another scenario # cypress/e2e/a.feature:9
             ✔ Given another step     # not available:0
       """

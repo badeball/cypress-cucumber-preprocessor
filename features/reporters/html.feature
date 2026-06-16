@@ -124,7 +124,7 @@ Feature: html report
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
         Given("a step", function() {})
         """
-      When I run cypress with "--env tags=@foobar"
+      When I run cypress with env "tags" = "@foobar"
       Then it should appear as if only a single test ran
       And the HTML should display 1 executed scenario
 

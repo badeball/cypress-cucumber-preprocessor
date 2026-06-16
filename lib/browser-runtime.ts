@@ -47,7 +47,7 @@ import {
   traverseGherkinDocument,
 } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
-import { getTags } from "./helpers/environment";
+import { getInternalValue } from "./helpers/environment";
 import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
 import {
   isExclusivelySuiteConfiguration,
@@ -147,7 +147,7 @@ export interface InternalSuiteProperties {
 }
 
 export function retrieveInternalSpecProperties(): InternalSpecProperties {
-  return Cypress.env(INTERNAL_SPEC_PROPERTIES) as InternalSpecProperties;
+  return getInternalValue(INTERNAL_SPEC_PROPERTIES) as InternalSpecProperties;
 }
 
 function updateInternalSpecProperties(
@@ -159,7 +159,7 @@ function updateInternalSpecProperties(
 function retrieveInternalSuiteProperties():
   | InternalSuiteProperties
   | undefined {
-  return Cypress.env(INTERNAL_SUITE_PROPERTIES);
+  return getInternalValue(INTERNAL_SUITE_PROPERTIES);
 }
 
 function taskSpecEnvelopes(context: CompositionContext) {
@@ -610,6 +610,12 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     inheritedTestOptions.env = internalEnv;
   }
 
+  if ((inheritedTestOptions as any).expose) {
+    Object.assign((inheritedTestOptions as any).expose, internalEnv);
+  } else {
+    (inheritedTestOptions as any).expose = internalEnv;
+  }
+
   it(scenarioName, inheritedTestOptions, function () {
     /**
      * This must always be true, otherwise something is off.
@@ -618,6 +624,10 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
       context.includedPickles[0].id === pickle.id,
       "Included pickle stack is unsynchronized",
     );
+
+    if (attempt > 0 && !(Cypress as any).env) {
+      retrieveInternalSpecProperties().testCaseStartedId = context.newId();
+    }
 
     const { remainingSteps, testCaseStartedId } =
       retrieveInternalSpecProperties();
@@ -720,7 +730,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
           const start = createTimestamp();
 
-          internalProperties.currentStepStartedAt = start;
+          retrieveInternalSpecProperties().currentStepStartedAt = start;
 
           taskTestStepStarted(context, {
             testStepId,
@@ -794,8 +804,10 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
           const start = createTimestamp();
 
-          internalProperties.currentStep = { pickleStep };
-          internalProperties.currentStepStartedAt = start;
+          retrieveInternalSpecProperties().currentStep = {
+            pickleStep,
+          };
+          retrieveInternalSpecProperties().currentStepStartedAt = start;
 
           taskTestStepStarted(context, {
             testStepId,
@@ -997,16 +1009,13 @@ function collectTagNamesFromGherkinDocument(
   return tagNames;
 }
 
-function createTestFilter(
-  gherkinDocument: messages.GherkinDocument,
-  environment: Cypress.ObjectLike,
-): Node {
+function createTestFilter(gherkinDocument: messages.GherkinDocument): Node {
   const tagsInDocument = collectTagNamesFromGherkinDocument(gherkinDocument);
 
   if (tagsInDocument.includes("@only") || tagsInDocument.includes("@focus")) {
     return parse("@only or @focus");
   } else {
-    const tags = getTags(environment);
+    const tags = getInternalValue("tags");
 
     return tags ? parse(tags) : { evaluate: () => true };
   }
@@ -1039,7 +1048,7 @@ function beforeHandler(this: Mocha.Context, context: CompositionContext) {
           id: testRunHookStartedId,
           hookId: hook.id,
           testRunStartedId: ensure(
-            Cypress.env("testRunStartedId"),
+            getInternalValue("testRunStartedId"),
             "Expected to find a testRunStartedId",
           ),
           timestamp: start,
@@ -1321,14 +1330,13 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
     willBeRetried,
   });
 
-  /**
-   * Repopulate internal properties in case previous test is retried.
-   */
   if (willBeRetried) {
-    updateInternalSpecProperties({
-      testCaseStartedId: context.newId(),
-      remainingSteps: [...properties.allSteps],
-    });
+    if ((Cypress as any).env) {
+      updateInternalSpecProperties({
+        testCaseStartedId: context.newId(),
+        remainingSteps: [...properties.allSteps],
+      });
+    }
   } else {
     context.includedPickles.shift();
 
@@ -1354,7 +1362,7 @@ function afterHandler(this: Mocha.Context, context: CompositionContext) {
           id: testRunHookStartedId,
           hookId: hook.id,
           testRunStartedId: ensure(
-            Cypress.env("testRunStartedId"),
+            getInternalValue("testRunStartedId"),
             "Expected to find a testRunStartedId",
           ),
           timestamp: start,
@@ -1408,7 +1416,7 @@ export default function createTests(
 
   type LexicallyOrdered = { lexicalOrder: number };
 
-  const testFilter = createTestFilter(gherkinDocument, Cypress.env());
+  const testFilter = createTestFilter(gherkinDocument);
 
   const stepDefinitions: (messages.StepDefinition & LexicallyOrdered)[] =
     registry.stepDefinitions.map((stepDefinition) => {

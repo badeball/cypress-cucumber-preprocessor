@@ -11,9 +11,10 @@ Feature: configuration overrides
       const { Given } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", function() {});
       """
-    When I run cypress with "-e stepDefinitions=foobar.js"
+    When I run cypress with env "stepDefinitions" = "foobar.js"
     Then it passes
 
+  @isPreExpose
   Scenario: overriding stepDefinitions through environment variables
     Given a file named "cypress/e2e/a.feature" with:
       """

@@ -27,17 +27,17 @@ Feature: target specific scenario
       """
 
   Scenario: run a single scenario
-    When I run cypress with "--env tags=@a"
+    When I run cypress with env "tags" = "@a"
     Then it passes
     And it should appear to have run the scenario "first scenario"
 
   Scenario: filter out scenarios with ~
-    When I run cypress with "--env 'tags=not @b'"
+    When I run cypress with env "tags" = "not @b"
     Then it passes
     And it should appear to have run the scenario "first scenario"
 
   Scenario: run a single scenario outline
-    When I run cypress with "--env tags=@b"
+    When I run cypress with env "tags" = "@b"
     Then it passes
     And it should appear to have run the scenarios
       | Name                             |
@@ -46,7 +46,7 @@ Feature: target specific scenario
       | second scenario - Z (example #3) |
 
   Scenario: run a single scenario outline examples
-    When I run cypress with "--env tags=@d"
+    When I run cypress with env "tags" = "@d"
     Then it passes
     And it should appear to have run the scenario "second scenario - Z (example #3)"
     But it should appear to not have run the scenarios

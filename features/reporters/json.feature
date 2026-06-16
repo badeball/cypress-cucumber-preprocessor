@@ -401,7 +401,7 @@ Feature: JSON formatter
           cy.screenshot();
         });
         """
-      When I run cypress with "-e attachmentsAddScreenshots=false"
+      When I run cypress with env "attachmentsAddScreenshots" = "false"
       Then it passes
       And there should be a JSON output similar to "fixtures/passed-example.json"
 
@@ -651,10 +651,12 @@ Feature: JSON formatter
         """
         Feature: a feature
           @env(origin="https://duckduckgo.com/")
+          @expose(origin="https://duckduckgo.com/")
           Scenario: a scenario
             Given a step
 
           @env(origin="https://google.com/")
+          @expose(origin="https://google.com/")
           Scenario: another scenario
             Given another step
         """
@@ -729,7 +731,7 @@ Feature: JSON formatter
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
 
         beforeEach(() => {
-          cy.visit(Cypress.env("origin"));
+          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
         });
 
         Given("a step", function() {});
@@ -746,7 +748,7 @@ Feature: JSON formatter
         const { Given } = require("@badeball/cypress-cucumber-preprocessor");
 
         afterEach(() => {
-          cy.visit(Cypress.env("origin"));
+          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
         });
 
         Given("a step", function() {});

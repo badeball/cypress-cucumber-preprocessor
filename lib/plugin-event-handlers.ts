@@ -261,7 +261,9 @@ const createGracefullPluginEventHandler = <A extends unknown[], R>(
   gracefullReturnValue: any = undefined,
 ) => {
   return async (config: Cypress.PluginConfigOptions, ...args: A) => {
-    const preprocessor = await resolve(config, config.env, "/");
+    const env: { [key: string]: any } =
+      (config as any).env ?? (config as any).expose;
+    const preprocessor = await resolve(config, env, "/");
 
     if (state.state === "tracking-error") {
       return gracefullReturnValue;
@@ -288,7 +290,9 @@ const createGracefullPluginEventHandler = <A extends unknown[], R>(
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   debug("beforeRunHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -327,7 +331,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   const testRunStarted: messages.Envelope = {
     testRunStarted: {
       id: ensure(
-        config.env["testRunStartedId"],
+        env["testRunStartedId"],
         "Expected to find a testRunStartedId",
       ),
       timestamp: createTimestamp(),
@@ -369,7 +373,9 @@ export async function afterRunHandler(
 ) {
   debug("afterRunHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -402,7 +408,7 @@ export async function afterRunHandler(
       const hookId = uuid();
       const testRunHookStartedId = uuid();
       const testRunStartedId = ensure(
-        config.env["testRunStartedId"],
+        env["testRunStartedId"],
         "Expected to find a testRunStartedId",
       );
 
@@ -614,7 +620,9 @@ export const beforeSpecHandler = createGracefullPluginEventHandler(
       return;
     }
 
-    const preprocessor = await resolve(config, config.env, "/");
+    const env: { [key: string]: any } =
+      (config as any).env ?? (config as any).expose;
+    const preprocessor = await resolve(config, env, "/");
 
     if (!preprocessor.isTrackingState) {
       return;
@@ -657,7 +665,8 @@ export const beforeSpecHandler = createGracefullPluginEventHandler(
     // because "received-envelopes" would anyway be the next natural state.
     if (
       state.state === "before-spec" &&
-      config.env[`${INTERNAL_PROPERTY_NAME}_simulate_backend_error`] !== true
+      env[`${INTERNAL_PROPERTY_NAME}_simulate_backend_error`]?.toString() !==
+        "true"
     ) {
       return;
     }
@@ -694,7 +703,9 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
       return;
     }
 
-    const preprocessor = await resolve(config, config.env, "/");
+    const env: { [key: string]: any } =
+      (config as any).env ?? (config as any).expose;
+    const preprocessor = await resolve(config, env, "/");
 
     if (!preprocessor.isTrackingState) {
       return;
@@ -808,7 +819,9 @@ export async function afterScreenshotHandler(
 ) {
   debug("afterScreenshotHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+  const preprocessor = await resolve(config, env, "/");
 
   if (
     !preprocessor.isTrackingState ||
@@ -1280,7 +1293,9 @@ export const createStringAttachmentHandler = createGracefullPluginEventHandler(
   ) => {
     debug("createStringAttachmentHandler()");
 
-    const preprocessor = await resolve(config, config.env, "/");
+    const env: { [key: string]: any } =
+      (config as any).env ?? (config as any).expose;
+    const preprocessor = await resolve(config, env, "/");
 
     if (!preprocessor.isTrackingState) {
       return true;

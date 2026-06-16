@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { After, Before, formatterHelpers } from "@cucumber/cucumber";
 
-import { isPre12, writeFile } from "./helpers";
+import { isPostExpose, isPre12, writeFile } from "./helpers";
 
 const projectPath = path.join(__dirname, "..", "..");
 
@@ -108,6 +108,12 @@ Before({ tags: "not @no-default-plugin" }, async function () {
 
 Before({ tags: "@cypress>=12" }, async function () {
   if (isPre12()) {
+    return "skipped";
+  }
+});
+
+Before({ tags: "@isPreExpose" }, async function () {
+  if (isPostExpose()) {
     return "skipped";
   }
 });

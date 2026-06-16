@@ -1,5 +1,5 @@
-export function getTags(env: Record<string, unknown>): string | null {
-  const tags = env.tags;
+export function getInternalValue(key: string): any {
+  const cypress = Cypress as any;
 
-  return tags == null ? null : String(tags);
+  return (cypress.env ?? cypress.expose)(key);
 }
