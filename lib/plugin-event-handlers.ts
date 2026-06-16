@@ -268,7 +268,10 @@ const createStateError = (stateHandler: string, currentState: State["state"]) =>
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   debug("beforeRunHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -307,7 +310,7 @@ export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   const testRunStarted: messages.Envelope = {
     testRunStarted: {
       id: ensure(
-        config.env["testRunStartedId"],
+        env["testRunStartedId"],
         "Expected to find a testRunStartedId",
       ),
       timestamp: createTimestamp(),
@@ -349,7 +352,10 @@ export async function afterRunHandler(
 ) {
   debug("afterRunHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -370,7 +376,7 @@ export async function afterRunHandler(
       const hookId = uuid();
       const testRunHookStartedId = uuid();
       const testRunStartedId = ensure(
-        config.env["testRunStartedId"],
+        env["testRunStartedId"],
         "Expected to find a testRunStartedId",
       );
 
@@ -584,7 +590,10 @@ export async function beforeSpecHandler(
     return;
   }
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -666,7 +675,10 @@ export async function afterSpecHandler(
     return;
   }
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -774,7 +786,10 @@ export async function afterScreenshotHandler(
 ) {
   debug("afterScreenshotHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (
     !preprocessor.isTrackingState ||
@@ -1264,7 +1279,10 @@ export async function createStringAttachmentHandler(
 ) {
   debug("createStringAttachmentHandler()");
 
-  const preprocessor = await resolve(config, config.env, "/");
+  const env: { [key: string]: any } =
+    (config as any).env ?? (config as any).expose;
+
+  const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
     return true;

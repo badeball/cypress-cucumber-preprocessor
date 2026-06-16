@@ -68,9 +68,12 @@ export async function compile(
     "Expected to find a common ancestor path",
   );
 
+  const env: { [key: string]: any } =
+    (configuration as any).env ?? (configuration as any).expose;
+
   const preprocessor = await resolve(
     configuration,
-    configuration.env,
+    env,
     implicitIntegrationFolder,
   );
 

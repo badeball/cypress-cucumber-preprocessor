@@ -38,5 +38,5 @@ Feature: omit filtered tests, creating a different common ancestor path
     Then it passes
 
   Scenario: with filtering
-    When I run cypress with "--env tags=@qux"
+    When I run cypress with env "tags" = "@qux"
     Then it passes

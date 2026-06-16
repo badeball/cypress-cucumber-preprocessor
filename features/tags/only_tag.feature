@@ -138,7 +138,7 @@ Feature: @only tag
       const { Given } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", function(table) {});
       """
-    When I run cypress with "-e tags=@foo"
+    When I run cypress with env "tags" = "@foo"
     Then it should appear to have run the scenario "a scenario"
     And it should appear to have skipped the scenario "another scenario"
 
