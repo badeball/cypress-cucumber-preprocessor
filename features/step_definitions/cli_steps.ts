@@ -7,7 +7,7 @@ import util, { stripVTControlCharacters } from "node:util";
 import { Then, When } from "@cucumber/cucumber";
 import * as glob from "glob";
 
-import { expectLastRun, rescape } from "../support/helpers";
+import { expectLastRun, isPostExpose, rescape } from "../support/helpers";
 import ICustomWorld from "../support/ICustomWorld";
 
 const isCI = process.env.CI === "true";
@@ -51,6 +51,16 @@ When(
   { timeout: 60 * 1000 },
   async function (this: ICustomWorld, unparsedArgs) {
     await this.runCypress({ extraArgs: await parseArgs(unparsedArgs) });
+  },
+);
+
+When(
+  "I run cypress with env {string} = {string}",
+  { timeout: 60 * 1000 },
+  async function (this: ICustomWorld, key: string, value: string) {
+    await this.runCypress({
+      extraArgs: [isPostExpose() ? "--expose" : "--env", key + "=" + value],
+    });
   },
 );
 

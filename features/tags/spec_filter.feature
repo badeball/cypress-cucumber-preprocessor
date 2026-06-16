@@ -42,25 +42,25 @@ Feature: filter spec
   Rule: it should filter features based on whether they contain a matching scenario
 
     Scenario: 1 / 2 specs matching
-      When I run cypress with "--env tags=@foo"
+      When I run cypress with env "tags" = "@foo"
       Then it passes
       And it should appear to not have ran spec "bar.feature"
       But it should appear to have ran spec "foo.feature"
 
     Scenario: 2 / 2 specs matching
-      When I run cypress with "--env tags=\"@foo or @bar\""
+      When I run cypress with env "tags" = "@foo or @bar"
       Then it passes
       And it should appear to have ran spec "foo.feature" and "bar.feature"
 
   Rule: filterSpecsMixedMode: hide (default) should hide non-feature specs regardless of tag expression
 
     Scenario: positive tag expression
-      When I run cypress with "--env tags=@foo"
+      When I run cypress with env "tags" = "@foo"
       Then it passes
       And it should appear to not have ran spec "baz.spec.js"
 
     Scenario: negative tag expression
-      When I run cypress with "--env \"tags=not @foo\""
+      When I run cypress with env "tags" = "not @foo"
       Then it passes
       And it should appear to not have ran spec "baz.spec.js"
 
@@ -75,12 +75,12 @@ Feature: filter spec
         """
 
     Scenario: positive tag expression
-      When I run cypress with "--env tags=@foo"
+      When I run cypress with env "tags" = "@foo"
       Then it passes
       And it should appear to have ran spec "baz.spec.js"
 
     Scenario: negative tag expression
-      When I run cypress with "--env \"tags=not @foo\""
+      When I run cypress with env "tags" = "not @foo"
       Then it passes
       And it should appear to have ran spec "baz.spec.js"
 
@@ -96,11 +96,11 @@ Feature: filter spec
         """
 
     Scenario: positive tag expression
-      When I run cypress with "--env tags=@foo"
+      When I run cypress with env "tags" = "@foo"
       Then it passes
       And it should appear to not have ran spec "baz.spec.js"
 
     Scenario: negative tag expression
-      When I run cypress with "--env \"tags=not @foo\""
+      When I run cypress with env "tags" = "not @foo"
       Then it passes
       And it should appear to have ran spec "baz.spec.js"

@@ -121,6 +121,14 @@ export function isPost15() {
   return parseInt(cypressVersion.split(".")[0], 10) >= 15;
 }
 
+export function isPostExpose() {
+  return parseInt(cypressVersion.split(".")[0], 10) >= 16;
+}
+
+export function isPreExpose() {
+  return !isPostExpose();
+}
+
 /**
  * Shamelessly copied from the RegExp.escape proposal.
  */

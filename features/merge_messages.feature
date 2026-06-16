@@ -5,7 +5,8 @@ Feature: merging reports
       """
       {
         "messages": {
-          "enabled": true
+          "enabled": true,
+          "output": "cucumber-messages-a.ndjson"
         }
       }
       """
@@ -26,7 +27,16 @@ Feature: merging reports
       const { Given } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", function() {})
       """
-    When I run cypress with "--spec cypress/e2e/a.feature --env messagesOutput=cucumber-messages-a.ndjson" (expecting exit code 0)
-    And I run cypress with "--spec cypress/e2e/b.feature --env messagesOutput=cucumber-messages-b.ndjson" (expecting exit code 0)
+    When I run cypress with "--spec cypress/e2e/a.feature" (expecting exit code 0)
+    Given additional preprocessor configuration
+      """
+      {
+        "messages": {
+          "enabled": true,
+          "output": "cucumber-messages-b.ndjson"
+        }
+      }
+      """
+    When I run cypress with "--spec cypress/e2e/b.feature" (expecting exit code 0)
     And I merge the messages reports
     Then there should be a messages similar to "fixtures/multiple-features.ndjson"

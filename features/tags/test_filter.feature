@@ -18,7 +18,7 @@ Feature: test filter
       const { Given } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", function() {})
       """
-    When I run cypress with "--env tags=@foo"
+    When I run cypress with env "tags" = "@foo"
     Then it passes
     And it should appear to have skipped the scenario "second scenario"
 
@@ -46,7 +46,7 @@ Feature: test filter
       const { Given } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", function() {})
       """
-    When I run cypress with "--env tags=@foo"
+    When I run cypress with env "tags" = "@foo"
     Then it passes
     And it should appear as if only a single test ran
     And I should not see "second rule" in the output
