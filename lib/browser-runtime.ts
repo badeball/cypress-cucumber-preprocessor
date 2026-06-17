@@ -40,7 +40,7 @@ import {
   traverseGherkinDocument,
 } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
-import { getInternalValue } from "./helpers/environment";
+import { getInternalValue } from "./helpers/expose/browser";
 import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
 import {
   isExclusivelySuiteConfiguration,

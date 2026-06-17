@@ -27,6 +27,7 @@ import {
 import { assert, assertIsString, ensure } from "./helpers/assertions";
 import debug from "./helpers/debug";
 import { CypressCucumberError, homepage } from "./helpers/error";
+import { getEnv } from "./helpers/expose/node";
 import {
   createHtmlStream,
   createJsonFormatter,
@@ -268,8 +269,7 @@ const createStateError = (stateHandler: string, currentState: State["state"]) =>
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   debug("beforeRunHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
+  const env = getEnv(config);
 
   const preprocessor = await resolve(config, env, "/");
 
@@ -352,8 +352,7 @@ export async function afterRunHandler(
 ) {
   debug("afterRunHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
+  const env = getEnv(config);
 
   const preprocessor = await resolve(config, env, "/");
 
@@ -590,10 +589,7 @@ export async function beforeSpecHandler(
     return;
   }
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
-
-  const preprocessor = await resolve(config, env, "/");
+  const preprocessor = await resolve(config, getEnv(config), "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -675,10 +671,7 @@ export async function afterSpecHandler(
     return;
   }
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
-
-  const preprocessor = await resolve(config, env, "/");
+  const preprocessor = await resolve(config, getEnv(config), "/");
 
   if (!preprocessor.isTrackingState) {
     return;
@@ -786,10 +779,7 @@ export async function afterScreenshotHandler(
 ) {
   debug("afterScreenshotHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
-
-  const preprocessor = await resolve(config, env, "/");
+  const preprocessor = await resolve(config, getEnv(config), "/");
 
   if (
     !preprocessor.isTrackingState ||
@@ -1279,10 +1269,7 @@ export async function createStringAttachmentHandler(
 ) {
   debug("createStringAttachmentHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
-
-  const preprocessor = await resolve(config, env, "/");
+  const preprocessor = await resolve(config, getEnv(config), "/");
 
   if (!preprocessor.isTrackingState) {
     return true;

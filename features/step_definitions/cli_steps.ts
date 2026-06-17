@@ -7,7 +7,8 @@ import util, { stripVTControlCharacters } from "node:util";
 import { Then, When } from "@cucumber/cucumber";
 import * as glob from "glob";
 
-import { expectLastRun, isPostExpose, rescape } from "../support/helpers";
+import { isPostExpose } from "../../lib/helpers/expose/cucumber";
+import { expectLastRun, rescape } from "../support/helpers";
 import ICustomWorld from "../support/ICustomWorld";
 
 const isCI = process.env.CI === "true";

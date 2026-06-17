@@ -10,6 +10,7 @@ import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin"
 import type { CreateTestsOptions } from "./browser-runtime";
 import { ensure } from "./helpers/assertions";
 import debug from "./helpers/debug";
+import { getEnv } from "./helpers/expose/node";
 import { ensureIsRelative } from "./helpers/paths";
 import { notNull } from "./helpers/type-guards";
 import { resolve } from "./preprocessor-configuration";
@@ -68,12 +69,9 @@ export async function compile(
     "Expected to find a common ancestor path",
   );
 
-  const env: { [key: string]: any } =
-    (configuration as any).env ?? (configuration as any).expose;
-
   const preprocessor = await resolve(
     configuration,
-    env,
+    getEnv(configuration),
     implicitIntegrationFolder,
   );
 
