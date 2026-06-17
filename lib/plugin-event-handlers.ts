@@ -32,6 +32,7 @@ import {
 import { assert, assertIsString, ensure } from "./helpers/assertions";
 import debug from "./helpers/debug";
 import { CypressCucumberError, homepage } from "./helpers/error";
+import { getEnv } from "./helpers/expose/node";
 import {
   createHtmlStream,
   createJsonFormatter,
@@ -261,9 +262,7 @@ const createGracefullPluginEventHandler = <A extends unknown[], R>(
   gracefullReturnValue: any = undefined,
 ) => {
   return async (config: Cypress.PluginConfigOptions, ...args: A) => {
-    const env: { [key: string]: any } =
-      (config as any).env ?? (config as any).expose;
-    const preprocessor = await resolve(config, env, "/");
+    const preprocessor = await resolve(config, getEnv(config), "/");
 
     if (state.state === "tracking-error") {
       return gracefullReturnValue;
@@ -290,8 +289,8 @@ const createGracefullPluginEventHandler = <A extends unknown[], R>(
 export async function beforeRunHandler(config: Cypress.PluginConfigOptions) {
   debug("beforeRunHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
+  const env = getEnv(config);
+
   const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
@@ -373,8 +372,8 @@ export async function afterRunHandler(
 ) {
   debug("afterRunHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
+  const env = getEnv(config);
+
   const preprocessor = await resolve(config, env, "/");
 
   if (!preprocessor.isTrackingState) {
@@ -620,8 +619,8 @@ export const beforeSpecHandler = createGracefullPluginEventHandler(
       return;
     }
 
-    const env: { [key: string]: any } =
-      (config as any).env ?? (config as any).expose;
+    const env = getEnv(config);
+
     const preprocessor = await resolve(config, env, "/");
 
     if (!preprocessor.isTrackingState) {
@@ -703,9 +702,7 @@ export const afterSpecHandler = createGracefullPluginEventHandler(
       return;
     }
 
-    const env: { [key: string]: any } =
-      (config as any).env ?? (config as any).expose;
-    const preprocessor = await resolve(config, env, "/");
+    const preprocessor = await resolve(config, getEnv(config), "/");
 
     if (!preprocessor.isTrackingState) {
       return;
@@ -819,9 +816,7 @@ export async function afterScreenshotHandler(
 ) {
   debug("afterScreenshotHandler()");
 
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
-  const preprocessor = await resolve(config, env, "/");
+  const preprocessor = await resolve(config, getEnv(config), "/");
 
   if (
     !preprocessor.isTrackingState ||
@@ -1293,9 +1288,7 @@ export const createStringAttachmentHandler = createGracefullPluginEventHandler(
   ) => {
     debug("createStringAttachmentHandler()");
 
-    const env: { [key: string]: any } =
-      (config as any).env ?? (config as any).expose;
-    const preprocessor = await resolve(config, env, "/");
+    const preprocessor = await resolve(config, getEnv(config), "/");
 
     if (!preprocessor.isTrackingState) {
       return true;

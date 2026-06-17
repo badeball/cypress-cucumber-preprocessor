@@ -22,6 +22,7 @@ import {
 } from "./cypress-task-definitions";
 import { assertNever } from "./helpers/assertions";
 import debug from "./helpers/debug";
+import { getEnv } from "./helpers/expose/node";
 import { memoize } from "./helpers/memoize";
 import { notNull } from "./helpers/type-guards";
 import {
@@ -83,8 +84,7 @@ export async function addCucumberPreprocessorPlugin(
   config: Cypress.PluginConfigOptions,
   options: AddOptions = {},
 ) {
-  const env: { [key: string]: any } =
-    (config as any).env ?? (config as any).expose;
+  const env = getEnv(config);
 
   env[INTERNAL_SUITE_PROPERTIES] = { isEventHandlersAttached: true };
 

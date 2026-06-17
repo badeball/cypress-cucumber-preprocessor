@@ -4,7 +4,8 @@ import path from "node:path";
 
 import { After, Before, formatterHelpers } from "@cucumber/cucumber";
 
-import { isPostExpose, isPre12, writeFile } from "./helpers";
+import { isPostExpose } from "../../lib/helpers/expose/cucumber";
+import { isPre12, writeFile } from "./helpers";
 
 const projectPath = path.join(__dirname, "..", "..");
 

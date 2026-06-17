@@ -118,14 +118,6 @@ export function isPre12() {
   return !isPost12();
 }
 
-export function isPostExpose() {
-  return parseInt(cypressVersion.split(".")[0], 10) >= 16;
-}
-
-export function isPreExpose() {
-  return !isPostExpose();
-}
-
 /**
  * Shamelessly copied from the RegExp.escape proposal.
  */
