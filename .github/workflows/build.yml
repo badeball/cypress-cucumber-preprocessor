@@ -57,13 +57,13 @@ jobs:
         run: printf "[Coredump]\nStorage=none\nProcessSizeMax=0\n" | sudo tee /etc/systemd/coredump.conf
       - name: Build
         run: npm run build
-      - name: Test
-        run: npm run test
       - name: Versions
         run: |
           npx cypress --version
           node --version
           npm --version
+      - name: Test
+        run: npm run test
 
   windows:
     runs-on: windows-latest
@@ -91,12 +91,12 @@ jobs:
         run: npm install --engine-strict
       - name: Build
         run: npm run build
-      - name: Test (unit)
-        run: npm run test:unit
-      - name: Test (integration)
-        run: npm run test:integration
       - name: Versions
         run: |
           npx cypress --version
           node --version
           npm --version
+      - name: Test (unit)
+        run: npm run test:unit
+      - name: Test (integration)
+        run: npm run test:integration
