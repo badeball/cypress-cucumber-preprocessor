@@ -13,7 +13,7 @@ export async function writeFile(filePath: string, fileContent: string) {
 
 export function assertAndReturn<T>(
   value: T | null | undefined,
-  msg?: string,
+  msg: string,
 ): T {
   assert(value, msg);
   return value;
