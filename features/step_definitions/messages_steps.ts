@@ -8,7 +8,7 @@ import { toByteArray } from "base64-js";
 import { PNG } from "pngjs";
 
 import {
-  assertAndReturn,
+  ensure,
   ndJsonToString,
   prepareMessagesReport,
   stringToNdJson,
@@ -247,7 +247,7 @@ Then(
   async function (this: ICustomWorld, name) {
     const messages = await readMessagesReport(this.tmpDir);
 
-    const hook = assertAndReturn(
+    const hook = ensure(
       messages.map((message) => message.hook).find((hook) => hook),
       "Expected to find a hook among messages",
     );

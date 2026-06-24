@@ -11,10 +11,7 @@ export async function writeFile(filePath: string, fileContent: string) {
   await fs.writeFile(filePath, fileContent);
 }
 
-export function assertAndReturn<T>(
-  value: T | null | undefined,
-  msg: string,
-): T {
+export function ensure<T>(value: T | null | undefined, msg: string): T {
   assert(value, msg);
   return value;
 }
@@ -125,7 +122,7 @@ export const rescape = (s: string) =>
   String(s).replace(/[\\^$*+?.()|[\]{}]/g, "\\$&");
 
 export const expectLastRun = (world: ICustomWorld) =>
-  assertAndReturn(world.lastRun, "Expected to find information about last run");
+  ensure(world.lastRun, "Expected to find information about last run");
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
