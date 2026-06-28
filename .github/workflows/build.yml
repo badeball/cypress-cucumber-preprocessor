@@ -47,7 +47,7 @@ jobs:
           CYPRESS_INSTALL_BINARY: "0"
         run: |
           npm install --engine-strict && \
-          npm install --no-save cypress@${{ matrix.cypress-version }} && \
+          npm install --no-save cypress@"${{ matrix.cypress-version }}" && \
           env -u CYPRESS_INSTALL_BINARY npx cypress install
       # Ensures that the 1st test doesn't take abnormally long time and risk timing out.
       - name: Cypress verify
