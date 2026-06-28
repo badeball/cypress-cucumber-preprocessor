@@ -25,8 +25,7 @@ declare module "stream" {
 declare global {
   namespace globalThis {
     var __cypress_cucumber_preprocessor_registry_dont_use_this:
-      | Registry
-      | undefined;
+      Registry | undefined;
 
     var __cypress_cucumber_preprocessor_mocha_dont_use_this:
       | Pick<MochaGlobals, "before" | "beforeEach" | "after" | "afterEach">

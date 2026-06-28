@@ -73,8 +73,7 @@ interface IteratorReturnResult<TReturn> {
 }
 
 type IteratorResult<T> =
-  | IteratorYieldResult<TYield<T>>
-  | IteratorReturnResult<TReturn<T>>;
+  IteratorYieldResult<TYield<T>> | IteratorReturnResult<TReturn<T>>;
 
 type TokenGenerator = ReturnType<(typeof Tokenizer.prototype)["tokens"]>;
 

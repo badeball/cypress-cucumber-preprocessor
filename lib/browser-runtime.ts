@@ -157,8 +157,7 @@ function updateInternalSpecProperties(
 }
 
 function retrieveInternalSuiteProperties():
-  | InternalSuiteProperties
-  | undefined {
+  InternalSuiteProperties | undefined {
   return Cypress.env(INTERNAL_SUITE_PROPERTIES);
 }
 
