@@ -8,6 +8,12 @@ Breaking changes:
 
 - Tags are no longer configurable using capital "TAGS", ie. `cypress run -e TAGS=@foo`, only lowercase.
 
+- Updated peer dependencies to exclude Cypress v15.18.0.
+
+  - This version introduced a [breaking change](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1358), which makes it currently unsupported.
+
+  - The above-mentioned version will hopefully be fully supported in the near future.
+
 ## v24.0.1
 
 - Update dependency @cucumber/pretty-formatter to v3.
