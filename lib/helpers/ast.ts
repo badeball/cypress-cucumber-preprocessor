@@ -4,7 +4,25 @@ import { ensure } from "./assertions";
 
 export function* traverseGherkinDocument(
   gherkinDocument: messages.GherkinDocument,
-) {
+): Generator<
+  | messages.GherkinDocument
+  | messages.Feature
+  | messages.Location
+  | messages.Tag
+  | messages.FeatureChild
+  | messages.Rule
+  | messages.Background
+  | messages.Scenario
+  | messages.RuleChild
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield gherkinDocument;
 
   if (gherkinDocument.feature) {
@@ -12,7 +30,26 @@ export function* traverseGherkinDocument(
   }
 }
 
-function* traverseFeature(feature: messages.Feature) {
+function* traverseFeature(
+  feature: messages.Feature,
+): Generator<
+  | messages.Feature
+  | messages.Location
+  | messages.Tag
+  | messages.FeatureChild
+  | messages.Rule
+  | messages.Background
+  | messages.Scenario
+  | messages.RuleChild
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield feature;
 
   if (feature.location) {
@@ -32,7 +69,24 @@ function* traverseFeature(feature: messages.Feature) {
   }
 }
 
-function* traverseFeatureChild(featureChild: messages.FeatureChild) {
+function* traverseFeatureChild(
+  featureChild: messages.FeatureChild,
+): Generator<
+  | messages.Location
+  | messages.FeatureChild
+  | messages.Rule
+  | messages.Background
+  | messages.Scenario
+  | messages.RuleChild
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield featureChild;
 
   if (featureChild.rule) {
@@ -48,7 +102,23 @@ function* traverseFeatureChild(featureChild: messages.FeatureChild) {
   }
 }
 
-function* traverseFeatureRule(rule: messages.Rule) {
+function* traverseFeatureRule(
+  rule: messages.Rule,
+): Generator<
+  | messages.Location
+  | messages.Rule
+  | messages.Background
+  | messages.Scenario
+  | messages.RuleChild
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield rule;
 
   if (rule.location) {
@@ -62,7 +132,22 @@ function* traverseFeatureRule(rule: messages.Rule) {
   }
 }
 
-function* traverseRuleChild(ruleChild: messages.RuleChild) {
+function* traverseRuleChild(
+  ruleChild: messages.RuleChild,
+): Generator<
+  | messages.Location
+  | messages.Background
+  | messages.Scenario
+  | messages.RuleChild
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield ruleChild;
 
   if (ruleChild.background) {
@@ -74,7 +159,19 @@ function* traverseRuleChild(ruleChild: messages.RuleChild) {
   }
 }
 
-function* traverseBackground(backgorund: messages.Background) {
+function* traverseBackground(
+  backgorund: messages.Background,
+): Generator<
+  | messages.Location
+  | messages.Background
+  | messages.Step
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield backgorund;
 
   if (backgorund.location) {
@@ -88,7 +185,20 @@ function* traverseBackground(backgorund: messages.Background) {
   }
 }
 
-function* traverseScenario(scenario: messages.Scenario) {
+function* traverseScenario(
+  scenario: messages.Scenario,
+): Generator<
+  | messages.Scenario
+  | messages.Location
+  | messages.Step
+  | messages.Examples
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield scenario;
 
   if (scenario.location) {
@@ -108,7 +218,18 @@ function* traverseScenario(scenario: messages.Scenario) {
   }
 }
 
-function* traverseStep(step: messages.Step) {
+function* traverseStep(
+  step: messages.Step,
+): Generator<
+  | messages.Location
+  | messages.Step
+  | messages.DocString
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield step;
 
   if (step.location) {
@@ -124,7 +245,9 @@ function* traverseStep(step: messages.Step) {
   }
 }
 
-function* traverseDocString(docString: messages.DocString) {
+function* traverseDocString(
+  docString: messages.DocString,
+): Generator<messages.Location | messages.DocString, void, unknown> {
   yield docString;
 
   if (docString.location) {
@@ -132,7 +255,16 @@ function* traverseDocString(docString: messages.DocString) {
   }
 }
 
-function* traverseDataTable(dataTable: messages.DataTable) {
+function* traverseDataTable(
+  dataTable: messages.DataTable,
+): Generator<
+  | messages.Location
+  | messages.DataTable
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield dataTable;
 
   if (dataTable.location) {
@@ -146,7 +278,13 @@ function* traverseDataTable(dataTable: messages.DataTable) {
   }
 }
 
-function* traverseRow(row: messages.TableRow) {
+function* traverseRow(
+  row: messages.TableRow,
+): Generator<
+  messages.Location | messages.TableRow | messages.TableCell,
+  void,
+  unknown
+> {
   yield row;
 
   if (row.location) {
@@ -160,7 +298,9 @@ function* traverseRow(row: messages.TableRow) {
   }
 }
 
-function* traverseCell(cell: messages.TableCell) {
+function* traverseCell(
+  cell: messages.TableCell,
+): Generator<messages.Location | messages.TableCell, void, unknown> {
   yield cell;
 
   if (cell.location) {
@@ -168,7 +308,16 @@ function* traverseCell(cell: messages.TableCell) {
   }
 }
 
-function* traverseExample(example: messages.Examples) {
+function* traverseExample(
+  example: messages.Examples,
+): Generator<
+  | messages.Location
+  | messages.Examples
+  | messages.TableRow
+  | messages.TableCell,
+  void,
+  unknown
+> {
   yield example;
 
   if (example.location) {
