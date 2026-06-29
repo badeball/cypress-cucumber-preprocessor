@@ -14,6 +14,10 @@ Breaking changes:
 
   - With the recent breaking changes made to Cypress, the following changes to this library would make it ever more so. Thus, I am removing this feature for now.
 
+Other changes:
+
+- Add support for Cypress v15.18.0.
+
 ## v25.0.0
 
 Breaking changes:

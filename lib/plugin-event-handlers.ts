@@ -8,6 +8,7 @@ import { styleText } from "node:util";
 
 import detectCiEnvironment from "@cucumber/ci-environment";
 import * as messages from "@cucumber/messages";
+import { version as cypressVersion } from "cypress/package.json";
 import split from "split";
 import { v4 as uuid } from "uuid";
 
@@ -235,6 +236,27 @@ const createPrettyStream = () => {
 
   return stream.compose(line, indent, log);
 };
+
+/**
+ * Cypress introduced a major breaking change with v15.18.0, where before:spec is no longer
+ * fired during reload-behavior. This means that reload-behavior now has to be accounted for
+ * in multiple different places.
+ */
+let isPost_15_18_0_ReloadBehavior: boolean;
+const [sMajor, sMinor] = cypressVersion.split(".");
+const [major, minor] = [parseInt(sMajor, 10), parseInt(sMinor, 10)];
+
+if (major > 15) {
+  isPost_15_18_0_ReloadBehavior = true;
+} else if (major === 15) {
+  if (minor >= 18) {
+    isPost_15_18_0_ReloadBehavior = true;
+  } else {
+    isPost_15_18_0_ReloadBehavior = false;
+  }
+} else {
+  isPost_15_18_0_ReloadBehavior = false;
+}
 
 export class CypressCucumberStateError extends CypressCucumberError {}
 
@@ -608,17 +630,24 @@ export async function beforeSpecHandler(
   }
 
   switch (state.state) {
+    /**
+     * All the mentioned reload-cases are in pre-v15.18.0 plugin behavior.
+     */
     case "received-envelopes": // This will be the case for reloading occurring in a beforeEach().
     case "step-started": // This will be the case for reloading occurring in a step.
     case "test-finished": // This will be the case for reloading occurring in any after-ish hook (and possibly beforeEach).
-      if (state.spec.relative === spec.relative) {
-        state = {
-          state: "has-reloaded",
-          spec: spec,
-          pretty: state.pretty,
-          messages: state.messages,
-        };
-        return;
+      if (!isPost_15_18_0_ReloadBehavior) {
+        if (state.spec.relative === spec.relative) {
+          state = {
+            state: "has-reloaded",
+            spec: spec,
+            pretty: state.pretty,
+            messages: state.messages,
+          };
+          return;
+        }
+      } else {
+        throw createStateError("beforeSpecHandler", state.state);
       }
     // eslint-disable-next-line no-fallthrough
     default:
@@ -804,6 +833,26 @@ export async function specEnvelopesHandler(
       };
 
       return true;
+    case "step-started": // This will be the case for reloading occurring in a step, assuming post-v15.18.0 plugin behavior.
+    case "test-finished": // This will be the case for reloading occurring in after() and afterEach(), assuming post-v15.18.0 plugin behavior.
+      if (isPost_15_18_0_ReloadBehavior) {
+        state = {
+          state: "has-reloaded-received-envelopes",
+          spec: state.spec,
+          specEnvelopes: data.messages,
+          pretty: state.pretty,
+          messages: state.messages,
+        };
+        return true;
+      } else {
+        throw createStateError("specEnvelopesHandler", state.state);
+      }
+    case "received-envelopes": // This will be the case for reloading occurring in beforeEach(), assuming post-v15.18.0 plugin behavior.
+      if (isPost_15_18_0_ReloadBehavior) {
+        break;
+      } else {
+        throw createStateError("specEnvelopesHandler", state.state);
+      }
     default:
       throw createStateError("specEnvelopesHandler", state.state);
   }
