@@ -906,12 +906,14 @@ export const testCaseStartedHandler = createGracefullPluginEventHandler(
           );
 
           const lastTestCaseStarted =
-            iLastTestCaseStarted > -1
-              ? state.messages.current[iLastTestCaseStarted]
-              : undefined;
+            state.messages.current[iLastTestCaseStarted];
 
-          // A test is being re-run.
-          if (lastTestCaseStarted?.testCaseStarted!.id === data.id) {
+          /**
+           * In case of reload during before/beforeEach, this won't be the case.
+           */
+          if (
+            lastTestCaseStarted?.testCaseStarted!.testCaseId === data.testCaseId
+          ) {
             if (state.pretty.enabled) {
               await end(state.pretty.writable);
 

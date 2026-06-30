@@ -555,8 +555,6 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
     return;
   }
 
-  let attempt = 0;
-
   const internalProperties: InternalSpecProperties = {
     pickle,
     testCaseStartedId: context.newId(),
@@ -618,13 +616,17 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
       "Included pickle stack is unsynchronized",
     );
 
+    if ((this.test as any)._currentRetry > 0) {
+      internalProperties.testCaseStartedId = context.newId();
+    }
+
     const { remainingSteps, testCaseStartedId } =
       retrieveInternalSpecProperties();
 
     taskTestCaseStarted(context, {
       id: testCaseStartedId,
       testCaseId,
-      attempt: attempt++,
+      attempt: (this.test as any)._currentRetry,
       timestamp: createTimestamp(),
     });
 
@@ -1325,7 +1327,6 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
    */
   if (willBeRetried) {
     updateInternalSpecProperties({
-      testCaseStartedId: context.newId(),
       remainingSteps: [...properties.allSteps],
     });
   } else {
