@@ -559,7 +559,7 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
 
   const internalProperties: InternalSpecProperties = {
     pickle,
-    testCaseStartedId: context.newId(),
+    testCaseStartedId: uuid(),
     allSteps: steps,
     remainingSteps: [...steps],
     toJSON: () => internalPropertiesReplacementText,
@@ -1325,7 +1325,6 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
    */
   if (willBeRetried) {
     updateInternalSpecProperties({
-      testCaseStartedId: context.newId(),
       remainingSteps: [...properties.allSteps],
     });
   } else {

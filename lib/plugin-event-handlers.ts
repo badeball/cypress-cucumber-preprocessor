@@ -906,51 +906,48 @@ export const testCaseStartedHandler = createGracefullPluginEventHandler(
           );
 
           const lastTestCaseStarted =
-            iLastTestCaseStarted > -1
-              ? state.messages.current[iLastTestCaseStarted]
-              : undefined;
+            state.messages.current[iLastTestCaseStarted];
 
-          // A test is being re-run.
-          if (lastTestCaseStarted?.testCaseStarted!.id === data.id) {
-            if (state.pretty.enabled) {
-              await end(state.pretty.writable);
+          assert(lastTestCaseStarted, "Expected to find a testCaseStarted");
 
-              // Reloading occurred
-              // - right within a step, or
-              // - after a test case
-              // .. so we output an extra newline.
-              if (
-                state.messages.current[state.messages.current.length - 1]
-                  .testStepStarted != null ||
-                state.messages.current[state.messages.current.length - 1]
-                  .testCaseFinished != null
-              ) {
-                console.log();
-              }
+          if (state.pretty.enabled) {
+            await end(state.pretty.writable);
 
-              console.log("  Reloading..");
-
-              const writable = createPrettyStream();
-
-              const broadcaster = createPrettyFormatter(writable);
-
-              for (const message of state.specEnvelopes) {
-                broadcaster.emit("envelope", message);
-              }
-
-              state.pretty = {
-                enabled: true,
-                writable,
-                broadcaster,
-              };
+            // Reloading occurred
+            // - right within a step, or
+            // - after a test case
+            // .. so we output an extra newline.
+            if (
+              state.messages.current[state.messages.current.length - 1]
+                .testStepStarted != null ||
+              state.messages.current[state.messages.current.length - 1]
+                .testCaseFinished != null
+            ) {
+              console.log();
             }
 
-            // Discard messages of previous test, which is being re-run.
-            state.messages.current = state.messages.current.slice(
-              0,
-              iLastTestCaseStarted,
-            );
+            console.log("  Reloading..");
+
+            const writable = createPrettyStream();
+
+            const broadcaster = createPrettyFormatter(writable);
+
+            for (const message of state.specEnvelopes) {
+              broadcaster.emit("envelope", message);
+            }
+
+            state.pretty = {
+              enabled: true,
+              writable,
+              broadcaster,
+            };
           }
+
+          // Discard messages of previous test, which is being re-run.
+          state.messages.current = state.messages.current.slice(
+            0,
+            iLastTestCaseStarted,
+          );
         }
         break;
       default:
