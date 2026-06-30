@@ -15,7 +15,6 @@ import {
   INTERNAL_SUITE_PROPERTIES,
 } from "./constants";
 import {
-  ITaskFrontendTrackingError,
   ITaskSpecEnvelopes,
   ITaskSuggestion,
   ITaskTestCaseFinished,
@@ -24,7 +23,6 @@ import {
   ITaskTestRunHookStarted,
   ITaskTestStepFinished,
   ITaskTestStepStarted,
-  TASK_FRONTEND_TRACKING_ERROR,
   TASK_SPEC_ENVELOPES,
   TASK_SUGGESTION,
   TASK_TEST_CASE_FINISHED,
@@ -35,12 +33,7 @@ import {
   TASK_TEST_STEP_STARTED,
 } from "./cypress-task-definitions";
 import DataTable from "./data_table";
-import {
-  assert,
-  CypressCucumberAssertionError,
-  ensure,
-  fail,
-} from "./helpers/assertions";
+import { assert, ensure, fail } from "./helpers/assertions";
 import {
   collectTagNames,
   createAstIdMap,
@@ -85,7 +78,6 @@ interface CompositionContext {
   testFilter: Node;
   omitFiltered: boolean;
   isTrackingState: boolean;
-  softErrors: boolean;
   stepDefinitionHints: {
     stepDefinitions: string | string[];
     stepDefinitionPatterns: string[];
@@ -261,16 +253,6 @@ function taskRunHookFinished(
       },
     );
   }
-}
-
-function taskFrontEndTrackingError(error: CypressCucumberAssertionError) {
-  cy.task(
-    TASK_FRONTEND_TRACKING_ERROR,
-    (error.stack ?? error.message) satisfies ITaskFrontendTrackingError,
-    {
-      log: true,
-    },
-  );
 }
 
 function taskSuggestion(
@@ -1085,32 +1067,84 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
   const endTimestamp = createTimestamp();
 
   if (remainingSteps.length > 0) {
-    try {
-      if (this.currentTest?.state === "failed") {
-        const error = ensure(
-          this.currentTest?.err,
-          "Expected to find an error",
-        );
+    if (this.currentTest?.state === "failed") {
+      const error = ensure(this.currentTest?.err, "Expected to find an error");
 
-        const message = ensure(
-          error.message,
-          "Expected to find an error message",
-        );
+      const message = ensure(
+        error.message,
+        "Expected to find an error message",
+      );
 
-        if (
-          EACH_HOOK_FAILURE_EXPR.test(message) ||
-          ALL_HOOK_FAILURE_EXPR.test(message)
-        ) {
-          return;
-        }
+      if (
+        EACH_HOOK_FAILURE_EXPR.test(message) ||
+        ALL_HOOK_FAILURE_EXPR.test(message)
+      ) {
+        return;
+      }
 
-        const failedStep = ensure(
-          remainingSteps.shift(),
-          "Expected there to be a remaining step",
-        );
+      const failedStep = ensure(
+        remainingSteps.shift(),
+        "Expected there to be a remaining step",
+      );
 
+      const hookIdOrPickleStepId = ensure(
+        failedStep.hook?.id ?? failedStep.pickleStep?.id,
+        "Expected a step to either be a hook or a pickleStep",
+      );
+
+      const testStepId = getTestStepId({
+        context,
+        pickleId: pickle.id,
+        hookIdOrPickleStepId,
+      });
+
+      const wasUndefinedStepDefinition = message.includes(
+        "Step implementation missing",
+      );
+
+      const failedTestStepFinished: messages.TestStepFinished =
+        wasUndefinedStepDefinition
+          ? {
+              testStepId,
+              testCaseStartedId,
+              testStepResult: {
+                status: messages.TestStepResultStatus.UNDEFINED,
+                duration: {
+                  seconds: 0,
+                  nanos: 0,
+                },
+              },
+              timestamp: endTimestamp,
+            }
+          : {
+              testStepId,
+              testCaseStartedId,
+              testStepResult: {
+                ...(message.includes("Multiple matching step definitions for")
+                  ? {
+                      status: messages.TestStepResultStatus.AMBIGUOUS,
+                    }
+                  : {
+                      status: messages.TestStepResultStatus.FAILED,
+                      exception: { type: error.name || "Error", message },
+                      message,
+                    }),
+                duration: duration(
+                  ensure(
+                    currentStepStartedAt,
+                    "Expected there to be a timestamp for current step",
+                  ),
+                  endTimestamp,
+                ),
+              },
+              timestamp: endTimestamp,
+            };
+
+      taskTestStepFinished(context, failedTestStepFinished);
+
+      for (const skippedStep of remainingSteps) {
         const hookIdOrPickleStepId = ensure(
-          failedStep.hook?.id ?? failedStep.pickleStep?.id,
+          skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
           "Expected a step to either be a hook or a pickleStep",
         );
 
@@ -1120,183 +1154,116 @@ function afterEachHandler(this: Mocha.Context, context: CompositionContext) {
           hookIdOrPickleStepId,
         });
 
-        const wasUndefinedStepDefinition = message.includes(
-          "Step implementation missing",
+        taskTestStepStarted(context, {
+          testStepId,
+          testCaseStartedId,
+          timestamp: endTimestamp,
+        });
+
+        taskTestStepFinished(context, {
+          testStepId,
+          testCaseStartedId,
+          testStepResult: {
+            status: messages.TestStepResultStatus.SKIPPED,
+            duration: {
+              seconds: 0,
+              nanos: 0,
+            },
+          },
+          timestamp: endTimestamp,
+        });
+      }
+    } else if (this.currentTest?.state === "pending") {
+      if (currentStepStartedAt) {
+        const skippedStep = ensure(
+          remainingSteps.shift(),
+          "Expected there to be a remaining step",
         );
 
-        const failedTestStepFinished: messages.TestStepFinished =
-          wasUndefinedStepDefinition
-            ? {
-                testStepId,
-                testCaseStartedId,
-                testStepResult: {
-                  status: messages.TestStepResultStatus.UNDEFINED,
-                  duration: {
-                    seconds: 0,
-                    nanos: 0,
-                  },
-                },
-                timestamp: endTimestamp,
-              }
-            : {
-                testStepId,
-                testCaseStartedId,
-                testStepResult: {
-                  ...(message.includes("Multiple matching step definitions for")
-                    ? {
-                        status: messages.TestStepResultStatus.AMBIGUOUS,
-                      }
-                    : {
-                        status: messages.TestStepResultStatus.FAILED,
-                        exception: { type: error.name || "Error", message },
-                        message,
-                      }),
-                  duration: duration(
-                    ensure(
-                      currentStepStartedAt,
-                      "Expected there to be a timestamp for current step",
-                    ),
-                    endTimestamp,
-                  ),
-                },
-                timestamp: endTimestamp,
-              };
+        const hookIdOrPickleStepId = ensure(
+          skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
+          "Expected a step to either be a hook or a pickleStep",
+        );
 
-        taskTestStepFinished(context, failedTestStepFinished);
+        const testStepId = getTestStepId({
+          context,
+          pickleId: pickle.id,
+          hookIdOrPickleStepId,
+        });
 
-        for (const skippedStep of remainingSteps) {
-          const hookIdOrPickleStepId = ensure(
-            skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
-            "Expected a step to either be a hook or a pickleStep",
-          );
-
-          const testStepId = getTestStepId({
-            context,
-            pickleId: pickle.id,
-            hookIdOrPickleStepId,
-          });
-
-          taskTestStepStarted(context, {
-            testStepId,
-            testCaseStartedId,
-            timestamp: endTimestamp,
-          });
-
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: messages.TestStepResultStatus.SKIPPED,
-              duration: {
-                seconds: 0,
-                nanos: 0,
-              },
-            },
-            timestamp: endTimestamp,
-          });
-        }
-      } else if (this.currentTest?.state === "pending") {
-        if (currentStepStartedAt) {
-          const skippedStep = ensure(
-            remainingSteps.shift(),
-            "Expected there to be a remaining step",
-          );
-
-          const hookIdOrPickleStepId = ensure(
-            skippedStep.hook?.id ?? skippedStep.pickleStep?.id,
-            "Expected a step to either be a hook or a pickleStep",
-          );
-
-          const testStepId = getTestStepId({
-            context,
-            pickleId: pickle.id,
-            hookIdOrPickleStepId,
-          });
-
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: messages.TestStepResultStatus.SKIPPED,
-              duration: duration(currentStepStartedAt, endTimestamp),
-            },
-            timestamp: endTimestamp,
-          });
-        }
-
-        for (const remainingStep of remainingSteps) {
-          const hookIdOrPickleStepId = ensure(
-            remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
-            "Expected a step to either be a hook or a pickleStep",
-          );
-
-          const testStepId = getTestStepId({
-            context,
-            pickleId: pickle.id,
-            hookIdOrPickleStepId,
-          });
-
-          taskTestStepStarted(context, {
-            testStepId,
-            testCaseStartedId,
-            timestamp: endTimestamp,
-          });
-
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: messages.TestStepResultStatus.SKIPPED,
-              duration: {
-                seconds: 0,
-                nanos: 0,
-              },
-            },
-            timestamp: endTimestamp,
-          });
-        }
-      } else {
-        for (const remainingStep of remainingSteps) {
-          const hookIdOrPickleStepId = ensure(
-            remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
-            "Expected a step to either be a hook or a pickleStep",
-          );
-
-          const testStepId = getTestStepId({
-            context,
-            pickleId: pickle.id,
-            hookIdOrPickleStepId,
-          });
-
-          taskTestStepStarted(context, {
-            testStepId,
-            testCaseStartedId,
-            timestamp: endTimestamp,
-          });
-
-          taskTestStepFinished(context, {
-            testStepId,
-            testCaseStartedId,
-            testStepResult: {
-              status: messages.TestStepResultStatus.UNKNOWN,
-              duration: {
-                seconds: 0,
-                nanos: 0,
-              },
-            },
-            timestamp: endTimestamp,
-          });
-        }
+        taskTestStepFinished(context, {
+          testStepId,
+          testCaseStartedId,
+          testStepResult: {
+            status: messages.TestStepResultStatus.SKIPPED,
+            duration: duration(currentStepStartedAt, endTimestamp),
+          },
+          timestamp: endTimestamp,
+        });
       }
-    } catch (e) {
-      if (
-        e instanceof CypressCucumberAssertionError &&
-        context.isTrackingState &&
-        context.softErrors
-      ) {
-        taskFrontEndTrackingError(e);
-      } else {
-        throw e;
+
+      for (const remainingStep of remainingSteps) {
+        const hookIdOrPickleStepId = ensure(
+          remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
+          "Expected a step to either be a hook or a pickleStep",
+        );
+
+        const testStepId = getTestStepId({
+          context,
+          pickleId: pickle.id,
+          hookIdOrPickleStepId,
+        });
+
+        taskTestStepStarted(context, {
+          testStepId,
+          testCaseStartedId,
+          timestamp: endTimestamp,
+        });
+
+        taskTestStepFinished(context, {
+          testStepId,
+          testCaseStartedId,
+          testStepResult: {
+            status: messages.TestStepResultStatus.SKIPPED,
+            duration: {
+              seconds: 0,
+              nanos: 0,
+            },
+          },
+          timestamp: endTimestamp,
+        });
+      }
+    } else {
+      for (const remainingStep of remainingSteps) {
+        const hookIdOrPickleStepId = ensure(
+          remainingStep.hook?.id ?? remainingStep.pickleStep?.id,
+          "Expected a step to either be a hook or a pickleStep",
+        );
+
+        const testStepId = getTestStepId({
+          context,
+          pickleId: pickle.id,
+          hookIdOrPickleStepId,
+        });
+
+        taskTestStepStarted(context, {
+          testStepId,
+          testCaseStartedId,
+          timestamp: endTimestamp,
+        });
+
+        taskTestStepFinished(context, {
+          testStepId,
+          testCaseStartedId,
+          testStepResult: {
+            status: messages.TestStepResultStatus.UNKNOWN,
+            duration: {
+              seconds: 0,
+              nanos: 0,
+            },
+          },
+          timestamp: endTimestamp,
+        });
       }
     }
   }
@@ -1385,7 +1352,6 @@ export default function createTests(
   gherkinDocument: messages.GherkinDocument,
   pickles: messages.Pickle[],
   isTrackingState: boolean,
-  softErrors: boolean,
   omitFiltered: boolean,
   stepDefinitionHints: {
     stepDefinitions: string | string[];
@@ -1641,7 +1607,6 @@ export default function createTests(
     testFilter,
     omitFiltered,
     isTrackingState,
-    softErrors,
     stepDefinitionHints,
     dryRun,
   };

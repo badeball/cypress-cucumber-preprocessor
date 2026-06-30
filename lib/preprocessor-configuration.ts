@@ -65,7 +65,6 @@ const StringishToBoolean: D.Decoder<unknown, boolean | undefined> = {
 
 const EnvironmentOverrides = D.partial({
   stepDefinitions: D.union(D.string, D.array(D.string)),
-  stateSoftErrors: StringishToBoolean,
   messagesEnabled: StringishToBoolean,
   messagesOutput: D.string,
   jsonEnabled: StringishToBoolean,
@@ -87,9 +86,6 @@ type IEnvironmentOverrides = D.TypeOf<typeof EnvironmentOverrides>;
 
 const BaseConfiguration = D.partial({
   stepDefinitions: D.union(D.string, D.array(D.string)),
-  state: D.partial({
-    softErrors: D.boolean,
-  }),
   messages: D.partial({
     enabled: D.boolean,
     output: D.string,
@@ -132,9 +128,6 @@ export type IUserConfiguration = D.TypeOf<typeof UserConfiguration>;
 
 export interface IPreprocessorConfiguration {
   readonly stepDefinitions: string | string[];
-  readonly state: {
-    softErrors: boolean;
-  };
   readonly messages: {
     enabled: boolean;
     output: string;
@@ -236,14 +229,6 @@ export function combineIntoConfiguration(
       "cucumber-messages.ndjson",
   };
 
-  const state: IPreprocessorConfiguration["state"] = {
-    softErrors:
-      overrides.stateSoftErrors ??
-      specific?.state?.softErrors ??
-      unspecific.state?.softErrors ??
-      false,
-  };
-
   const usage: IPreprocessorConfiguration["usage"] = {
     enabled:
       overrides.usageEnabled ??
@@ -320,7 +305,6 @@ export function combineIntoConfiguration(
 
   return {
     stepDefinitions,
-    state,
     messages,
     json,
     html,

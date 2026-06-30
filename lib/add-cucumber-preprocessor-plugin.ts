@@ -10,7 +10,6 @@ import { v4 as uuid } from "uuid";
 import { INTERNAL_PROPERTY_NAME, INTERNAL_SUITE_PROPERTIES } from "./constants";
 import {
   TASK_CREATE_STRING_ATTACHMENT,
-  TASK_FRONTEND_TRACKING_ERROR,
   TASK_SPEC_ENVELOPES,
   TASK_SUGGESTION,
   TASK_TEST_CASE_FINISHED,
@@ -32,7 +31,6 @@ import {
   beforeRunHandler,
   beforeSpecHandler,
   createStringAttachmentHandler,
-  frontendTrackingErrorHandler,
   OnAfterStep,
   specEnvelopesHandler,
   suggestion,
@@ -128,10 +126,6 @@ export async function addCucumberPreprocessorPlugin(
     ),
     [TASK_TEST_CASE_FINISHED]: testCaseFinishedHandler.bind(null, config),
     [TASK_CREATE_STRING_ATTACHMENT]: createStringAttachmentHandler.bind(
-      null,
-      config,
-    ),
-    [TASK_FRONTEND_TRACKING_ERROR]: frontendTrackingErrorHandler.bind(
       null,
       config,
     ),

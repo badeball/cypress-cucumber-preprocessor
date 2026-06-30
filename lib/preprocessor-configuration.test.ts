@@ -445,27 +445,6 @@ describe("resolve()", () => {
         });
       });
 
-      describe("state", () => {
-        describe("softErrors", () => {
-          const getValueFn = (
-            configuration: IPreprocessorConfiguration,
-          ): boolean => configuration.state.softErrors;
-
-          const setValueFn = (
-            configuration: IBaseUserConfiguration,
-            value: boolean,
-          ) => (configuration.state = { softErrors: value });
-
-          basicBooleanExample({
-            testingType,
-            default: false,
-            environmentKey: "stateSoftErrors",
-            getValueFn,
-            setValueFn,
-          });
-        });
-      });
-
       describe("messages", () => {
         describe("enabled", () => {
           const getValueFn = (

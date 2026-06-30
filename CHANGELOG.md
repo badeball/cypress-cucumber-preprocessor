@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Breaking changes:
+
+- Remove flag to turn expectation errors soft. This feature was
+
+  1. Overly complicated implementation-wise
+  2. Likely not adopted widely, albeit I'm unsure
+  3. Difficult to test properly
+
+  - With the recent breaking changes made to Cypress, the following changes to this library would make it ever more so. Thus, I am removing this feature for now.
+
 ## v25.0.0
 
 Breaking changes:
