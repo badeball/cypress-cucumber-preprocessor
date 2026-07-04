@@ -109,14 +109,6 @@ export function ndJsonToString(ndjson: any) {
   return ndjson.map((o: any) => JSON.stringify(o)).join("\n") + "\n";
 }
 
-export function isPost12() {
-  return parseInt(cypressVersion.split(".")[0], 10) >= 12;
-}
-
-export function isPre12() {
-  return !isPost12();
-}
-
 export function isPost15() {
   return parseInt(cypressVersion.split(".")[0], 10) >= 15;
 }
