@@ -34,7 +34,7 @@ jobs:
     env:
       NPM_CONFIG_PACKAGE_LOCK: "false"
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Checkout

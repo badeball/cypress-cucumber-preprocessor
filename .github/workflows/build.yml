@@ -27,7 +27,7 @@ jobs:
       matrix:
         cypress-version: ${{fromJson(needs.prepare-versions.outputs.matrix)}}
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Checkout
@@ -71,7 +71,7 @@ jobs:
       NPM_CONFIG_CACHE: ${{ github.workspace }}/.npm
       CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Checkout
