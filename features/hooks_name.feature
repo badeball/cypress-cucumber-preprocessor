@@ -37,7 +37,7 @@ Feature: named hooks
         Before({ name: "foo", tags: "@foo" }, () => {
           cy.expectCommandLogEntry({
             method: "Before",
-            message: "foo"
+            message: "foo (@foo)"
           });
         });
         """
@@ -93,7 +93,7 @@ Feature: named hooks
         BeforeStep({ name: "foo", tags: "@foo" }, () => {
           cy.expectCommandLogEntry({
             method: "BeforeStep",
-            message: "foo"
+            message: "foo (@foo)"
           });
         });
         """
@@ -121,7 +121,7 @@ Feature: named hooks
         AfterStep({ name: "foo", tags: "@foo" }, () => {
           cy.expectCommandLogEntry({
             method: "AfterStep",
-            message: "foo"
+            message: "foo (@foo)"
           });
         });
         """
