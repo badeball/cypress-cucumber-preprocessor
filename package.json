@@ -76,7 +76,7 @@
     "base64-js": "^1.5.1",
     "cli-table": "^0.3.11",
     "common-ancestor-path": "^2.0.0",
-    "cosmiconfig": "^9.0.0",
+    "cosmiconfig": "^10.0.0",
     "debug": "^4.3.6",
     "error-stack-parser": "^2.1.4",
     "find-cypress-specs": "^1.45.2",
