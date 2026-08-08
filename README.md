@@ -84,7 +84,7 @@ A special thanks goes out to [Łukasz Gandecki](https://github.com/lgandecki) fo
 <br />
 
 <p align="center">
-  <a href="https://www.testmu.ai/?utm_source=cypress-cucumber-preprocessor&utm_medium=sponsor"><img src="docs/testmu-logo.svg" width="300"></a>
+  <a href="https://www.testmuai.com/?utm_medium=sponsor&utm_source=cypress-cucumber-preprocessor"><img src="docs/testmu-logo.svg" width="300"></a>
 </p>
 
 <br />
