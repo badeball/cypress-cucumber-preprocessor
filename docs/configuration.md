@@ -52,7 +52,7 @@ If you place configuration values in multiple locations, *only one* of them will
 If you're unsure of what configuration values is actually being applied, then you can run Cypress with the following to enable debug output which will tell you.
 
 ```
-$ DEBUG=cypress:electron,cypress-configuration,cypress-cucumber-preprocessor cypress run
+$ DEBUG=cypress:electron,cypress-cucumber-preprocessor cypress run
 ```
 
 ## Configuration overrides

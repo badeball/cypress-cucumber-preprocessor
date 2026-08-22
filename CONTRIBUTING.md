@@ -45,7 +45,7 @@ Guidelines for bug reports:
    with the following environment variable.
 
    ```
-   $ DEBUG=cypress:electron,cypress-configuration,cypress-cucumber-preprocessor cypress run
+   $ DEBUG=cypress:electron,cypress-cucumber-preprocessor cypress run
    ```
 
 A good bug report shouldn't leave others needing to chase you up for more
