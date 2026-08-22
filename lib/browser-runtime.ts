@@ -41,6 +41,10 @@ import {
 } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
 import { getInternalValue } from "./helpers/expose/browser";
+import {
+  ConfigurationEra,
+  determineConfigurationEra,
+} from "./helpers/expose/expose";
 import { createTimestamp, duration, StrictTimestamp } from "./helpers/messages";
 import {
   isExclusivelySuiteConfiguration,
@@ -583,16 +587,20 @@ function createPickle(context: CompositionContext, pickle: messages.Pickle) {
       .filter(isNotExclusivelySuiteConfiguration),
   ) as Cypress.TestConfigOverrides;
 
-  if (inheritedTestOptions.env) {
-    Object.assign(inheritedTestOptions.env, internalEnv);
+  if (determineConfigurationEra() === ConfigurationEra.Env) {
+    if ((inheritedTestOptions as any).env) {
+      Object.assign((inheritedTestOptions as any).env, internalEnv);
+    } else {
+      (inheritedTestOptions as any).env = internalEnv;
+    }
   } else {
-    inheritedTestOptions.env = internalEnv;
-  }
+    delete (inheritedTestOptions as any)["env"];
 
-  if ((inheritedTestOptions as any).expose) {
-    Object.assign((inheritedTestOptions as any).expose, internalEnv);
-  } else {
-    (inheritedTestOptions as any).expose = internalEnv;
+    if ((inheritedTestOptions as any).expose) {
+      Object.assign((inheritedTestOptions as any).expose, internalEnv);
+    } else {
+      (inheritedTestOptions as any).expose = internalEnv;
+    }
   }
 
   it(scenarioName, inheritedTestOptions, function () {

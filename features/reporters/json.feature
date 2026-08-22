@@ -728,10 +728,10 @@ Feature: JSON formatter
     Scenario: reloading in beforeEach()
       Given a file named "cypress/support/step_definitions/steps.js" with:
         """
-        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        const { Given, getInternalValue } = require("@badeball/cypress-cucumber-preprocessor");
 
         beforeEach(() => {
-          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
+          cy.visit(getInternalValue("origin"));
         });
 
         Given("a step", function() {});
@@ -745,10 +745,10 @@ Feature: JSON formatter
     Scenario: reloading in afterEach()
       Given a file named "cypress/support/step_definitions/steps.js" with:
         """
-        const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+        const { Given, getInternalValue } = require("@badeball/cypress-cucumber-preprocessor");
 
         afterEach(() => {
-          cy.visit((Cypress.env ?? Cypress.expose)("origin"));
+          cy.visit(getInternalValue("origin"));
         });
 
         Given("a step", function() {});

@@ -12,9 +12,9 @@ Feature: overriding env
       """
     And a file named "cypress/e2e/foo/bar.js" with:
       """
-      const { Given } = require("@badeball/cypress-cucumber-preprocessor");
+      const { Given, getInternalValue } = require("@badeball/cypress-cucumber-preprocessor");
       Given("a step", () => {
-        expect((Cypress.env ?? Cypress.expose)("foo")).to.equal("bar");
+        expect(getInternalValue("foo")).to.equal("bar");
       });
       """
     When I run cypress
