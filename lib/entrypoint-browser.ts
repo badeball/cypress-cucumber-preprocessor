@@ -13,6 +13,7 @@ import DataTable from "./data_table";
 import { collectTagNames } from "./helpers/ast";
 import { runStepWithLogGroup } from "./helpers/cypress";
 import { createError } from "./helpers/error";
+import { getInternalValue } from "./helpers/expose/browser";
 import {
   ConfigurationFileResolver,
   ICypressRuntimeConfiguration,
@@ -268,7 +269,7 @@ export function link(text: string): Cypress.Chainable {
 }
 
 function isFeature() {
-  return Cypress.env(INTERNAL_SPEC_PROPERTIES) != null;
+  return getInternalValue(INTERNAL_SPEC_PROPERTIES) != null;
 }
 
 const NOT_FEATURE_ERROR =
@@ -379,3 +380,6 @@ export async function afterScreenshotHandler(
 ): Promise<Cypress.ScreenshotDetails> {
   throw createUnimplemented();
 }
+
+// TODO: Remove once v15 becomes unsupported.
+export { getInternalValue };

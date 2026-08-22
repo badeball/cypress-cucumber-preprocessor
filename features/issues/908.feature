@@ -10,12 +10,9 @@ Feature: hide internals from cypress environment
       """
     And a file named "cypress/support/step_definitions/steps.js" with:
       """
-      const { Then } = require("@badeball/cypress-cucumber-preprocessor");
+      const { Then, getInternalValue } = require("@badeball/cypress-cucumber-preprocessor");
       Then("the visible internal state should be stringified to a replacement text", () => {
-        const {
-          __cypress_cucumber_preprocessor_dont_use_this_spec: internalProperties
-        } = JSON.parse(JSON.stringify(Cypress.env()));
-
+        const internalProperties = JSON.parse(JSON.stringify(getInternalValue("__cypress_cucumber_preprocessor_dont_use_this_spec")));
         expect(internalProperties).to.equal("Internal properties of cypress-cucumber-preprocessor omitted from report.");
       });
       """
