@@ -1,11 +1,11 @@
-import { FORCE_EXPOSE_USE } from "./force";
+import { ConfigurationEra, determineConfigurationEra } from "./expose";
 
 export function getEnv(config: Cypress.PluginConfigOptions): {
   [key: string]: any;
 } {
-  if (FORCE_EXPOSE_USE) {
+  if (determineConfigurationEra() === ConfigurationEra.Expose) {
     return (config as any).expose;
   } else {
-    return (config as any).env ?? (config as any).expose;
+    return (config as any).env;
   }
 }

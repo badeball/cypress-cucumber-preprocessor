@@ -33,7 +33,7 @@ Upgrade your node version to v18.0.0, which is the minimum required version.
 
 ## `--env` / `tags` isn't picked up
 
-This might be because you're trying to specify `-e / --env` multiple times, but [multiple values should be comma-separated](https://docs.cypress.io/guides/guides/command-line#cypress-run-env-lt-env-gt).
+This might be because you're trying to specify `-e / --env` multiple times, but [multiple values should be comma-separated](https://docs.cypress.io/guides/guides/command-line#cypress-run-env-lt-env-gt). The same goes for `-x / --expose`.
 
 ## Negated tags / complex tag expressions aren't working as expected on Windows
 

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Breaking changes:
+
+- Starting from now, users of Cypress v15.17 and above will have to use `-x` or `--expose` command line options for configuration overrides, _not_ `-e` or `--env` as previously, fixes [#1363](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1363).
+
+  - Starting from Cypress v15.10, the env API and paradigm is [deprecated](https://www.cypress.io/blog/environment-variable-access-in-cypress-v15-10-0-migrating-to-cy-env-and-cypress-expose). However, the new expose API didn't mature until [v15.17](https://docs.cypress.io/app/references/changelog#15-17-0), hence the delay.
+
+  - This change allows users to disable `allowCypressEnv` in their Cypress configuration, as this library no longer uses the deprecated env API when detecting Cypress v15.17 and above.
+
 ## v26.0.0
 
 Breaking changes:

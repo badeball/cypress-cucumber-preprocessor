@@ -57,13 +57,19 @@ $ DEBUG=cypress:electron,cypress-cucumber-preprocessor cypress run
 
 ## Configuration overrides
 
-Configuration options can be overridden using (Cypress-) [environment variable](https://docs.cypress.io/guides/guides/environment-variables). The `filterSpecs` options (described in [docs/tags.md](tags.md)) can for instance be overridden by running Cypress like shown below.
+Starting with Cypress v15.17 and above, configuration can be overriden using the `-x` or `--expose` argument. The `filterSpecs` options (described in [docs/tags.md](tags.md)) can for instance be overridden by running Cypress like shown below.
+
+```
+$ cypress run -x filterSpecs=true
+```
+
+For users of Cypress v15.16 and below, configuration can be overriden using the `-e` or `--env` argument, like shown below.
 
 ```
 $ cypress run -e filterSpecs=true
 ```
 
-Cypress environment variables can also be configured through ordinary environment variables, like shown below.
+For users of Cypress v15.16 and below, cypress environment variables can also be configured through ordinary environment variables, like shown below. This ability has been removed from Cypress' expose API, which users of Cypress v15.17 and above are bound to.
 
 ```
 $ CYPRESS_filterSpecs=true cypress run

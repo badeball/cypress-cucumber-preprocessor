@@ -1,21 +1,11 @@
-import { FORCE_EXPOSE_USE } from "./force";
+import { ConfigurationEra, determineConfigurationEra } from "./expose";
 
 export function getInternalValue(key: string): any {
   const cypress = Cypress as any;
 
-  if (FORCE_EXPOSE_USE) {
+  if (determineConfigurationEra() === ConfigurationEra.Expose) {
     return cypress.expose(key);
   } else {
-    return (cypress.env ?? cypress.expose)(key);
-  }
-}
-
-export function isPostExpose() {
-  if (FORCE_EXPOSE_USE) {
-    return true;
-  } else {
-    const cypress = Cypress as any;
-
-    return cypress.env ? false : true;
+    return cypress.env(key);
   }
 }
