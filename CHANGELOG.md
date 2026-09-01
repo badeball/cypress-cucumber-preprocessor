@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+Breaking changes:
+
+- Drop support for Cypress v12.
+
+Other changes:
+
+- Add support for Cypress v16.
+
 ## v27.0.0
 
 Breaking changes:
