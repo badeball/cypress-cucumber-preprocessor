@@ -1,4 +1,3 @@
-@cypress>=12
 Feature: suite only options
 
   Background:

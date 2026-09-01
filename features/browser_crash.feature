@@ -1,4 +1,3 @@
-@cypress>=12
 Feature: browser crash
 
   # Crash-behavior is a mess, ref. https://github.com/cypress-io/cypress/issues/22631.
