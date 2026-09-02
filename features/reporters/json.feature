@@ -369,6 +369,7 @@ Feature: JSON formatter
       Then it passes
       And there should be a JSON output similar to "fixtures/attachments/screenshot.json"
 
+    @only(<16)
     Scenario: screenshot of failed test
       Given a file named "cypress/e2e/a.feature" with:
         """

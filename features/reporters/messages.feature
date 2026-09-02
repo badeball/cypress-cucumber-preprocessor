@@ -370,6 +370,7 @@ Feature: messages report
       Then it passes
       And there should be a messages similar to "fixtures/attachments/screenshot.ndjson"
 
+    @only(<16)
     Scenario: screenshot of failed test
       Given a file named "cypress/e2e/a.feature" with:
         """

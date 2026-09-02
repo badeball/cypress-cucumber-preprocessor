@@ -1,6 +1,7 @@
 # https://github.com/badeball/cypress-cucumber-preprocessor/issues/705
 
 @no-default-plugin
+@only(<16)
 Feature: overriding event handlers
   Background:
     Given additional preprocessor configuration

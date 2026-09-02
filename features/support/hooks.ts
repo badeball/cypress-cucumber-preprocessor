@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { After, Before, formatterHelpers } from "@cucumber/cucumber";
+import { version as cypressVersion } from "cypress/package.json";
+import { satisfies } from "semver";
 
 import { isPostExpose } from "../../lib/helpers/expose/cucumber";
 import { isPost15, writeFile } from "./helpers";
@@ -116,6 +118,20 @@ Before({ tags: "@cypress>=15" }, async function () {
 Before({ tags: "@isPreExpose" }, async function () {
   if (isPostExpose()) {
     return "skipped";
+  }
+});
+
+Before(function ({ pickle }) {
+  const onlyPrefix = "@only(";
+
+  const onlyTag = pickle.tags.find((tag) => tag.name.startsWith(onlyPrefix));
+
+  if (onlyTag) {
+    const constraint = onlyTag.name.slice(onlyPrefix.length, -1);
+
+    if (!satisfies(cypressVersion, constraint)) {
+      return "skipped";
+    }
   }
 });
 
