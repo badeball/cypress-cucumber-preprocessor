@@ -63,7 +63,7 @@ Feature: html report
       Feature: example.org
         Scenario: visiting the frontpage
           When I visit example.org
-          Then I should see a heading
+          Then I should some paragraphs
       """
     And a file named "cypress/support/step_definitions/steps.js" with:
       """
@@ -71,9 +71,9 @@ Feature: html report
       When("I visit example.org", () => {
         cy.visit("https://example.org/");
       });
-      Then("I should see a heading", () => {
-        cy.get("h1")
-          .and("contain.text", "Example Domain");
+      Then("I should some paragraphs", () => {
+        cy.get("p")
+          .should("have.lengthOf.at.least", 2);
       });
 
       """
