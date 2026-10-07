@@ -42,6 +42,8 @@ Other changes:
 
 - Handle even more corner cases related to reload-behavior, fixes [#1362](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1362).
 
+- Don't crash `after:spec` when reload-behavior (pre-v15.18.0) is triggered after the last test has finished, eg. by a browser (GPU / renderer) crash that makes Cypress recover by re-firing `before:spec`. Previously this threw `Unexpected state in afterSpecHandler: has-reloaded`; the already-completed messages are now preserved in the report as usual.
+
 ## v25.0.0
 
 Breaking changes:

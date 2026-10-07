@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Account Dashboard</title>
+  </head>
+  <body>
+    <h1>Account Dashboard</h1>
+    <p id="account"></p>
+    <div id="charts"></div>
+    <script>
+      // Show the account from the query string (?account=NNNN).
+      var account = new URLSearchParams(location.search).get("account") || "?";
+      document.getElementById("account").textContent = "Account " + account;
+
+      // Render a handful of WebGL canvases so each page load consumes real GPU
+      // memory -- across many scenarios this builds the pressure that, in the
+      // field, eventually crashed the GPU process (crashMode=memory).
+      var charts = document.getElementById("charts");
+      for (var i = 0; i < 8; i++) {
+        var canvas = document.createElement("canvas");
+        canvas.width = 1024;
+        canvas.height = 512;
+        var gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+        if (gl) {
+          gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+        charts.appendChild(canvas);
+      }
+    </script>
+  </body>
+</html>

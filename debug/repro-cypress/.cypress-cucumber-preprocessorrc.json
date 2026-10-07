@@ -1,0 +1,4 @@
+{
+  "messages": { "enabled": true, "output": "cucumber-messages.ndjson" },
+  "json": { "enabled": true, "output": "cucumber-report.json" }
+}

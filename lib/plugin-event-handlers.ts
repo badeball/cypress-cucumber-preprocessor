@@ -712,11 +712,21 @@ export async function afterSpecHandler(
     return;
   }
 
+  /**
+   * The "has-reloaded" states below can occur when reload-behavior (pre-v15.18.0)
+   * is triggered after all test bodies have completed, typically in an after() /
+   * afterEach() hook of the last test. Cypress re-fires before:spec, moving us into
+   * a "has-reloaded" state, but since the suite is already done, no test re-runs and
+   * after:spec fires directly. In both cases `messages.current` already holds the
+   * completed test messages, so the report is generated as usual further below.
+   */
   switch (state.state) {
     case "test-finished": // This is the normal case.
     case "run-hook-finished": // In case of AfterAll hooks.
     case "before-spec": // This can happen if a spec doesn't contain any tests.
     case "received-envelopes": // This can happen in case of a failing beforeEach hook.
+    case "has-reloaded": // In case of reloading after the last test has finished.
+    case "has-reloaded-received-envelopes": // Ditto, with re-hydrated envelopes.
       break;
     default:
       throw createStateError("afterSpecHandler", state.state);
