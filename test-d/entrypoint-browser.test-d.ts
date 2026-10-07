@@ -4,7 +4,6 @@
  */
 
 import messages from "@cucumber/messages";
-import { expectType } from "tsd";
 
 import {
   addCucumberPreprocessorPlugin,
@@ -31,6 +30,7 @@ import {
   Then,
   When,
 } from "../lib/entrypoint-browser";
+import { expectType } from "./expect-type";
 
 declare const config: Cypress.PluginConfigOptions;
 declare const on: Cypress.PluginEvents;

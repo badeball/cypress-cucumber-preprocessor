@@ -126,7 +126,6 @@
     "strip-indent": "^4.1.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "tsd": "^0.31.1",
     "typescript": "^5.5.4",
     "webpack": "^5.93.0"
   },
