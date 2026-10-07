@@ -4,7 +4,6 @@ import { inspect } from "node:util";
 import { generateMessages } from "@cucumber/gherkin";
 import { IdGenerator, SourceMediaType } from "@cucumber/messages";
 import { commonAncestorPath as ancestor } from "common-ancestor-path";
-import { getSpecs } from "find-cypress-specs";
 
 import { rebuildOriginalConfigObject } from "./add-cucumber-preprocessor-plugin";
 import type { CreateTestsOptions } from "./browser-runtime";
@@ -12,6 +11,7 @@ import { ensure } from "./helpers/assertions";
 import debug from "./helpers/debug";
 import { getEnv } from "./helpers/expose/node";
 import { ensureIsRelative } from "./helpers/paths";
+import { getSpecs } from "./helpers/specs";
 import { notNull } from "./helpers/type-guards";
 import { resolve } from "./preprocessor-configuration";
 import {
@@ -61,11 +61,7 @@ export async function compile(
   const pickles = envelopes.map((envelope) => envelope.pickle).filter(notNull);
 
   const implicitIntegrationFolder = ensure(
-    ancestor(
-      ...getSpecs(configuration, "foobar" as any, true)
-        .map(path.dirname)
-        .map(path.normalize),
-    ),
+    ancestor(...getSpecs(configuration).map(path.dirname).map(path.normalize)),
     "Expected to find a common ancestor path",
   );
 

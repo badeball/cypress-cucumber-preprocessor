@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Replace `find-cypress-specs` with `glob`, removing a large amount of transitive dependencies (among them a vulnerable version of `braces`), fixes [#1377](https://github.com/badeball/cypress-cucumber-preprocessor/issues/1377).
+
 ## v28.0.0
 
 Breaking changes:

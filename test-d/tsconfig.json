@@ -7,6 +7,5 @@
   "include": [
     "*.test-d.ts",
     "../augmentations.d.ts",
-    "../declarations.d.ts",
   ]
 }

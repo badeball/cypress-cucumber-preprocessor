@@ -16,8 +16,7 @@
   },
   "include": [
     "lib/**/*.ts",
-    "augmentations.d.ts",
-    "declarations.d.ts"
+    "augmentations.d.ts"
   ],
   "exclude": [
     "lib/**/*.test.ts"
