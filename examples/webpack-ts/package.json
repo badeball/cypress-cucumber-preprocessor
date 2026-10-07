@@ -4,7 +4,7 @@
     "@cypress/webpack-preprocessor": "latest",
     "cypress": "latest",
     "ts-loader": "latest",
-    "typescript": "latest",
+    "typescript": "^6.0.0",
     "webpack": "latest"
   }
 }
