@@ -4,7 +4,8 @@ import { toPosix } from "./paths";
 
 /**
  * Resolves absolute paths of spec files from a resolved configuration object, mimicking what
- * `find-cypress-specs` used to do.
+ * `find-cypress-specs` used to do. The actual Cypress algorithm uses globby and can be found in
+ * packages/data-context/src/sources/FileDataSource.ts.
  */
 export function getSpecs(
   config: Pick<
