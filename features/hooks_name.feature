@@ -1,4 +1,3 @@
-@skip
 Feature: named hooks
 
   Background:
