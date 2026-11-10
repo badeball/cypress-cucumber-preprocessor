@@ -20,6 +20,9 @@ export function createHtmlStream(): CucumberHtmlStream {
     require.resolve("@cucumber/html-formatter/dist/main.js", {
       paths: [__dirname],
     }),
+    require.resolve("@cucumber/html-formatter/dist/src/icon.url", {
+      paths: [__dirname],
+    }),
   );
 }
 
