@@ -62,8 +62,18 @@ jobs:
           npx cypress --version
           node --version
           npm --version
-      - name: Test
-        run: npm run test
+      - name: Test (fmt)
+        run: npm run test:fmt
+      - name: Test (lint)
+        run: npm run test:lint
+      - name: Test (types)
+        run: npm run test:types
+      - name: Test (unit)
+        run: npm run test:unit
+      - name: Test (cck)
+        run: npm run test:compatibility
+      - name: Test (integration)
+        run: npm run test:integration
 
   windows:
     runs-on: windows-latest
