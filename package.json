@@ -69,7 +69,7 @@
     "@cucumber/gherkin": "^43.0.0",
     "@cucumber/html-formatter": "^23.0.0",
     "@cucumber/message-streams": "^5.0.0",
-    "@cucumber/messages": "^34.0.0",
+    "@cucumber/messages": "^35.0.0",
     "@cucumber/pretty-formatter": "^4.0.0",
     "@cucumber/tag-expressions": "^11.0.0",
     "@jridgewell/trace-mapping": "^0.3.31",
