@@ -1,0 +1,15 @@
+{
+  "name": "has-reloaded-repro",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Minimal Cypress project reproducing the afterSpecHandler has-reloaded crash",
+  "scripts": {
+    "test": "cypress run --browser electron"
+  },
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^24.0.1",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.0",
+    "cypress": "15.15.0",
+    "esbuild": "^0.24.0"
+  }
+}
