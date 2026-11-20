@@ -5,14 +5,25 @@ import {
   JsonFormatter,
   UsageFormatter,
 } from "@cucumber/cucumber";
-import { CucumberHtmlStream } from "@cucumber/html-formatter";
+import type { CucumberHtmlStream } from "@cucumber/html-formatter";
 import type * as messages from "@cucumber/messages";
 import { PrettyPrinter } from "@cucumber/pretty-formatter";
 
 import { assertIsString } from "./assertions";
 import { notNull } from "./type-guards";
 
-export function createHtmlStream(): CucumberHtmlStream {
+export async function createHtmlStream(): Promise<CucumberHtmlStream> {
+  /**
+   * Import this dynamically to circumvent tsx from rewriting this module to CJS. The tsx version
+   * bundled with Cypress from v15.0.0 to v15.16.0 doesn't populate import.meta.dirname or
+   * import.meta.filename, which prevents this module from working properly.
+   *
+   * https://github.com/cypress-io/cypress/issues/35351
+   * https://github.com/badeball/cypress-cucumber-preprocessor/issues/1372
+   * https://github.com/privatenumber/tsx/issues/781
+   */
+  const { CucumberHtmlStream } = await import("@cucumber/html-formatter");
+
   return new CucumberHtmlStream(
     require.resolve("@cucumber/html-formatter/dist/main.css", {
       paths: [__dirname],

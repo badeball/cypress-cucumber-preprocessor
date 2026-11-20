@@ -540,7 +540,7 @@ export async function afterRunHandler(
 
     await pipeline(
       stream.Readable.from(state.messages.accumulation),
-      createHtmlStream(),
+      await createHtmlStream(),
       output,
     );
   }

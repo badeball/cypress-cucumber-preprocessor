@@ -6,14 +6,16 @@ import { NdjsonToMessageStream } from "@cucumber/message-streams";
 
 import { createHtmlStream } from "../helpers/formatters";
 
-stream
-  .pipeline(
+async function run() {
+  return stream.pipeline(
     process.stdin,
     new NdjsonToMessageStream(),
-    createHtmlStream(),
+    await createHtmlStream(),
     process.stdout,
-  )
-  .catch((err) => {
-    console.error(err.stack);
-    process.exitCode = 1;
-  });
+  );
+}
+
+run().catch((err) => {
+  console.error(err.stack);
+  process.exitCode = 1;
+});
